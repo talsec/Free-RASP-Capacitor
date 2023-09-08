@@ -1,0 +1,92 @@
+{
+  "name": "capacitor-freerasp",
+  "version": "1.0.0",
+  "description": "Capacitor plugin for improving app security and threat monitoring on Android and iOS mobile devices",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "unpkg": "dist/plugin.js",
+  "files": [
+    "android/src/main/",
+    "android/build.gradle",
+    "android/consumer-rules.pro",
+    "android/proguard-rules.pro",
+    "android/gradle.properties",
+    "android/settings.gradle",
+    "dist/",
+    "ios/Plugin/",
+    "CapacitorFreerasp.podspec"
+  ],
+  "author": "talsec.app",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/talsec/Free-RASP-Capacitor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/talsec/Free-RASP-Capacitor/issues"
+  },
+  "keywords": [
+    "capacitor",
+    "plugin",
+    "freerasp",
+    "capacitor-library",
+    "capacitor-plugin",
+    "capacitor-security",
+    "capacitor-app-security",
+    "capacitor-tampering-detection",
+    "capacitor-root-detection",
+    "capacitor-app-shielding",
+    "capacitor-rasp",
+    "capacitor-tampering",
+    "capacitor-reverse-engineering",
+    "capacitor-application-security",
+    "capacitor-frida"
+  ],
+  "scripts": {
+    "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
+    "verify:ios": "cd ios && pod install && xcodebuild -workspace Plugin.xcworkspace -scheme Plugin -destination generic/platform=iOS && cd ..",
+    "verify:android": "cd android && ./gradlew clean build test && cd ..",
+    "verify:web": "npm run build",
+    "lint": "npm run eslint && npm run prettier -- --check && npm run swiftlint -- lint",
+    "fmt": "npm run eslint -- --fix && npm run prettier -- --write && npm run swiftlint -- --fix --format",
+    "eslint": "eslint . --ext ts",
+    "prettier": "prettier \"**/*.{css,html,ts,js,java}\"",
+    "swiftlint": "node-swiftlint",
+    "build": "npm run clean && tsc && rollup -c rollup.config.js",
+    "clean": "rimraf ./dist",
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^5.0.0",
+    "@capacitor/core": "^5.0.0",
+    "@capacitor/ios": "^5.0.0",
+    "@ionic/eslint-config": "^0.3.0",
+    "@ionic/prettier-config": "^1.0.1",
+    "@ionic/swiftlint-config": "^1.1.2",
+    "eslint": "^7.11.0",
+    "prettier": "~2.3.0",
+    "prettier-plugin-java": "~1.0.2",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.32.0",
+    "swiftlint": "^1.0.1",
+    "typescript": "~4.1.5"
+  },
+  "peerDependencies": {
+    "@capacitor/core": "*"
+  },
+  "prettier": "@ionic/prettier-config",
+  "swiftlint": "@ionic/swiftlint-config",
+  "eslintConfig": {
+    "extends": "@ionic/eslint-config/recommended"
+  },
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    },
+    "android": {
+      "src": "android"
+    }
+  }
+}
