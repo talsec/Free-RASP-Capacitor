@@ -1,27 +1,34 @@
 export interface FreeraspPlugin {
-    addListener(listener: string, callback: () => any): any;
+    addListener(listener: string, callback: (event: any) => void): any;
     talsecStart(options: {
         config: FreeraspConfig;
     }): Promise<{
         started: boolean;
     }>;
+    onInvalidCallback(): void;
+    getThreatIdentifiers(): Promise<{
+        ids: number[];
+    }>;
+    getThreatChannelData(): Promise<{
+        ids: [string, string];
+    }>;
 }
-export declare type FreeraspConfig = {
+export type FreeraspConfig = {
     androidConfig?: AndroidConfig;
     iosConfig?: IOSConfig;
     watcherMail: string;
     isProd?: boolean;
 };
-export declare type AndroidConfig = {
+export type AndroidConfig = {
     packageName: string;
     certificateHashes: string[];
     supportedAlternativeStores?: string[];
 };
-export declare type IOSConfig = {
+export type IOSConfig = {
     appBundleId: string;
     appTeamId: string;
 };
-export declare type NativeEventEmitterActions = {
+export type NativeEventEmitterActions = {
     privilegedAccess?: () => any;
     debug?: () => any;
     simulator?: () => any;
@@ -34,3 +41,20 @@ export declare type NativeEventEmitterActions = {
     secureHardwareNotAvailable?: () => any;
     obfuscationIssues?: () => any;
 };
+export declare class Threat {
+    value: number;
+    static AppIntegrity: Threat;
+    static PrivilegedAccess: Threat;
+    static Debug: Threat;
+    static Hooks: Threat;
+    static Passcode: Threat;
+    static Simulator: Threat;
+    static SecureHardwareNotAvailable: Threat;
+    static DeviceBinding: Threat;
+    static DeviceID: Threat;
+    static UnofficialStore: Threat;
+    static Overlay: Threat;
+    static ObfuscationIssues: Threat;
+    constructor(value: number);
+    static getValues(): Threat[];
+}
