@@ -1,5 +1,6 @@
 package com.aheaditec.freerasp
 
+import android.annotation.SuppressLint
 import com.aheaditec.talsec_security.security.api.Talsec
 import com.aheaditec.talsec_security.security.api.TalsecConfig
 import com.aheaditec.talsec_security.security.api.ThreatListener
@@ -8,17 +9,18 @@ import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
+import org.json.JSONArray
 import java.lang.Exception
 
 @CapacitorPlugin(name = "Freerasp")
-class FreeraspPlugin : Plugin(), ThreatListener.DeviceState, ThreatListener.ThreatDetected {
+class FreeraspPlugin : Plugin() {
 
-    private val listener = ThreatListener(this, this)
+    private val listener = ThreatListener(TalsecThreatHandler, TalsecThreatHandler)
     private var registered = true
-    private val emptyData = JSObject()
 
-    @PluginMethod()
+    @PluginMethod
     fun talsecStart(call: PluginCall) {
+        instance = this
         val config = call.getObject("config")
         if (config == null) {
             call.reject("Missing config parameter in freeRASP Native Plugin")
@@ -48,45 +50,40 @@ class FreeraspPlugin : Plugin(), ThreatListener.DeviceState, ThreatListener.Thre
         }
     }
 
-    override fun onRootDetected() {
-        notifyListeners("privilegedAccess", emptyData, true)
+    /**
+     * Method to get the random identifiers of callbacks
+     */
+    @PluginMethod
+    fun getThreatIdentifiers(call: PluginCall) {
+        call.resolve(JSObject().put("ids", Threat.getThreatValues()))
     }
 
-    override fun onDebuggerDetected() {
-        notifyListeners("debug", emptyData, true)
+    /**
+     * Method to setup the message passing between native and React Native
+     * @return list of [THREAT_CHANNEL_NAME, THREAT_CHANNEL_KEY]
+     */
+    @PluginMethod
+    fun getThreatChannelData(call: PluginCall) {
+        val channelData = JSONArray(
+            (listOf(
+                THREAT_CHANNEL_NAME, THREAT_CHANNEL_KEY
+            ))
+        )
+        call.resolve(JSObject().put("ids", channelData))
     }
 
-    override fun onEmulatorDetected() {
-        notifyListeners("simulator", emptyData, true)
+    /**
+     * We never send an invalid callback over our channel.
+     * Therefore, if this happens, we want to kill the app.
+     */
+    @PluginMethod
+    fun onInvalidCallback() {
+        android.os.Process.killProcess(android.os.Process.myPid())
     }
 
-    override fun onTamperDetected() {
-        notifyListeners("appIntegrity", emptyData, true)
+    internal fun notifyListeners(threat: Threat) {
+        notifyListeners(THREAT_CHANNEL_NAME, JSObject().put(THREAT_CHANNEL_KEY, threat.value), true)
     }
-
-    override fun onUntrustedInstallationSourceDetected() {
-        notifyListeners("unofficialStore", emptyData, true)
-    }
-
-    override fun onHookDetected() {
-        notifyListeners("hooks", emptyData, true)
-    }
-
-    override fun onDeviceBindingDetected() {
-        notifyListeners("deviceBinding", emptyData, true)
-    }
-
-    override fun onUnlockedDeviceDetected() {
-        notifyListeners("passcode", emptyData, true)
-    }
-
-    override fun onHardwareBackedKeystoreNotAvailableDetected() {
-        notifyListeners("secureHardwareNotAvailable", emptyData, true)
-    }
-
-   override fun onObfuscationIssuesDetected() {
-       notifyListeners("obfuscationIssues", emptyData, true)
-   }
 
     private fun parseTalsecConfigThrowing(configJson: JSObject): TalsecConfig {
         val androidConfig = configJson.getJSONObject("androidConfig")
@@ -116,5 +113,16 @@ class FreeraspPlugin : Plugin(), ThreatListener.DeviceState, ThreatListener.Thre
             alternativeStores.toTypedArray(),
             isProd
         )
+    }
+
+    companion object {
+        val THREAT_CHANNEL_NAME = (10000..999999999).random()
+            .toString() // name of the channel over which threat callbacks are sent
+        val THREAT_CHANNEL_KEY = (10000..999999999).random()
+            .toString() // key of the argument map under which threats are expected
+
+        @SuppressLint("StaticFieldLeak")
+        lateinit var instance: FreeraspPlugin
+
     }
 }
