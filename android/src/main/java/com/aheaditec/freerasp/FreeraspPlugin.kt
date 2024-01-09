@@ -1,6 +1,5 @@
 package com.aheaditec.freerasp
 
-import android.annotation.SuppressLint
 import com.aheaditec.talsec_security.security.api.Talsec
 import com.aheaditec.talsec_security.security.api.TalsecConfig
 import com.aheaditec.talsec_security.security.api.ThreatListener
@@ -15,12 +14,12 @@ import java.lang.Exception
 @CapacitorPlugin(name = "Freerasp")
 class FreeraspPlugin : Plugin() {
 
-    private val listener = ThreatListener(TalsecThreatHandler, TalsecThreatHandler)
+    private val threatHandler = TalsecThreatHandler(this)
+    private val listener = ThreatListener(threatHandler, threatHandler)
     private var registered = true
 
     @PluginMethod
     fun talsecStart(call: PluginCall) {
-        instance = this
         val config = call.getObject("config")
         if (config == null) {
             call.reject("Missing config parameter in freeRASP Native Plugin")
@@ -116,13 +115,9 @@ class FreeraspPlugin : Plugin() {
     }
 
     companion object {
-        val THREAT_CHANNEL_NAME = (10000..999999999).random()
+        private val THREAT_CHANNEL_NAME = (10000..999999999).random()
             .toString() // name of the channel over which threat callbacks are sent
-        val THREAT_CHANNEL_KEY = (10000..999999999).random()
+        private val THREAT_CHANNEL_KEY = (10000..999999999).random()
             .toString() // key of the argument map under which threats are expected
-
-        @SuppressLint("StaticFieldLeak")
-        lateinit var instance: FreeraspPlugin
-
     }
 }
