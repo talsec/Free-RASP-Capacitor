@@ -73,7 +73,7 @@ We will guide you step-by-step, but you can always check the expected result in 
 
 ### Android
 
-freeRASP for Android requires a minimum **SDK** level of **23**. Capacitor projects, by default, support even lower levels of minimum SDK. This creates an inconsistency we must solve by updating the minimum SDK level of the application:
+freeRASP for Android requires a **minSdkVersion** level of **>=23** and a **targetSdkVersion** level of **>=33**. Some Capacitor projects, by default, support even lower levels of minimum and target SDKs. This creates an inconsistency we must solve by updating the SDK levels of the application:
 
 1. From the root of your project, go to **android > variables.gradle** (or equivalent).
 1. In **ext**, update **minSdkVersion** to at least **23** (Android 6.0) or higher and **compileSdkVersion** to **33** (Android 13).
@@ -123,7 +123,7 @@ const config = {
 
    - `packageName` _: string_ - package name of your app you chose when you created it
    - `certificateHashes` _: string[]_ - hash of the certificate of the key which was used to sign the application. **Hash which is passed here must be encoded in Base64 form.** If you are not sure how to get your certificate hash, you can check out the guide on our [Github wiki](https://github.com/talsec/Free-RASP-Community/wiki/Getting-your-signing-certificate-hash-of-app). Multiple hashes are supported, e.g. if you are using a different one for the Huawei App Gallery.
-   - `supportedAlternativeStores` _: string[] | undefined_ - Google Play Store and Huawei AppGallery are supported out of the box, you **don't have to assign anything**. You can add other stores like the Samsung Galaxy Store in the example code (```com.sec.android.app.samsungapps```). For more information, visit the  [Detecting Unofficial Installation](https://github.com/talsec/Free-RASP-Community/wiki/Threat-detection#detecting-unofficial-installation) wiki page.
+   - `supportedAlternativeStores` _: string[] | undefined_ - Google Play Store and Huawei AppGallery are supported out of the box, you **don't have to assign anything**. You can add other stores like the Samsung Galaxy Store in the example code (`com.sec.android.app.samsungapps`). For more information, visit the [Detecting Unofficial Installation](https://github.com/talsec/Free-RASP-Community/wiki/Threat-detection#detecting-unofficial-installation) wiki page.
 
 1. `iosConfig` _: object | undefined_ - required for iOS devices, has following keys:
    - `appBundleId` _: string_ - Bundle ID of your app

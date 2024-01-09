@@ -1,3 +1,19 @@
+# freeRASP 1.2.0
+
+- ⚡ Improved message passing between native iOS/Android and Capacitor
+- ✔️ Restricted message passing to valid callbacks only. If an invalid callback is received, the SDK will kill the app
+- ⚡ Improved reaction obfuscation
+- 📄 Documentation updates and improvements
+
+### Android
+
+- ⚡ Fixed ProviderException which could be occassionally triggered
+
+### iOS
+
+- ❗ Raised supported Xcode version to 14.3.1
+- ⚡ Improved SDK obfuscation
+
 # freeRASP 1.1.0
 
 - 📄 Documentation updates and improvements
