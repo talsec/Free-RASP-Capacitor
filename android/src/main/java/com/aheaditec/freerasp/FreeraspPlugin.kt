@@ -37,8 +37,10 @@ class FreeraspPlugin : Plugin() {
 
     override fun handleOnPause() {
         super.handleOnPause()
-        listener.unregisterListener(context)
-        registered = false
+        if (activity.isFinishing) {
+            listener.unregisterListener(context)
+            registered = false
+        }
     }
 
     override fun handleOnResume() {
