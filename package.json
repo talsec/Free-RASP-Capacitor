@@ -1,6 +1,6 @@
 {
   "name": "capacitor-freerasp",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Capacitor plugin for improving app security and threat monitoring on Android and iOS mobile devices",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
