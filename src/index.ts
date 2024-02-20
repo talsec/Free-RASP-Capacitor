@@ -80,6 +80,9 @@ const setThreatListeners = async <T extends NativeEventEmitterActions>(
       case Threat.ObfuscationIssues.value:
         callbacks.obfuscationIssues?.();
         break;
+      case Threat.DeviceID.value:
+        callbacks.deviceID?.();
+        break;
       default:
         onInvalidCallback();
         break;
