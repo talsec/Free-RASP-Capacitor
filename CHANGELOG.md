@@ -1,3 +1,11 @@
+# freeRASP 1.2.1
+
+### Android
+- ⚡ Fixed bug that prevented firing callbacks in specific situations
+
+### iOS
+- ⚡ Fixed bug that caused app being killed in specific situations ([#42](https://github.com/talsec/Free-RASP-ReactNative/issues/42))
+
 # freeRASP 1.2.0
 
 - ⚡ Improved message passing between native iOS/Android and Capacitor
