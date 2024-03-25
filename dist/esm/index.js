@@ -33,7 +33,7 @@ const setThreatListeners = async (callbacks) => {
     const [channel, key] = await getThreatChannelData();
     await prepareMapping();
     await Freerasp.addListener(channel, (event) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
         if (event[key] === undefined) {
             onInvalidCallback();
         }
@@ -67,6 +67,9 @@ const setThreatListeners = async (callbacks) => {
                 break;
             case Threat.ObfuscationIssues.value:
                 (_k = callbacks.obfuscationIssues) === null || _k === void 0 ? void 0 : _k.call(callbacks);
+                break;
+            case Threat.DeviceID.value:
+                (_l = callbacks.deviceID) === null || _l === void 0 ? void 0 : _l.call(callbacks);
                 break;
             default:
                 onInvalidCallback();
