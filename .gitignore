@@ -28,7 +28,6 @@ xcuserdata
 bin
 gen
 out
-package-lock.json
 
 # Gradle files
 .gradle
