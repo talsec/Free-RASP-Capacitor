@@ -1,3 +1,9 @@
+# freeRASP 1.3.1
+
+### Android
+
+- ⚡ Updated freeRASP SDK artifact hosting ensuring better stability and availibility
+
 # freeRASP 1.3.0
 
 - 📄 Documentation updates
