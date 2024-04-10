@@ -81,6 +81,7 @@ ios/Plugin.xcworkspace
 ios/PluginTests
 ios/Podfile
 src/
+!android/src/main
 rollup.config.js   
 tsconfig.json
 ci-template.ejs

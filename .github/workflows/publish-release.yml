@@ -55,22 +55,12 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           node-version-file: .nvmrc
 
-      - name: Cache npm dependencies
-        id: npm-cache
-        uses: actions/cache@v4
-        with:
-          path: '~/.npm'
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
       - name: Install dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
         shell: bash
 
       - name: Compile .ts files
-        run: npx tsc
+        run: npm run ts:build
         shell: bash
 
 
