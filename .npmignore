@@ -1,4 +1,12 @@
+config.json
+config.example.json
+*.zip
+*.tgz
+example/
+scripts/
+
 # node files
+dist
 node_modules
 
 # iOS files
@@ -8,9 +16,9 @@ Build
 xcuserdata
 
 # macOS files
-.DS_Store
+**/.DS_Store
 
-
+package-lock.json
 
 # Based on Android gitignore template: https://github.com/github/gitignore/blob/HEAD/Android.gitignore
 
@@ -23,6 +31,7 @@ xcuserdata
 
 # Java class files
 *.class
+android/src/test/
 
 # Generated files
 bin
@@ -58,3 +67,22 @@ captures
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild
+
+# Remove development files
+**/.*
+android/gradle/
+android/gradlew
+android/gradlew.bat
+android/proguard-rules.pro
+android/settings.gradle
+android/src/androidTest
+ios/Plugin.xcodeproj
+ios/Plugin.xcworkspace
+ios/PluginTests
+ios/Podfile
+src/
+rollup.config.js   
+tsconfig.json
+ci-template.ejs
+deploy.sh
+ejs-config*

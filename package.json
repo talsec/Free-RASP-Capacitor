@@ -6,17 +6,6 @@
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "unpkg": "dist/plugin.js",
-  "files": [
-    "android/src/main/",
-    "android/build.gradle",
-    "android/consumer-rules.pro",
-    "android/proguard-rules.pro",
-    "android/gradle.properties",
-    "android/settings.gradle",
-    "dist/",
-    "ios/Plugin/",
-    "CapacitorFreerasp.podspec"
-  ],
   "author": "talsec.app",
   "license": "MIT",
   "repository": {
