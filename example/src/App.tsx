@@ -115,6 +115,16 @@ const App: React.FC = () => {
       );
     },
     // Android & iOS
+    systemVPN: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'System VPN'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
+    // Android & iOS
     passcode: () => {
       setAppChecks(currentState =>
         currentState.map(threat =>
@@ -135,6 +145,16 @@ const App: React.FC = () => {
       setAppChecks(currentState =>
         currentState.map(threat =>
           threat.name === 'Obfuscation Issues'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
+    // Android only
+    devMode: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Developer Mode'
             ? { ...threat, isSecure: false }
             : threat,
         ),
