@@ -33,7 +33,7 @@ const setThreatListeners = async (callbacks) => {
     const [channel, key] = await getThreatChannelData();
     await prepareMapping();
     await Freerasp.addListener(channel, (event) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         if (event[key] === undefined) {
             onInvalidCallback();
         }
@@ -70,6 +70,12 @@ const setThreatListeners = async (callbacks) => {
                 break;
             case Threat.DeviceID.value:
                 (_l = callbacks.deviceID) === null || _l === void 0 ? void 0 : _l.call(callbacks);
+                break;
+            case Threat.DevMode.value:
+                (_m = callbacks.devMode) === null || _m === void 0 ? void 0 : _m.call(callbacks);
+                break;
+            case Threat.SystemVPN.value:
+                (_o = callbacks.systemVPN) === null || _o === void 0 ? void 0 : _o.call(callbacks);
                 break;
             default:
                 onInvalidCallback();

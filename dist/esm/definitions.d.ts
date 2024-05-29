@@ -40,6 +40,8 @@ export type NativeEventEmitterActions = {
     passcode?: () => any;
     secureHardwareNotAvailable?: () => any;
     obfuscationIssues?: () => any;
+    devMode?: () => any;
+    systemVPN?: () => any;
 };
 export declare class Threat {
     value: number;
@@ -50,11 +52,13 @@ export declare class Threat {
     static Passcode: Threat;
     static Simulator: Threat;
     static SecureHardwareNotAvailable: Threat;
+    static SystemVPN: Threat;
     static DeviceBinding: Threat;
     static DeviceID: Threat;
     static UnofficialStore: Threat;
     static Overlay: Threat;
     static ObfuscationIssues: Threat;
+    static DevMode: Threat;
     constructor(value: number);
     static getValues(): Threat[];
 }

@@ -83,6 +83,12 @@ const setThreatListeners = async <T extends NativeEventEmitterActions>(
       case Threat.DeviceID.value:
         callbacks.deviceID?.();
         break;
+      case Threat.DevMode.value:
+        callbacks.devMode?.();
+        break;
+      case Threat.SystemVPN.value:
+        callbacks.systemVPN?.();
+        break;
       default:
         onInvalidCallback();
         break;
