@@ -1,15 +1,19 @@
 export const commonChecks = [
+  { name: 'App Integrity', isSecure: true },
   { name: 'Privileged Access', isSecure: true },
   { name: 'Debug', isSecure: true },
-  { name: 'Simulator', isSecure: true },
-  { name: 'App Integrity', isSecure: true },
-  { name: 'Unofficial Store', isSecure: true },
   { name: 'Hooks', isSecure: true },
-  { name: 'Device Binding', isSecure: true },
-  { name: 'Secure Hardware Not Available', isSecure: true },
   { name: 'Passcode', isSecure: true },
+  { name: 'Simulator', isSecure: true },
+  { name: 'Secure Hardware Not Available', isSecure: true },
+  { name: 'System VPN', isSecure: true },
+  { name: 'Device Binding', isSecure: true },
+  { name: 'Unofficial Store', isSecure: true },
 ];
 
 export const iosChecks = [{ name: 'Device ID', isSecure: true }];
 
-export const androidChecks = [{ name: 'Obfuscation Issues', isSecure: true }];
+export const androidChecks = [
+  { name: 'Obfuscation Issues', isSecure: true },
+  { name: 'Developer Mode', isSecure: true },
+];
