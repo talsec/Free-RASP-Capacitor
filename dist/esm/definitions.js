@@ -13,10 +13,12 @@ export class Threat {
                 this.Passcode,
                 this.Simulator,
                 this.SecureHardwareNotAvailable,
+                this.SystemVPN,
                 this.DeviceBinding,
                 this.UnofficialStore,
                 this.Overlay,
                 this.ObfuscationIssues,
+                this.DevMode,
             ]
             : [
                 this.AppIntegrity,
@@ -26,6 +28,7 @@ export class Threat {
                 this.Passcode,
                 this.Simulator,
                 this.SecureHardwareNotAvailable,
+                this.SystemVPN,
                 this.DeviceBinding,
                 this.DeviceID,
                 this.UnofficialStore,
@@ -39,9 +42,11 @@ Threat.Hooks = new Threat(0);
 Threat.Passcode = new Threat(0);
 Threat.Simulator = new Threat(0);
 Threat.SecureHardwareNotAvailable = new Threat(0);
+Threat.SystemVPN = new Threat(0);
 Threat.DeviceBinding = new Threat(0);
 Threat.DeviceID = new Threat(0);
 Threat.UnofficialStore = new Threat(0);
 Threat.Overlay = new Threat(0);
 Threat.ObfuscationIssues = new Threat(0);
+Threat.DevMode = new Threat(0);
 //# sourceMappingURL=definitions.js.map
