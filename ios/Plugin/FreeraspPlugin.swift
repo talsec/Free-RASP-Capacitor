@@ -5,11 +5,10 @@ import TalsecRuntime
 @objc(FreeraspPlugin)
 public class FreeraspPlugin: CAPPlugin {
 
-    public static var shared:FreeraspPlugin?
+    public static var shared: FreeraspPlugin?
     
     let threatChannelKey = String(Int.random(in: 100_000..<999_999_999)) // key of the argument map under which threats are expected
     let threatChannelName = String(Int.random(in: 100_000..<999_999_999)) // name of the channel over which threat callbacks are sent
-    let threatIdentifierList = (1...12).map { _ in Int.random(in: 100_000..<999_999_999) }
     
     override public func load() {
         FreeraspPlugin.shared = self
@@ -100,33 +99,39 @@ extension SecurityThreatCenter: SecurityThreatHandler {
     }
 }
 
-/// An extension to unify callback names with RN ones.
+struct ThreatIdentifiers {
+    static let threatIdentifierList: [Int] = (1...12).map { _ in Int.random(in: 100_000..<999_999_999) }
+}
+
+/// An extension to unify callback names with Capacitor ones.
 extension SecurityThreat {
 
     var callbackIdentifier: Int {
         switch self {
             case .signature:
-            return FreeraspPlugin.shared!.threatIdentifierList[0]
+                return ThreatIdentifiers.threatIdentifierList[0]
             case .jailbreak:
-                return FreeraspPlugin.shared!.threatIdentifierList[1]
+                return ThreatIdentifiers.threatIdentifierList[1]
             case .debugger:
-                return FreeraspPlugin.shared!.threatIdentifierList[2]
+                return ThreatIdentifiers.threatIdentifierList[2]
             case .runtimeManipulation:
-                return FreeraspPlugin.shared!.threatIdentifierList[3]
+                return ThreatIdentifiers.threatIdentifierList[3]
             case .passcode:
-                return FreeraspPlugin.shared!.threatIdentifierList[4]
+                return ThreatIdentifiers.threatIdentifierList[4]
             case .passcodeChange:
-                return FreeraspPlugin.shared!.threatIdentifierList[5]
+                return ThreatIdentifiers.threatIdentifierList[5]
             case .simulator:
-                return FreeraspPlugin.shared!.threatIdentifierList[6]
+                return ThreatIdentifiers.threatIdentifierList[6]
             case .missingSecureEnclave:
-                return FreeraspPlugin.shared!.threatIdentifierList[7]
+                return ThreatIdentifiers.threatIdentifierList[7]
+            case .systemVPN:
+                return ThreatIdentifiers.threatIdentifierList[8]
             case .deviceChange:
-                return FreeraspPlugin.shared!.threatIdentifierList[8]
+                return ThreatIdentifiers.threatIdentifierList[9]
             case .deviceID:
-                return FreeraspPlugin.shared!.threatIdentifierList[9]
+                return ThreatIdentifiers.threatIdentifierList[10]
             case .unofficialStore:
-            return FreeraspPlugin.shared!.threatIdentifierList[10]
+                return ThreatIdentifiers.threatIdentifierList[11]
             @unknown default:
                 abort()
         }
