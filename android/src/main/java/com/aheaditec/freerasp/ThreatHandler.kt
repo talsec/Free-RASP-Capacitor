@@ -44,4 +44,12 @@ internal class TalsecThreatHandler(private val instance: FreeraspPlugin) :
     override fun onHardwareBackedKeystoreNotAvailableDetected() {
         instance.notifyListeners(Threat.SecureHardwareNotAvailable)
     }
+
+    override fun onDeveloperModeDetected() {
+        instance.notifyListeners(Threat.DevMode)
+    }
+
+    override fun onSystemVPNDetected() {
+        instance.notifyListeners(Threat.SystemVPN)
+    }
 }
