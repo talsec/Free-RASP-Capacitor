@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Android
 
+#### Added
+
+- Added the auditing of the internal execution for the future check optimization and overall security improvements.
+
 #### Fixed
 
 - Fixed native crashes (SEGFAULT errors) in `ifpip` method
