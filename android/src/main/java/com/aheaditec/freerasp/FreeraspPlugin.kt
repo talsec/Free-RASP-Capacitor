@@ -28,6 +28,9 @@ class FreeraspPlugin : Plugin() {
         try {
             val talsecConfig = buildTalsecConfigThrowing(config)
             listener.registerListener(context)
+            bridge.activity.runOnUiThread {
+                Talsec.start(context, talsecConfig)
+            }
             Talsec.start(context, talsecConfig)
             call.resolve(JSObject().put("started", true))
         } catch (e: Exception) {
