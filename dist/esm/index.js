@@ -84,12 +84,17 @@ const setThreatListeners = async (callbacks) => {
     });
 };
 const removeThreatListeners = () => {
-    activeListeners.forEach((listener) => listener.remove());
+    activeListeners.forEach(listener => listener.remove());
 };
 const startFreeRASP = async (config, reactions) => {
     await setThreatListeners(reactions);
-    const { started } = await Freerasp.talsecStart({ config });
-    return started;
+    try {
+        const { started } = await Freerasp.talsecStart({ config });
+        return started;
+    }
+    catch (e) {
+        console.error(`${e.code}: ${e.message}`);
+    }
 };
 export * from './definitions';
 export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners };

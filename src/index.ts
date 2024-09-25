@@ -1,6 +1,10 @@
 import { registerPlugin } from '@capacitor/core';
 
-import type { FreeraspPlugin, FreeraspConfig, NativeEventEmitterActions } from './definitions';
+import type {
+  FreeraspPlugin,
+  FreeraspConfig,
+  NativeEventEmitterActions,
+} from './definitions';
 import { Threat } from './definitions';
 import { getThreatCount, itemsHaveType } from './utils';
 
@@ -40,12 +44,12 @@ const prepareMapping = async (): Promise<void> => {
 };
 
 const setThreatListeners = async <T extends NativeEventEmitterActions>(
-  callbacks: T & Record<Exclude<keyof T, keyof NativeEventEmitterActions>, []>
+  callbacks: T & Record<Exclude<keyof T, keyof NativeEventEmitterActions>, []>,
 ) => {
-    const [channel, key] = await getThreatChannelData();
-    await prepareMapping();
+  const [channel, key] = await getThreatChannelData();
+  await prepareMapping();
 
-    await Freerasp.addListener(channel, (event: any) => {
+  await Freerasp.addListener(channel, (event: any) => {
     if (event[key] === undefined) {
       onInvalidCallback();
     }
@@ -97,16 +101,21 @@ const setThreatListeners = async <T extends NativeEventEmitterActions>(
 };
 
 const removeThreatListeners = () => {
-  activeListeners.forEach((listener) => listener.remove());
+  activeListeners.forEach(listener => listener.remove());
 };
 
-const startFreeRASP = async <T extends NativeEventEmitterActions>(config: FreeraspConfig, reactions:  T & Record<Exclude<keyof T, keyof NativeEventEmitterActions>, []>) => {
-  
+const startFreeRASP = async <T extends NativeEventEmitterActions>(
+  config: FreeraspConfig,
+  reactions: T & Record<Exclude<keyof T, keyof NativeEventEmitterActions>, []>,
+) => {
   await setThreatListeners(reactions);
-  const { started } = await Freerasp.talsecStart({config})
-
-  return started
-}
+  try {
+    const { started } = await Freerasp.talsecStart({ config });
+    return started;
+  } catch (e: any) {
+    console.error(`${e.code}: ${e.message}`);
+  }
+};
 
 export * from './definitions';
 export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners };
