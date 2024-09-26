@@ -94,7 +94,7 @@ class FreeraspPlugin : Plugin() {
         val packageName = androidConfig.getString("packageName")
         val certificateHashes = androidConfig.getArraySafe("certificateHashes")
         val talsecBuilder = TalsecConfig.Builder(packageName, certificateHashes)
-            .watcherMail(config.getString("watcherMail"))
+            .watcherMail(configJson.getString("watcherMail"))
             .supportedAlternativeStores(androidConfig.getArraySafe("supportedAlternativeStores"))
             .prod(configJson.getBool("isProd") ?: true)
 
