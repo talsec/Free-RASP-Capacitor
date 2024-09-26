@@ -24,7 +24,7 @@ public class FreeraspPlugin: CAPPlugin {
         do {
             try initializeTalsec(talsecConfig: config)
         } catch let error as NSError {
-            call.reject(error.localizedDescription)
+            call.reject("Could not initialize freeRASP: \(error.domain)", "TalsecInitializationError", error)
             return
         }
         call.resolve([

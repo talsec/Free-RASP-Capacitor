@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Android SDK version: 11.1.0
 - iOS SDK version: 6.6.0
 
+### Capacitor
+
+#### Changed
+
+- Improved error messages when validation of the freeRASP configuration fails
+
 ### Android
 
 #### Added
