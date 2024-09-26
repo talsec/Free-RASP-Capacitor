@@ -26,12 +26,15 @@ class FreeraspPlugin : Plugin() {
             return
         }
         try {
-            val talsecConfig = parseTalsecConfigThrowing(config)
+            val talsecConfig = buildTalsecConfigThrowing(config)
             listener.registerListener(context)
+            bridge.activity.runOnUiThread {
+                Talsec.start(context, talsecConfig)
+            }
             Talsec.start(context, talsecConfig)
             call.resolve(JSObject().put("started", true))
         } catch (e: Exception) {
-            call.reject("Error during Talsec Native plugin initialization - ${e.message}", null, e)
+            call.reject("Error during Talsec Native plugin initialization - ${e.message}", "TalsecInitializationError", e)
         }
     }
 
@@ -86,34 +89,16 @@ class FreeraspPlugin : Plugin() {
         notifyListeners(THREAT_CHANNEL_NAME, JSObject().put(THREAT_CHANNEL_KEY, threat.value), true)
     }
 
-    private fun parseTalsecConfigThrowing(configJson: JSObject): TalsecConfig {
+    private fun buildTalsecConfigThrowing(configJson: JSObject): TalsecConfig {
         val androidConfig = configJson.getJSONObject("androidConfig")
         val packageName = androidConfig.getString("packageName")
-        val certificateHashes = mutableListOf<String>()
-        val hashes = androidConfig.getJSONArray("certificateHashes")
-        if (hashes.length() == 0) {
-            throw IllegalArgumentException("At least 1 certificate hash is required.")
-        }
-        for (i in 0 until hashes.length()) {
-            certificateHashes.add(hashes.getString(i))
-        }
-        val watcherMail = configJson.getString("watcherMail")
-        val alternativeStores = mutableListOf<String>()
-        if (androidConfig.has("supportedAlternativeStores")) {
-            val stores = androidConfig.getJSONArray("supportedAlternativeStores")
-            for (i in 0 until stores.length()) {
-                alternativeStores.add(stores.getString(i))
-            }
-        }
-        val isProd = configJson.getBool("isProd") ?: true
+        val certificateHashes = androidConfig.getArraySafe("certificateHashes")
+        val talsecBuilder = TalsecConfig.Builder(packageName, certificateHashes)
+            .watcherMail(configJson.getString("watcherMail"))
+            .supportedAlternativeStores(androidConfig.getArraySafe("supportedAlternativeStores"))
+            .prod(configJson.getBool("isProd") ?: true)
 
-        return TalsecConfig(
-            packageName,
-            certificateHashes.toTypedArray(),
-            watcherMail,
-            alternativeStores.toTypedArray(),
-            isProd
-        )
+        return talsecBuilder.build()
     }
 
     companion object {

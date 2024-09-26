@@ -1,5 +1,6 @@
 package com.aheaditec.freerasp
 
+import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.aheaditec.talsec_security.security.api.ThreatListener
 
 internal class TalsecThreatHandler(private val instance: FreeraspPlugin) :
@@ -36,6 +37,8 @@ internal class TalsecThreatHandler(private val instance: FreeraspPlugin) :
     override fun onObfuscationIssuesDetected() {
         instance.notifyListeners(Threat.ObfuscationIssues)
     }
+
+    override fun onMalwareDetected(p0: MutableList<SuspiciousAppInfo>?) {}
 
     override fun onUnlockedDeviceDetected() {
         instance.notifyListeners(Threat.Passcode)
