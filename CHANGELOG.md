@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added 
 
 - [Dopamine](https://github.com/opa334/Dopamine) jailbreak detection.
+- Enhanced and accelerated the data collection logic
 
 #### Changed
 
