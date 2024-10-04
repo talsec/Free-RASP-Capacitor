@@ -17,11 +17,13 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.0.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'kotlinx-serialization'
 
 android {
     namespace "com.aheaditec.freerasp"
@@ -67,6 +69,7 @@ dependencies {
     implementation project(':capacitor-android')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation "androidx.core:core-ktx:$androidCoreKtxVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"

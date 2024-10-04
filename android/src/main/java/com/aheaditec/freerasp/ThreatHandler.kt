@@ -38,7 +38,9 @@ internal class TalsecThreatHandler(private val instance: FreeraspPlugin) :
         instance.notifyListeners(Threat.ObfuscationIssues)
     }
 
-    override fun onMalwareDetected(p0: MutableList<SuspiciousAppInfo>?) {}
+    override fun onMalwareDetected(suspiciousAppInfos: MutableList<SuspiciousAppInfo>?) {
+        instance.notifyMalware(suspiciousAppInfos ?: mutableListOf())
+    }
 
     override fun onUnlockedDeviceDetected() {
         instance.notifyListeners(Threat.Passcode)
