@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2024-11-12
+
+-   Android SDK version: 11.1.3
+-   iOS SDK version: 6.6.1
+
+### Capacitor
+
+#### Added
+
+-  Added configuration fields for malware detection
+
+### Android
+
+-   New feature: **malware detection** as a new callback for enhanced app security
+
 ## [1.5.3] - 2024-10-28
 - Android SDK version: 11.1.3
 - iOS SDK version: 6.6.1
