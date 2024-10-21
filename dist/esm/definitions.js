@@ -1,4 +1,4 @@
-import { Capacitor } from "@capacitor/core";
+import { Capacitor } from '@capacitor/core';
 export class Threat {
     constructor(value) {
         this.value = value;
@@ -19,6 +19,7 @@ export class Threat {
                 this.Overlay,
                 this.ObfuscationIssues,
                 this.DevMode,
+                this.Malware,
             ]
             : [
                 this.AppIntegrity,
@@ -49,4 +50,5 @@ Threat.UnofficialStore = new Threat(0);
 Threat.Overlay = new Threat(0);
 Threat.ObfuscationIssues = new Threat(0);
 Threat.DevMode = new Threat(0);
+Threat.Malware = new Threat(0);
 //# sourceMappingURL=definitions.js.map
