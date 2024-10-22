@@ -46,11 +46,7 @@ const prepareMapping = async (): Promise<void> => {
 
 // parses base64-encoded malware data to SuspiciousAppInfo[]
 const parseMalwareData = (data: string[]): SuspiciousAppInfo[] => {
-  const result: SuspiciousAppInfo[] = [];
-  data.forEach(entry => {
-    result.push(toSuspiciousAppInfo(entry));
-  });
-  return result;
+  return data.map(entry => toSuspiciousAppInfo(entry));
 };
 
 const toSuspiciousAppInfo = (base64Value: string): SuspiciousAppInfo => {
