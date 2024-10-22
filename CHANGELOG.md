@@ -7,14 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.6.0] - 2024-10-14
 
--   Android SDK version: 11.1.1
+-   Android SDK version: 11.1.3
 -   iOS SDK version: 6.6.0
+
+### Capacitor
+
+#### Added
+
+-  Added configuration fields for malware detection 
 
 ### Android
 
--   A whole new **feature**, malware detection capability. All the necessary information about which can be found in the documentation
+#### Added
+
+-   New feature: **malware detection** as a new callback for enhanced app security
 
 ## [1.5.2] - 2024-10-18
+
+-   Android SDK version: 11.1.3
+-   iOS SDK version: 6.6.0
 
 ### Android
 
