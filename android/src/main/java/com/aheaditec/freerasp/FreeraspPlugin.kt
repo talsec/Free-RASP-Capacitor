@@ -125,8 +125,8 @@ class FreeraspPlugin : Plugin() {
             .supportedAlternativeStores(androidConfig.getArraySafe("supportedAlternativeStores"))
             .prod(configJson.getBool("isProd") ?: true)
 
-        if (androidConfig.has("malware")) {
-            val malwareConfig = androidConfig.getJSONObject("malware")
+        if (androidConfig.has("malwareConfig")) {
+            val malwareConfig = androidConfig.getJSONObject("malwareConfig")
             talsecBuilder.whitelistedInstallationSources(malwareConfig.getArraySafe("whitelistedInstallationSources"))
             talsecBuilder.blocklistedHashes(malwareConfig.getArraySafe("blocklistedHashes"))
             talsecBuilder.blocklistedPermissions(malwareConfig.getNestedArraySafe("blocklistedPermissions"))

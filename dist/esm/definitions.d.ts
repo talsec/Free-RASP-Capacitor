@@ -28,7 +28,7 @@ export type AndroidConfig = {
     packageName: string;
     certificateHashes: string[];
     supportedAlternativeStores?: string[];
-    malware?: MalwareConfig;
+    malwareConfig?: MalwareConfig;
 };
 export type IOSConfig = {
     appBundleId: string;
