@@ -38,16 +38,18 @@ const FreeRaspDemo: React.FC<{
 
   const addItemsToMalwareWhitelist = async () => {
     const appsToWhitelist = ['io.ionic.starter', 'com.example.myApp'];
-    appsToWhitelist.forEach(async app => {
-      try {
-        const whitelistResponse = await addToWhitelist(app);
-        console.info(
-          `${app} stored to Malware Whitelist: ${whitelistResponse}`,
-        );
-      } catch (error: any) {
-        console.info('Malware whitelist failed: ', error);
-      }
-    });
+    await Promise.all(
+      appsToWhitelist.map(async app => {
+        try {
+          const whitelistResponse = await addToWhitelist(app);
+          console.info(
+            `${app} stored to Malware Whitelist: ${whitelistResponse}`,
+          );
+        } catch (error) {
+          console.info('Malware whitelist failed: ', error);
+        }
+      }),
+    );
   };
 
   return (
