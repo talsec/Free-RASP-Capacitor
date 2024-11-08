@@ -46,6 +46,7 @@
     "build": "npm run clean && tsc && rollup -c rollup.config.js",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
+    "ionic:build": "npm run build",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {

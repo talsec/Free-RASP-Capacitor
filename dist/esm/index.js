@@ -105,6 +105,7 @@ const startFreeRASP = async (config, reactions) => {
     }
     catch (e) {
         console.error(`${e.code}: ${e.message}`);
+        return Promise.reject(`${e.code}: ${e.message}`);
     }
 };
 const addToWhitelist = async (packageName) => {
