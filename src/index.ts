@@ -40,7 +40,7 @@ const prepareMapping = async (): Promise<void> => {
   const threats = Threat.getValues();
 
   threats.map((threat, index) => {
-    threat.value = newValues[index]!;
+    threat.value = newValues[index];
   });
 };
 
@@ -57,7 +57,7 @@ const toSuspiciousAppInfo = (base64Value: string): SuspiciousAppInfo => {
 
 const setThreatListeners = async <T extends NativeEventEmitterActions>(
   callbacks: T & Record<Exclude<keyof T, keyof NativeEventEmitterActions>, []>,
-) => {
+): Promise<void> => {
   const [channel, key, malwareKey] = await getThreatChannelData();
   await prepareMapping();
 
@@ -115,20 +115,21 @@ const setThreatListeners = async <T extends NativeEventEmitterActions>(
   });
 };
 
-const removeThreatListeners = () => {
+const removeThreatListeners = (): void => {
   activeListeners.forEach(listener => listener.remove());
 };
 
 const startFreeRASP = async <T extends NativeEventEmitterActions>(
   config: FreeraspConfig,
   reactions: T & Record<Exclude<keyof T, keyof NativeEventEmitterActions>, []>,
-) => {
+): Promise<boolean> => {
   await setThreatListeners(reactions);
   try {
     const { started } = await Freerasp.talsecStart({ config });
     return started;
   } catch (e: any) {
     console.error(`${e.code}: ${e.message}`);
+    return Promise.reject(`${e.code}: ${e.message}`);
   }
 };
 

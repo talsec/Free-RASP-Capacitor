@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowUnreachableCode": false,
+    "skipLibCheck": true,
     "declaration": true,
     "esModuleInterop": true,
     "inlineSources": true,
@@ -14,7 +15,8 @@
     "pretty": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "target": "es2017",
+    "types": []
   },
-  "files": ["src/index.ts"]
+  "files": ["src/index.ts"],
 }
