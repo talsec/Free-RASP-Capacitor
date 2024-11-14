@@ -18,40 +18,40 @@ export interface FreeraspPlugin {
         result: boolean;
     }>;
 }
-export declare type FreeraspConfig = {
+export type FreeraspConfig = {
     androidConfig?: AndroidConfig;
     iosConfig?: IOSConfig;
     watcherMail: string;
     isProd?: boolean;
 };
-export declare type AndroidConfig = {
+export type AndroidConfig = {
     packageName: string;
     certificateHashes: string[];
     supportedAlternativeStores?: string[];
     malwareConfig?: MalwareConfig;
 };
-export declare type IOSConfig = {
+export type IOSConfig = {
     appBundleId: string;
     appTeamId: string;
 };
-export declare type MalwareConfig = {
-    blocklistedHashes?: string[];
-    blocklistedPackageNames?: string[];
-    blocklistedPermissions?: string[][];
+export type MalwareConfig = {
+    blacklistedHashes?: string[];
+    blacklistedPackageNames?: string[];
+    suspiciousPermissions?: string[][];
     whitelistedInstallationSources?: string[];
 };
-export declare type SuspiciousAppInfo = {
+export type SuspiciousAppInfo = {
     packageInfo: PackageInfo;
     reason: string;
 };
-export declare type PackageInfo = {
+export type PackageInfo = {
     packageName: string;
     appName?: string;
     version?: string;
     appIcon?: string;
     installerStore?: string;
 };
-export declare type NativeEventEmitterActions = {
+export type NativeEventEmitterActions = {
     privilegedAccess?: () => any;
     debug?: () => any;
     simulator?: () => any;

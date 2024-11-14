@@ -33,9 +33,9 @@ export type IOSConfig = {
 };
 
 export type MalwareConfig = {
-  blocklistedHashes?: string[];
-  blocklistedPackageNames?: string[];
-  blocklistedPermissions?: string[][];
+  blacklistedHashes?: string[];
+  blacklistedPackageNames?: string[];
+  suspiciousPermissions?: string[][];
   whitelistedInstallationSources?: string[];
 };
 
