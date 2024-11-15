@@ -10,7 +10,12 @@ export interface FreeraspPlugin {
         ids: number[];
     }>;
     getThreatChannelData(): Promise<{
-        ids: [string, string];
+        ids: [string, string, string];
+    }>;
+    addToWhitelist(options: {
+        packageName: string;
+    }): Promise<{
+        result: boolean;
     }>;
 }
 export type FreeraspConfig = {
@@ -23,10 +28,28 @@ export type AndroidConfig = {
     packageName: string;
     certificateHashes: string[];
     supportedAlternativeStores?: string[];
+    malwareConfig?: MalwareConfig;
 };
 export type IOSConfig = {
     appBundleId: string;
     appTeamId: string;
+};
+export type MalwareConfig = {
+    blacklistedHashes?: string[];
+    blacklistedPackageNames?: string[];
+    suspiciousPermissions?: string[][];
+    whitelistedInstallationSources?: string[];
+};
+export type SuspiciousAppInfo = {
+    packageInfo: PackageInfo;
+    reason: string;
+};
+export type PackageInfo = {
+    packageName: string;
+    appName?: string;
+    version?: string;
+    appIcon?: string;
+    installerStore?: string;
 };
 export type NativeEventEmitterActions = {
     privilegedAccess?: () => any;
@@ -42,6 +65,7 @@ export type NativeEventEmitterActions = {
     obfuscationIssues?: () => any;
     devMode?: () => any;
     systemVPN?: () => any;
+    malware?: (suspiciousApps: SuspiciousAppInfo[]) => any;
 };
 export declare class Threat {
     value: number;
@@ -59,6 +83,7 @@ export declare class Threat {
     static Overlay: Threat;
     static ObfuscationIssues: Threat;
     static DevMode: Threat;
+    static Malware: Threat;
     constructor(value: number);
     static getValues(): Threat[];
 }

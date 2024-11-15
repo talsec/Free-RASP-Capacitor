@@ -1,5 +1,9 @@
 package com.aheaditec.freerasp
 
+import com.aheaditec.freerasp.utils.getArraySafe
+import com.aheaditec.freerasp.utils.getNestedArraySafe
+import com.aheaditec.freerasp.utils.toEncodedJSArray
+import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.aheaditec.talsec_security.security.api.Talsec
 import com.aheaditec.talsec_security.security.api.TalsecConfig
 import com.aheaditec.talsec_security.security.api.ThreatListener
@@ -31,7 +35,6 @@ class FreeraspPlugin : Plugin() {
             bridge.activity.runOnUiThread {
                 Talsec.start(context, talsecConfig)
             }
-            Talsec.start(context, talsecConfig)
             call.resolve(JSObject().put("started", true))
         } catch (e: Exception) {
             call.reject("Error during Talsec Native plugin initialization - ${e.message}", "TalsecInitializationError", e)
@@ -70,7 +73,7 @@ class FreeraspPlugin : Plugin() {
     fun getThreatChannelData(call: PluginCall) {
         val channelData = JSONArray(
             (listOf(
-                THREAT_CHANNEL_NAME, THREAT_CHANNEL_KEY
+                THREAT_CHANNEL_NAME, THREAT_CHANNEL_KEY, MALWARE_CHANNEL_KEY
             ))
         )
         call.resolve(JSObject().put("ids", channelData))
@@ -85,8 +88,32 @@ class FreeraspPlugin : Plugin() {
         android.os.Process.killProcess(android.os.Process.myPid())
     }
 
+    /**
+     * Add app with given package name to Talsec Malware Whitelist
+     * @param packageName - package name of the whitelisted app
+     * @return true if successful
+     */
+    @PluginMethod
+    fun addToWhitelist(call: PluginCall) {
+        val packageName = call.getString("packageName")
+        if (packageName.isNullOrEmpty()) {
+            call.reject(
+                "Package name argument is missing or empty in the call",
+                "MissingArgumentError"
+            )
+            return
+        }
+        Talsec.addToWhitelist(context, packageName)
+        call.resolve(JSObject().put("result", true))
+    }
+
     internal fun notifyListeners(threat: Threat) {
         notifyListeners(THREAT_CHANNEL_NAME, JSObject().put(THREAT_CHANNEL_KEY, threat.value), true)
+    }
+
+    internal fun notifyMalware(suspiciousApps: MutableList<SuspiciousAppInfo>) {
+        notifyListeners(THREAT_CHANNEL_NAME, JSObject().put(THREAT_CHANNEL_KEY, Threat.Malware.value).put(
+            MALWARE_CHANNEL_KEY, suspiciousApps.toEncodedJSArray(context)), true)
     }
 
     private fun buildTalsecConfigThrowing(configJson: JSObject): TalsecConfig {
@@ -98,6 +125,13 @@ class FreeraspPlugin : Plugin() {
             .supportedAlternativeStores(androidConfig.getArraySafe("supportedAlternativeStores"))
             .prod(configJson.getBool("isProd") ?: true)
 
+        if (androidConfig.has("malwareConfig")) {
+            val malwareConfig = androidConfig.getJSONObject("malwareConfig")
+            talsecBuilder.whitelistedInstallationSources(malwareConfig.getArraySafe("whitelistedInstallationSources"))
+            talsecBuilder.blacklistedHashes(malwareConfig.getArraySafe("blacklistedHashes"))
+            talsecBuilder.blacklistedPackageNames(malwareConfig.getArraySafe("blacklistedPackageNames"))
+            talsecBuilder.suspiciousPermissions(malwareConfig.getNestedArraySafe("suspiciousPermissions"))
+        }
         return talsecBuilder.build()
     }
 
@@ -106,5 +140,7 @@ class FreeraspPlugin : Plugin() {
             .toString() // name of the channel over which threat callbacks are sent
         private val THREAT_CHANNEL_KEY = (10000..999999999).random()
             .toString() // key of the argument map under which threats are expected
+        val MALWARE_CHANNEL_KEY = (10000..999999999).random()
+            .toString() // key of the argument map under which malware data is expected
     }
 }

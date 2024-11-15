@@ -1,11 +1,16 @@
-import { Capacitor } from "@capacitor/core";
+import { Capacitor } from '@capacitor/core';
 
 export interface FreeraspPlugin {
   addListener(listener: string, callback: (event: any) => void): any;
-  talsecStart(options: { config: FreeraspConfig }): Promise<{ started: boolean }>;
+  talsecStart(options: {
+    config: FreeraspConfig;
+  }): Promise<{ started: boolean }>;
   onInvalidCallback(): void;
   getThreatIdentifiers(): Promise<{ ids: number[] }>;
-  getThreatChannelData(): Promise<{ ids: [string, string] }>;
+  getThreatChannelData(): Promise<{ ids: [string, string, string] }>;
+  addToWhitelist(options: {
+    packageName: string;
+  }): Promise<{ result: boolean }>;
 }
 
 export type FreeraspConfig = {
@@ -13,18 +18,39 @@ export type FreeraspConfig = {
   iosConfig?: IOSConfig;
   watcherMail: string;
   isProd?: boolean;
-}
+};
 
 export type AndroidConfig = {
   packageName: string;
   certificateHashes: string[];
   supportedAlternativeStores?: string[];
-}
+  malwareConfig?: MalwareConfig;
+};
 
 export type IOSConfig = {
   appBundleId: string;
   appTeamId: string;
-}
+};
+
+export type MalwareConfig = {
+  blacklistedHashes?: string[];
+  blacklistedPackageNames?: string[];
+  suspiciousPermissions?: string[][];
+  whitelistedInstallationSources?: string[];
+};
+
+export type SuspiciousAppInfo = {
+  packageInfo: PackageInfo;
+  reason: string;
+};
+
+export type PackageInfo = {
+  packageName: string;
+  appName?: string;
+  version?: string;
+  appIcon?: string;
+  installerStore?: string;
+};
 
 export type NativeEventEmitterActions = {
   privilegedAccess?: () => any;
@@ -40,6 +66,7 @@ export type NativeEventEmitterActions = {
   obfuscationIssues?: () => any;
   devMode?: () => any;
   systemVPN?: () => any;
+  malware?: (suspiciousApps: SuspiciousAppInfo[]) => any;
 };
 
 export class Threat {
@@ -59,6 +86,7 @@ export class Threat {
   static Overlay = new Threat(0);
   static ObfuscationIssues = new Threat(0);
   static DevMode = new Threat(0);
+  static Malware = new Threat(0);
 
   constructor(value: number) {
     this.value = value;
@@ -80,6 +108,7 @@ export class Threat {
           this.Overlay,
           this.ObfuscationIssues,
           this.DevMode,
+          this.Malware,
         ]
       : [
           this.AppIntegrity,

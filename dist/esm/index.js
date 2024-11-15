@@ -1,10 +1,8 @@
-import { registerPlugin } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Threat } from './definitions';
 import { getThreatCount, itemsHaveType } from './utils';
 const activeListeners = [];
-const Freerasp = registerPlugin('Freerasp', {
-    web: () => import('./web').then(m => new m.FreeraspWeb()),
-});
+const Freerasp = registerPlugin('Freerasp', {});
 const onInvalidCallback = () => {
     Freerasp.onInvalidCallback();
 };
@@ -16,8 +14,9 @@ const getThreatIdentifiers = async () => {
     return ids;
 };
 const getThreatChannelData = async () => {
+    const dataLength = Capacitor.getPlatform() === 'ios' ? 2 : 3;
     const { ids } = await Freerasp.getThreatChannelData();
-    if (ids.length !== 2 || !itemsHaveType(ids, 'string')) {
+    if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
         onInvalidCallback();
     }
     return ids;
@@ -29,11 +28,20 @@ const prepareMapping = async () => {
         threat.value = newValues[index];
     });
 };
+// parses base64-encoded malware data to SuspiciousAppInfo[]
+const parseMalwareData = (data) => {
+    return data.map(entry => toSuspiciousAppInfo(entry));
+};
+const toSuspiciousAppInfo = (base64Value) => {
+    const data = JSON.parse(atob(base64Value));
+    const packageInfo = data.packageInfo;
+    return { packageInfo, reason: data.reason };
+};
 const setThreatListeners = async (callbacks) => {
-    const [channel, key] = await getThreatChannelData();
+    const [channel, key, malwareKey] = await getThreatChannelData();
     await prepareMapping();
     await Freerasp.addListener(channel, (event) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
         if (event[key] === undefined) {
             onInvalidCallback();
         }
@@ -77,6 +85,9 @@ const setThreatListeners = async (callbacks) => {
             case Threat.SystemVPN.value:
                 (_o = callbacks.systemVPN) === null || _o === void 0 ? void 0 : _o.call(callbacks);
                 break;
+            case Threat.Malware.value:
+                (_p = callbacks.malware) === null || _p === void 0 ? void 0 : _p.call(callbacks, parseMalwareData(event[malwareKey]));
+                break;
             default:
                 onInvalidCallback();
                 break;
@@ -94,8 +105,16 @@ const startFreeRASP = async (config, reactions) => {
     }
     catch (e) {
         console.error(`${e.code}: ${e.message}`);
+        return Promise.reject(`${e.code}: ${e.message}`);
     }
 };
+const addToWhitelist = async (packageName) => {
+    if (Capacitor.getPlatform() === 'ios') {
+        return Promise.reject('Malware detection not available on iOS');
+    }
+    const { result } = await Freerasp.addToWhitelist({ packageName });
+    return result;
+};
 export * from './definitions';
-export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners };
+export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, };
 //# sourceMappingURL=index.js.map

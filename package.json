@@ -1,6 +1,6 @@
 {
   "name": "capacitor-freerasp",
-  "version": "1.5.3",
+  "version": "1.6.0",
   "description": "Capacitor plugin for improving app security and threat monitoring on Android and iOS mobile devices",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -33,19 +33,20 @@
     "capacitor-frida"
   ],
   "scripts": {
-    "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
+    "verify": "npm run verify:ios && npm run verify:android",
     "verify:ios": "cd ios && pod install && xcodebuild -workspace Plugin.xcworkspace -scheme Plugin -destination generic/platform=iOS && cd ..",
     "verify:android": "cd android && ./gradlew clean build test && cd ..",
-    "verify:web": "npm run build",
     "lint": "npm run eslint && npm run prettier -- --check && npm run swiftlint -- lint",
     "fmt": "npm run eslint -- --fix && npm run prettier -- --write && npm run swiftlint -- --fix --format",
     "eslint": "eslint . --ext ts",
-    "prettier": "prettier \"**/*.{css,html,ts,js,java}\"",
+    "prettier": "prettier \"**/*.{ts, js, jsx, tsx}\"",
+    "typecheck": "tsc --noEmit",
     "swiftlint": "node-swiftlint",
     "ts:build": "tsc",
     "build": "npm run clean && tsc && rollup -c rollup.config.js",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
+    "ionic:build": "npm run build",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
@@ -61,7 +62,7 @@
     "rimraf": "^3.0.2",
     "rollup": "^2.32.0",
     "swiftlint": "^1.0.1",
-    "typescript": "~5.2.2"
+    "typescript": "~4.1.5"
   },
   "peerDependencies": {
     "@capacitor/core": "*"

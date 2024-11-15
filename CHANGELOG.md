@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2024-11-15
+
+-   Android SDK version: 12.0.0
+-   iOS SDK version: 6.6.3
+
+### Capacitor
+
+#### Added
+
+-  Added configuration fields for malware detection 
+
+#### Fixed
+
+- Resolved compatibilty issues with JDK 21 [(issue #21)](https://github.com/talsec/Free-RASP-Capacitor/issues/21)
+
+### Android
+
+#### Added
+
+- New feature: **malware detection** as a new callback for enhanced app security
+
+#### Fixed
+
+- Refactoring Magisk checks in the root detection
+
+### iOS
+
+#### Added
+
+- Enhanced security with **[Serotonin Jailbreak](https://github.com/SerotoninApp/Serotonin) Detection** to identify compromised devices.
+
+#### Changed
+
+- Updated SDK code signing; it will now be signed with:
+  - Team ID: PBDDS45LQS
+  - Team Name: Lynx SFT s.r.o.
+
 ## [1.5.3] - 2024-10-28
 - Android SDK version: 11.1.3
 - iOS SDK version: 6.6.1

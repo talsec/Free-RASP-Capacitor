@@ -3,7 +3,7 @@ import { IonApp, setupIonicReact } from '@ionic/react';
 import FreeRaspDemo from './pages/FreeRaspDemo';
 import { Capacitor } from '@capacitor/core';
 
-import { startFreeRASP } from 'capacitor-freerasp';
+import { startFreeRASP, SuspiciousAppInfo } from 'capacitor-freerasp';
 import { androidChecks, commonChecks, iosChecks } from './utils/checks';
 
 /* Core CSS required for Ionic components to work properly */
@@ -25,11 +25,28 @@ const App: React.FC = () => {
     ...(Capacitor.getPlatform() === 'ios' ? iosChecks : androidChecks),
   ]);
 
+  const [suspiciousApps, setSuspiciousApps] = React.useState<
+    SuspiciousAppInfo[]
+  >([]);
+
   const config = {
     androidConfig: {
       packageName: 'com.capacitor.example',
       certificateHashes: ['AKoRuyLMM91E7lX/Zqp3u4jMmd0A7hH/Iqozu0TMVd0='],
       // supportedAlternativeStores: ['storeOne', 'storeTwo'],
+      malwareConfig: {
+        blacklistedHashes: ['FgvSehLMM91E7lX/Zqp3u4jMmd0A7hH/Iqozu0TMVd0u'],
+        blacklistedPackageNames: ['com.wultra.app.screenlogger'],
+        suspiciousPermissions: [
+          [
+            'android.permission.INTERNET',
+            'android.permission.ACCESS_COARSE_LOCATION',
+          ],
+          ['android.permission.BLUETOOTH'],
+          ['android.permission.BATTERY_STATS'],
+        ],
+        whitelistedInstallationSources: ['com.apkpure.aegon'],
+      },
     },
     iosConfig: {
       appBundleId: 'com.capacitor.example',
@@ -160,6 +177,15 @@ const App: React.FC = () => {
         ),
       );
     },
+    // Android only
+    malware: (detectedApps: SuspiciousAppInfo[]) => {
+      setSuspiciousApps(detectedApps);
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Malware' ? { ...threat, isSecure: false } : threat,
+        ),
+      );
+    },
   };
 
   // start freeRASP
@@ -173,7 +199,7 @@ const App: React.FC = () => {
 
   return (
     <IonApp>
-      <FreeRaspDemo checks={appChecks} />
+      <FreeRaspDemo checks={appChecks} suspiciousApps={suspiciousApps} />
     </IonApp>
   );
 };
