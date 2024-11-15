@@ -16,11 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -  Added configuration fields for malware detection 
 
+#### Fixed
+
+- Resolved compatibilty issues with JDK 21 [(issue #21)](https://github.com/talsec/Free-RASP-Capacitor/issues/21)
+
 ### Android
 
 #### Added
 
 - New feature: **malware detection** as a new callback for enhanced app security
+
+#### Fixed
+
+- Refactoring Magisk checks in the root detection
 
 ### iOS
 
