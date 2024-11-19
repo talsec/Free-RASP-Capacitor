@@ -20,6 +20,7 @@ export class Threat {
                 this.ObfuscationIssues,
                 this.DevMode,
                 this.Malware,
+                this.ADBEnabled,
             ]
             : [
                 this.AppIntegrity,
@@ -51,4 +52,5 @@ Threat.Overlay = new Threat(0);
 Threat.ObfuscationIssues = new Threat(0);
 Threat.DevMode = new Threat(0);
 Threat.Malware = new Threat(0);
+Threat.ADBEnabled = new Threat(0);
 //# sourceMappingURL=definitions.js.map
