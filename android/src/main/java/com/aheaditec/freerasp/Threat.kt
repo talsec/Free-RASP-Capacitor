@@ -24,6 +24,7 @@ internal sealed class Threat(val value: Int) {
     object SystemVPN : Threat((10000..999999999).random())
     object DevMode : Threat((10000..999999999).random())
     object Malware : Threat((10000..999999999).random())
+    object ADBEnabled : Threat((10000..999999999).random())
 
     companion object {
         internal fun getThreatValues(): JSONArray {
@@ -42,7 +43,8 @@ internal sealed class Threat(val value: Int) {
                     Overlay.value,
                     ObfuscationIssues.value,
                     DevMode.value,
-                    Malware.value
+                    Malware.value,
+                    ADBEnabled.value
                 ))
             )
         }
