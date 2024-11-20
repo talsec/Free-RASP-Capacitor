@@ -31,12 +31,12 @@ const App: React.FC = () => {
 
   const config = {
     androidConfig: {
-      packageName: 'com.capacitor.example',
+      packageName: 'io.ionic.starter',
       certificateHashes: ['AKoRuyLMM91E7lX/Zqp3u4jMmd0A7hH/Iqozu0TMVd0='],
       // supportedAlternativeStores: ['storeOne', 'storeTwo'],
       malwareConfig: {
         blacklistedHashes: ['FgvSehLMM91E7lX/Zqp3u4jMmd0A7hH/Iqozu0TMVd0u'],
-        blacklistedPackageNames: ['com.wultra.app.screenlogger'],
+        blacklistedPackageNames: ['io.ionic.starter'],
         suspiciousPermissions: [
           [
             'android.permission.INTERNET',
@@ -49,7 +49,7 @@ const App: React.FC = () => {
       },
     },
     iosConfig: {
-      appBundleId: 'com.capacitor.example',
+      appBundleId: 'io.ionic.starter',
       appTeamId: 'your_team_ID',
     },
     watcherMail: 'your_email_address@example.com',
@@ -183,6 +183,16 @@ const App: React.FC = () => {
       setAppChecks(currentState =>
         currentState.map(threat =>
           threat.name === 'Malware' ? { ...threat, isSecure: false } : threat,
+        ),
+      );
+    },
+    // Android only
+    adbEnabled: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'ADB Enabled'
+            ? { ...threat, isSecure: false }
+            : threat,
         ),
       );
     },

@@ -67,6 +67,7 @@ export type NativeEventEmitterActions = {
   devMode?: () => any;
   systemVPN?: () => any;
   malware?: (suspiciousApps: SuspiciousAppInfo[]) => any;
+  adbEnabled?: () => any;
 };
 
 export class Threat {
@@ -87,6 +88,7 @@ export class Threat {
   static ObfuscationIssues = new Threat(0);
   static DevMode = new Threat(0);
   static Malware = new Threat(0);
+  static ADBEnabled = new Threat(0);
 
   constructor(value: number) {
     this.value = value;
@@ -109,6 +111,7 @@ export class Threat {
           this.ObfuscationIssues,
           this.DevMode,
           this.Malware,
+          this.ADBEnabled,
         ]
       : [
           this.AppIntegrity,

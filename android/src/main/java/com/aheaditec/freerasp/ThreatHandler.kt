@@ -54,6 +54,10 @@ internal class TalsecThreatHandler(private val instance: FreeraspPlugin) :
         instance.notifyListeners(Threat.DevMode)
     }
 
+    override fun onADBEnabledDetected() {
+        instance.notifyListeners(Threat.ADBEnabled)
+    }
+
     override fun onSystemVPNDetected() {
         instance.notifyListeners(Threat.SystemVPN)
     }
