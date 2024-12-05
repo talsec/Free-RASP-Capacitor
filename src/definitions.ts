@@ -11,6 +11,7 @@ export interface FreeraspPlugin {
   addToWhitelist(options: {
     packageName: string;
   }): Promise<{ result: boolean }>;
+  getAppIcon(options: { packageName: string }): Promise<{ result: string }>;
 }
 
 export type FreeraspConfig = {

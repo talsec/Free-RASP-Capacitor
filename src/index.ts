@@ -45,8 +45,12 @@ const prepareMapping = async (): Promise<void> => {
 };
 
 // parses base64-encoded malware data to SuspiciousAppInfo[]
-const parseMalwareData = (data: string[]): SuspiciousAppInfo[] => {
-  return data.map(entry => toSuspiciousAppInfo(entry));
+const parseMalwareData = async (
+  data: string[],
+): Promise<SuspiciousAppInfo[]> => {
+  return new Promise((resolve, _reject) => {
+    resolve(data.map(entry => toSuspiciousAppInfo(entry)));
+  });
 };
 
 const toSuspiciousAppInfo = (base64Value: string): SuspiciousAppInfo => {
@@ -61,7 +65,7 @@ const setThreatListeners = async <T extends NativeEventEmitterActions>(
   const [channel, key, malwareKey] = await getThreatChannelData();
   await prepareMapping();
 
-  await Freerasp.addListener(channel, (event: any) => {
+  await Freerasp.addListener(channel, async (event: any) => {
     if (event[key] === undefined) {
       onInvalidCallback();
     }
@@ -106,7 +110,7 @@ const setThreatListeners = async <T extends NativeEventEmitterActions>(
         callbacks.systemVPN?.();
         break;
       case Threat.Malware.value:
-        callbacks.malware?.(parseMalwareData(event[malwareKey]));
+        callbacks.malware?.(await parseMalwareData(event[malwareKey]));
         break;
       case Threat.ADBEnabled.value:
         callbacks.adbEnabled?.();
@@ -144,6 +148,16 @@ const addToWhitelist = async (packageName: string): Promise<boolean> => {
   return result;
 };
 
+const getAppIcon = async (packageName: string): Promise<string> => {
+  if (Capacitor.getPlatform() === 'ios') {
+    return Promise.reject(
+      'App icon retrieval for Malware detection not available on iOS',
+    );
+  }
+  const { result } = await Freerasp.getAppIcon({ packageName });
+  return result;
+};
+
 export * from './definitions';
 export {
   Freerasp,
@@ -151,4 +165,5 @@ export {
   setThreatListeners,
   removeThreatListeners,
   addToWhitelist,
+  getAppIcon,
 };
