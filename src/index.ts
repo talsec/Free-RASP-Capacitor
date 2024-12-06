@@ -48,8 +48,13 @@ const prepareMapping = async (): Promise<void> => {
 const parseMalwareData = async (
   data: string[],
 ): Promise<SuspiciousAppInfo[]> => {
-  return new Promise((resolve, _reject) => {
-    resolve(data.map(entry => toSuspiciousAppInfo(entry)));
+  return new Promise((resolve, reject) => {
+    try {
+      const suspiciousAppData = data.map(entry => toSuspiciousAppInfo(entry));
+      resolve(suspiciousAppData);
+    } catch (error: any) {
+      reject(`Parsing app data failed: ${error}`);
+    }
   });
 };
 

@@ -30,8 +30,14 @@ const prepareMapping = async () => {
 };
 // parses base64-encoded malware data to SuspiciousAppInfo[]
 const parseMalwareData = async (data) => {
-    return new Promise((resolve, _reject) => {
-        resolve(data.map(entry => toSuspiciousAppInfo(entry)));
+    return new Promise((resolve, reject) => {
+        try {
+            const suspiciousAppData = data.map(entry => toSuspiciousAppInfo(entry));
+            resolve(suspiciousAppData);
+        }
+        catch (error) {
+            reject(`Parsing app data failed: ${error}`);
+        }
     });
 };
 const toSuspiciousAppInfo = (base64Value) => {
