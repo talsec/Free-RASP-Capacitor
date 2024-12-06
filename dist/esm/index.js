@@ -43,7 +43,7 @@ const setThreatListeners = async (callbacks) => {
     const [channel, key, malwareKey] = await getThreatChannelData();
     await prepareMapping();
     await Freerasp.addListener(channel, async (event) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
         if (event[key] === undefined) {
             onInvalidCallback();
         }
@@ -89,6 +89,9 @@ const setThreatListeners = async (callbacks) => {
                 break;
             case Threat.Malware.value:
                 (_p = callbacks.malware) === null || _p === void 0 ? void 0 : _p.call(callbacks, await parseMalwareData(event[malwareKey]));
+                break;
+            case Threat.ADBEnabled.value:
+                (_q = callbacks.adbEnabled) === null || _q === void 0 ? void 0 : _q.call(callbacks);
                 break;
             default:
                 onInvalidCallback();
