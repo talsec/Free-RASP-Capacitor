@@ -1,5 +1,9 @@
 package com.aheaditec.freerasp
 
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Looper
+import com.aheaditec.freerasp.utils.Utils
 import com.aheaditec.freerasp.utils.getArraySafe
 import com.aheaditec.freerasp.utils.getNestedArraySafe
 import com.aheaditec.freerasp.utils.toEncodedJSArray
@@ -37,7 +41,11 @@ class FreeraspPlugin : Plugin() {
             }
             call.resolve(JSObject().put("started", true))
         } catch (e: Exception) {
-            call.reject("Error during Talsec Native plugin initialization - ${e.message}", "TalsecInitializationError", e)
+            call.reject(
+                "Error during Talsec Native plugin initialization - ${e.message}",
+                "TalsecInitializationError",
+                e
+            )
         }
     }
 
@@ -55,6 +63,11 @@ class FreeraspPlugin : Plugin() {
             registered = true
             listener.registerListener(context)
         }
+    }
+
+    override fun handleOnDestroy() {
+        super.handleOnDestroy()
+        backgroundHandlerThread.quitSafely()
     }
 
     /**
@@ -107,13 +120,44 @@ class FreeraspPlugin : Plugin() {
         call.resolve(JSObject().put("result", true))
     }
 
+    /**
+     * Method retrieves app icon for the given parameter
+     * @param packageName package name of the app we want to retrieve icon for
+     * @return PNG with app icon encoded as a base64 string
+     */
+    @PluginMethod
+    fun getAppIcon(call: PluginCall) {
+        val packageName = call.getString("packageName")
+        if (packageName.isNullOrEmpty()) {
+            call.reject(
+                "Package name argument is missing or empty in the call",
+                "MissingArgumentError"
+            )
+            return
+        }
+        // Perform the app icon encoding on a background thread
+        backgroundHandler.post {
+            val encodedData = Utils.getAppIconAsBase64String(context, packageName)
+            mainHandler.post { call.resolve(JSObject().put("result", encodedData)) }
+        }
+    }
+
     internal fun notifyListeners(threat: Threat) {
         notifyListeners(THREAT_CHANNEL_NAME, JSObject().put(THREAT_CHANNEL_KEY, threat.value), true)
     }
 
     internal fun notifyMalware(suspiciousApps: MutableList<SuspiciousAppInfo>) {
-        notifyListeners(THREAT_CHANNEL_NAME, JSObject().put(THREAT_CHANNEL_KEY, Threat.Malware.value).put(
-            MALWARE_CHANNEL_KEY, suspiciousApps.toEncodedJSArray(context)), true)
+        // Perform the malware encoding on a background thread
+        backgroundHandler.post {
+
+            val encodedSuspiciousApps = suspiciousApps.toEncodedJSArray(context)
+            mainHandler.post {
+                val params = JSObject()
+                    .put(THREAT_CHANNEL_KEY, Threat.Malware.value)
+                    .put(MALWARE_CHANNEL_KEY, encodedSuspiciousApps)
+                notifyListeners(THREAT_CHANNEL_NAME, params, true)
+            }
+        }
     }
 
     private fun buildTalsecConfigThrowing(configJson: JSObject): TalsecConfig {
@@ -140,7 +184,10 @@ class FreeraspPlugin : Plugin() {
             .toString() // name of the channel over which threat callbacks are sent
         private val THREAT_CHANNEL_KEY = (10000..999999999).random()
             .toString() // key of the argument map under which threats are expected
-        val MALWARE_CHANNEL_KEY = (10000..999999999).random()
+        private val MALWARE_CHANNEL_KEY = (10000..999999999).random()
             .toString() // key of the argument map under which malware data is expected
+        private val backgroundHandlerThread = HandlerThread("BackgroundThread").apply { start() }
+        private val backgroundHandler = Handler(backgroundHandlerThread.looper)
+        private val mainHandler = Handler(Looper.getMainLooper())
     }
 }
