@@ -29,8 +29,16 @@ const prepareMapping = async () => {
     });
 };
 // parses base64-encoded malware data to SuspiciousAppInfo[]
-const parseMalwareData = (data) => {
-    return data.map(entry => toSuspiciousAppInfo(entry));
+const parseMalwareData = async (data) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const suspiciousAppData = data.map(entry => toSuspiciousAppInfo(entry));
+            resolve(suspiciousAppData);
+        }
+        catch (error) {
+            reject(`Parsing app data failed: ${error}`);
+        }
+    });
 };
 const toSuspiciousAppInfo = (base64Value) => {
     const data = JSON.parse(atob(base64Value));
@@ -40,7 +48,7 @@ const toSuspiciousAppInfo = (base64Value) => {
 const setThreatListeners = async (callbacks) => {
     const [channel, key, malwareKey] = await getThreatChannelData();
     await prepareMapping();
-    await Freerasp.addListener(channel, (event) => {
+    await Freerasp.addListener(channel, async (event) => {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
         if (event[key] === undefined) {
             onInvalidCallback();
@@ -86,7 +94,7 @@ const setThreatListeners = async (callbacks) => {
                 (_o = callbacks.systemVPN) === null || _o === void 0 ? void 0 : _o.call(callbacks);
                 break;
             case Threat.Malware.value:
-                (_p = callbacks.malware) === null || _p === void 0 ? void 0 : _p.call(callbacks, parseMalwareData(event[malwareKey]));
+                (_p = callbacks.malware) === null || _p === void 0 ? void 0 : _p.call(callbacks, await parseMalwareData(event[malwareKey]));
                 break;
             case Threat.ADBEnabled.value:
                 (_q = callbacks.adbEnabled) === null || _q === void 0 ? void 0 : _q.call(callbacks);
@@ -118,6 +126,13 @@ const addToWhitelist = async (packageName) => {
     const { result } = await Freerasp.addToWhitelist({ packageName });
     return result;
 };
+const getAppIcon = async (packageName) => {
+    if (Capacitor.getPlatform() === 'ios') {
+        return Promise.reject('App icon retrieval for Malware detection not available on iOS');
+    }
+    const { result } = await Freerasp.getAppIcon({ packageName });
+    return result;
+};
 export * from './definitions';
-export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, };
+export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, getAppIcon, };
 //# sourceMappingURL=index.js.map

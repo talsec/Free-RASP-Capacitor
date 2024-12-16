@@ -17,6 +17,11 @@ export interface FreeraspPlugin {
     }): Promise<{
         result: boolean;
     }>;
+    getAppIcon(options: {
+        packageName: string;
+    }): Promise<{
+        result: string;
+    }>;
 }
 export type FreeraspConfig = {
     androidConfig?: AndroidConfig;
