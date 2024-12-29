@@ -78,5 +78,5 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     
-    implementation 'com.aheaditec.talsec.security:TalsecSecurity-Community-Capacitor:13.0.0'
+    implementation 'com.aheaditec.talsec.security:TalsecSecurity-Community-Capacitor:13.2.0'
 }
