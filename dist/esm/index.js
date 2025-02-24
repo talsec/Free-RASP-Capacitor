@@ -49,7 +49,7 @@ const setThreatListeners = async (callbacks) => {
     const [channel, key, malwareKey] = await getThreatChannelData();
     await prepareMapping();
     await Freerasp.addListener(channel, async (event) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
         if (event[key] === undefined) {
             onInvalidCallback();
         }
@@ -99,6 +99,12 @@ const setThreatListeners = async (callbacks) => {
             case Threat.ADBEnabled.value:
                 (_q = callbacks.adbEnabled) === null || _q === void 0 ? void 0 : _q.call(callbacks);
                 break;
+            case Threat.Screenshot.value:
+                (_r = callbacks.screenshot) === null || _r === void 0 ? void 0 : _r.call(callbacks);
+                break;
+            case Threat.ScreenRecording.value:
+                (_s = callbacks.screenRecording) === null || _s === void 0 ? void 0 : _s.call(callbacks);
+                break;
             default:
                 onInvalidCallback();
                 break;
@@ -133,6 +139,20 @@ const getAppIcon = async (packageName) => {
     const { result } = await Freerasp.getAppIcon({ packageName });
     return result;
 };
+const blockScreenCapture = async (enable) => {
+    if (Capacitor.getPlatform() === 'ios') {
+        return Promise.reject('Block Screen Capture is not available on iOS');
+    }
+    const { result } = await Freerasp.blockScreenCapture({ enable });
+    return result;
+};
+const isScreenCaptureBlocked = async () => {
+    if (Capacitor.getPlatform() === 'ios') {
+        return Promise.reject('Screen Capture Status is not available on iOS');
+    }
+    const { result } = await Freerasp.isScreenCaptureBlocked();
+    return result;
+};
 export * from './definitions';
-export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, getAppIcon, };
+export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, getAppIcon, blockScreenCapture, isScreenCaptureBlocked, };
 //# sourceMappingURL=index.js.map

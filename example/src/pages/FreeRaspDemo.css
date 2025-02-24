@@ -5,3 +5,7 @@
 ion-label {
   font-weight: 600;
 }
+
+.button {
+  max-width: 100%;
+}

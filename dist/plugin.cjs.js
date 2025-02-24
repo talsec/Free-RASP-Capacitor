@@ -25,6 +25,9 @@ class Threat {
                 this.ObfuscationIssues,
                 this.DevMode,
                 this.Malware,
+                this.ADBEnabled,
+                this.Screenshot,
+                this.ScreenRecording,
             ]
             : [
                 this.AppIntegrity,
@@ -38,6 +41,8 @@ class Threat {
                 this.DeviceBinding,
                 this.DeviceID,
                 this.UnofficialStore,
+                this.Screenshot,
+                this.ScreenRecording,
             ];
     }
 }
@@ -56,6 +61,9 @@ Threat.Overlay = new Threat(0);
 Threat.ObfuscationIssues = new Threat(0);
 Threat.DevMode = new Threat(0);
 Threat.Malware = new Threat(0);
+Threat.ADBEnabled = new Threat(0);
+Threat.Screenshot = new Threat(0);
+Threat.ScreenRecording = new Threat(0);
 
 const getThreatCount = () => {
     return Threat.getValues().length;
@@ -92,8 +100,16 @@ const prepareMapping = async () => {
     });
 };
 // parses base64-encoded malware data to SuspiciousAppInfo[]
-const parseMalwareData = (data) => {
-    return data.map(entry => toSuspiciousAppInfo(entry));
+const parseMalwareData = async (data) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const suspiciousAppData = data.map(entry => toSuspiciousAppInfo(entry));
+            resolve(suspiciousAppData);
+        }
+        catch (error) {
+            reject(`Parsing app data failed: ${error}`);
+        }
+    });
 };
 const toSuspiciousAppInfo = (base64Value) => {
     const data = JSON.parse(atob(base64Value));
@@ -103,8 +119,8 @@ const toSuspiciousAppInfo = (base64Value) => {
 const setThreatListeners = async (callbacks) => {
     const [channel, key, malwareKey] = await getThreatChannelData();
     await prepareMapping();
-    await Freerasp.addListener(channel, (event) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+    await Freerasp.addListener(channel, async (event) => {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
         if (event[key] === undefined) {
             onInvalidCallback();
         }
@@ -149,7 +165,16 @@ const setThreatListeners = async (callbacks) => {
                 (_o = callbacks.systemVPN) === null || _o === void 0 ? void 0 : _o.call(callbacks);
                 break;
             case Threat.Malware.value:
-                (_p = callbacks.malware) === null || _p === void 0 ? void 0 : _p.call(callbacks, parseMalwareData(event[malwareKey]));
+                (_p = callbacks.malware) === null || _p === void 0 ? void 0 : _p.call(callbacks, await parseMalwareData(event[malwareKey]));
+                break;
+            case Threat.ADBEnabled.value:
+                (_q = callbacks.adbEnabled) === null || _q === void 0 ? void 0 : _q.call(callbacks);
+                break;
+            case Threat.Screenshot.value:
+                (_r = callbacks.screenshot) === null || _r === void 0 ? void 0 : _r.call(callbacks);
+                break;
+            case Threat.ScreenRecording.value:
+                (_s = callbacks.screenRecording) === null || _s === void 0 ? void 0 : _s.call(callbacks);
                 break;
             default:
                 onInvalidCallback();
@@ -178,10 +203,34 @@ const addToWhitelist = async (packageName) => {
     const { result } = await Freerasp.addToWhitelist({ packageName });
     return result;
 };
+const getAppIcon = async (packageName) => {
+    if (core.Capacitor.getPlatform() === 'ios') {
+        return Promise.reject('App icon retrieval for Malware detection not available on iOS');
+    }
+    const { result } = await Freerasp.getAppIcon({ packageName });
+    return result;
+};
+const blockScreenCapture = async (enable) => {
+    if (core.Capacitor.getPlatform() === 'ios') {
+        return Promise.reject('Block Screen Capture is not available on iOS');
+    }
+    const { result } = await Freerasp.blockScreenCapture({ enable });
+    return result;
+};
+const isScreenCaptureBlocked = async () => {
+    if (core.Capacitor.getPlatform() === 'ios') {
+        return Promise.reject('Screen Capture Status is not available on iOS');
+    }
+    const { result } = await Freerasp.isScreenCaptureBlocked();
+    return result;
+};
 
 exports.Freerasp = Freerasp;
 exports.Threat = Threat;
 exports.addToWhitelist = addToWhitelist;
+exports.blockScreenCapture = blockScreenCapture;
+exports.getAppIcon = getAppIcon;
+exports.isScreenCaptureBlocked = isScreenCaptureBlocked;
 exports.removeThreatListeners = removeThreatListeners;
 exports.setThreatListeners = setThreatListeners;
 exports.startFreeRASP = startFreeRASP;

@@ -1,8 +1,12 @@
 package com.aheaditec.freerasp
 
+import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.aheaditec.freerasp.utils.Utils
 import com.aheaditec.freerasp.utils.getArraySafe
 import com.aheaditec.freerasp.utils.getNestedArraySafe
@@ -25,6 +29,8 @@ class FreeraspPlugin : Plugin() {
     private val threatHandler = TalsecThreatHandler(this)
     private val listener = ThreatListener(threatHandler, threatHandler)
     private var registered = true
+    private var screenProtector: ScreenProtector? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) ScreenProtector() else null
 
     @PluginMethod
     fun talsecStart(call: PluginCall) {
@@ -49,6 +55,18 @@ class FreeraspPlugin : Plugin() {
         }
     }
 
+    override fun handleOnStart() {
+        super.handleOnStart()
+        screenProtector?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                it.activity = activity
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                it.enable()
+            }
+        }
+    }
+
     override fun handleOnPause() {
         super.handleOnPause()
         if (activity.isFinishing) {
@@ -65,9 +83,23 @@ class FreeraspPlugin : Plugin() {
         }
     }
 
+    override fun handleOnStop() {
+        super.handleOnStop()
+        screenProtector?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                it.activity = null
+            }
+        }
+    }
+
     override fun handleOnDestroy() {
         super.handleOnDestroy()
         backgroundHandlerThread.quitSafely()
+        screenProtector?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                it.activity = null
+            }
+        }
     }
 
     /**
@@ -142,6 +174,49 @@ class FreeraspPlugin : Plugin() {
         }
     }
 
+    /**
+     * Method to set screen capture state
+     * @param enable Pass `true` to block screen capture, `false` to enable it
+     */
+    @PluginMethod
+    fun blockScreenCapture(call: PluginCall) {
+        val enable = call.getBoolean("enable") ?: run {
+            call.reject(
+                "Enable argument is missing or not a boolean.", "MissingArgumentError"
+            )
+            return
+        }
+
+        activity?.runOnUiThread {
+            try {
+                Talsec.blockScreenCapture(context, enable)
+                call.resolve(JSObject().put("result", true))
+            } catch (e: kotlin.Exception) {
+                call.reject(
+                    "Error while setting screen capture: ${e.message}", "BlockScreenCaptureError"
+                )
+            }
+        } ?: run {
+            call.reject("Cannot block screen capture, activity is null.", "BlockScreenCaptureError")
+        }
+    }
+
+    /**
+     * Method to check if screen capturing is currently blocked
+     */
+    @PluginMethod
+    fun isScreenCaptureBlocked(call: PluginCall) {
+        try {
+            val isBlocked = Talsec.isScreenCaptureBlocked()
+            call.resolve(JSObject().put("result", isBlocked))
+        } catch (e: kotlin.Exception) {
+            call.reject(
+                "Error while checking if screen capture is blocked: ${e.message}",
+                "IsScreenCaptureBlockedError"
+            )
+        }
+    }
+
     internal fun notifyListeners(threat: Threat) {
         notifyListeners(THREAT_CHANNEL_NAME, JSObject().put(THREAT_CHANNEL_KEY, threat.value), true)
     }
@@ -178,6 +253,7 @@ class FreeraspPlugin : Plugin() {
         }
         return talsecBuilder.build()
     }
+
 
     companion object {
         private val THREAT_CHANNEL_NAME = (10000..999999999).random()

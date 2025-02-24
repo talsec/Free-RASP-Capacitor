@@ -13,11 +13,12 @@ import {
   IonList,
   IonListHeader,
   IonRow,
+  IonButton,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
 
-import { SuspiciousAppInfo, addToWhitelist } from 'capacitor-freerasp';
+import { SuspiciousAppInfo, addToWhitelist, blockScreenCapture, isScreenCaptureBlocked, } from 'capacitor-freerasp';
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import MalwareModal from '../components/MalwareModal';
@@ -29,10 +30,14 @@ const FreeRaspDemo: React.FC<{
   }[];
   suspiciousApps: SuspiciousAppInfo[];
 }> = ({ checks, suspiciousApps }) => {
+     const [screenCaptureBlocked, setScreenCaptureBlocked] = React.useState(false);
+       const platform = Capacitor.getPlatform();
   useEffect(() => {
     (async () => {
-      Capacitor.getPlatform() === 'android' &&
-        (await addItemsToMalwareWhitelist());
+      if (platform === 'android') {
+             await addItemsToMalwareWhitelist();
+             await updateScreenCaptureStatus();
+           }
     })();
   }, []);
 
@@ -52,6 +57,30 @@ const FreeRaspDemo: React.FC<{
     );
   };
 
+ const updateScreenCaptureStatus = async () => {
+    try {
+      const isBlocked = await isScreenCaptureBlocked();
+      setScreenCaptureBlocked(isBlocked);
+    } catch (error) {
+      console.error('Error fetching screen capture status:', error);
+    }
+  };
+
+  const handleScreenCapture = async (enable: boolean) => {
+    try {
+      const blockScreenCaptureResponse = await blockScreenCapture(enable);
+      console.info(
+        'Changing Screen Capture Status:',
+        blockScreenCaptureResponse,
+      );
+      await updateScreenCaptureStatus();
+    } catch (e: any) {
+      console.error(
+        `Failed to ${enable ? 'block' : 'enable'} screen capture: ${e.message}`,
+      );
+    }
+  };
+
   return (
     <IonContent scrollY={true}>
       <IonHeader>
@@ -60,7 +89,23 @@ const FreeRaspDemo: React.FC<{
         </IonToolbar>
       </IonHeader>
 
+
       <IonList>
+      {platform === 'android' && (
+                <>
+                  <IonRow>
+                    <IonButton
+                      className="ion-text-wrap button"
+                      color={screenCaptureBlocked ? 'success' : 'danger'}
+                      onClick={() => handleScreenCapture(!screenCaptureBlocked)}
+                    >
+                      {screenCaptureBlocked
+                        ? 'Unblock Screen Capture'
+                        : 'Block Screen Capture'}
+                    </IonButton>
+                  </IonRow>
+                </>
+              )}
         <IonListHeader>
           <h1>freeRASP checks:</h1>
         </IonListHeader>
