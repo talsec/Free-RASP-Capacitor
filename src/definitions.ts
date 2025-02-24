@@ -13,8 +13,8 @@ export interface FreeraspPlugin {
   }): Promise<{ result: boolean }>;
   getAppIcon(options: { packageName: string }): Promise<{ result: string }>;
   blockScreenCapture(options: {
-      enable: boolean;
-    }): Promise<{ result: boolean }>;
+    enable: boolean;
+  }): Promise<{ result: boolean }>;
   isScreenCaptureBlocked(): Promise<{ result: boolean }>;
 }
 
@@ -122,7 +122,7 @@ export class Threat {
           this.Malware,
           this.ADBEnabled,
           this.Screenshot,
-                    this.ScreenRecording,
+          this.ScreenRecording,
         ]
       : [
           this.AppIntegrity,
@@ -136,8 +136,8 @@ export class Threat {
           this.DeviceBinding,
           this.DeviceID,
           this.UnofficialStore,
-            this.Screenshot,
-                    this.ScreenRecording,
+          this.Screenshot,
+          this.ScreenRecording,
         ];
   }
 }

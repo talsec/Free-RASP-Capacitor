@@ -120,12 +120,12 @@ const setThreatListeners = async <T extends NativeEventEmitterActions>(
       case Threat.ADBEnabled.value:
         callbacks.adbEnabled?.();
         break;
-              case Threat.Screenshot.value:
-                callbacks.screenshot?.();
-                break;
-              case Threat.ScreenRecording.value:
-                callbacks.screenRecording?.();
-                break;
+      case Threat.Screenshot.value:
+        callbacks.screenshot?.();
+        break;
+      case Threat.ScreenRecording.value:
+        callbacks.screenRecording?.();
+        break;
       default:
         onInvalidCallback();
         break;
@@ -193,6 +193,6 @@ export {
   removeThreatListeners,
   addToWhitelist,
   getAppIcon,
-    blockScreenCapture,
-    isScreenCaptureBlocked,
+  blockScreenCapture,
+  isScreenCaptureBlocked,
 };
