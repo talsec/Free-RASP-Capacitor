@@ -4,9 +4,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import com.aheaditec.freerasp.utils.Utils
 import com.aheaditec.freerasp.utils.getArraySafe
 import com.aheaditec.freerasp.utils.getNestedArraySafe
@@ -29,8 +26,6 @@ class FreeraspPlugin : Plugin() {
     private val threatHandler = TalsecThreatHandler(this)
     private val listener = ThreatListener(threatHandler, threatHandler)
     private var registered = true
-    private var screenProtector: ScreenProtector? =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) ScreenProtector() else null
 
     @PluginMethod
     fun talsecStart(call: PluginCall) {
@@ -44,8 +39,16 @@ class FreeraspPlugin : Plugin() {
             listener.registerListener(context)
             bridge.activity.runOnUiThread {
                 Talsec.start(context, talsecConfig)
+                mainHandler.post {
+                    talsecStarted = true
+                    // This code must be called only AFTER Talsec.start
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        ScreenProtector.register(activity)
+                    }
+                    call.resolve(JSObject().put("started", true))
+                }
             }
-            call.resolve(JSObject().put("started", true))
+
         } catch (e: Exception) {
             call.reject(
                 "Error during Talsec Native plugin initialization - ${e.message}",
@@ -57,13 +60,8 @@ class FreeraspPlugin : Plugin() {
 
     override fun handleOnStart() {
         super.handleOnStart()
-        screenProtector?.let {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                it.activity = activity
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                it.enable()
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ScreenProtector.register(activity)
         }
     }
 
@@ -85,21 +83,15 @@ class FreeraspPlugin : Plugin() {
 
     override fun handleOnStop() {
         super.handleOnStop()
-        screenProtector?.let {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                it.activity = null
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ScreenProtector.unregister(activity)
         }
+
     }
 
     override fun handleOnDestroy() {
         super.handleOnDestroy()
         backgroundHandlerThread.quitSafely()
-        screenProtector?.let {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                it.activity = null
-            }
-        }
     }
 
     /**
@@ -265,5 +257,7 @@ class FreeraspPlugin : Plugin() {
         private val backgroundHandlerThread = HandlerThread("BackgroundThread").apply { start() }
         private val backgroundHandler = Handler(backgroundHandlerThread.looper)
         private val mainHandler = Handler(Looper.getMainLooper())
+
+        internal var talsecStarted = false
     }
 }

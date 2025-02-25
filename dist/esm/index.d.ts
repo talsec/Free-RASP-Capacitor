@@ -1,8 +1,8 @@
 import type { FreeraspPlugin, FreeraspConfig, NativeEventEmitterActions } from './definitions';
 declare const Freerasp: FreeraspPlugin;
-declare const setThreatListeners: <T extends NativeEventEmitterActions>(callbacks: T & Record<Exclude<keyof T, "privilegedAccess" | "debug" | "simulator" | "appIntegrity" | "unofficialStore" | "hooks" | "deviceBinding" | "deviceID" | "passcode" | "secureHardwareNotAvailable" | "obfuscationIssues" | "devMode" | "systemVPN" | "malware" | "adbEnabled" | "screenshot" | "screenRecording">, []>) => Promise<void>;
+declare const setThreatListeners: <T extends NativeEventEmitterActions>(callbacks: T & Record<Exclude<keyof T, keyof NativeEventEmitterActions>, []>) => Promise<void>;
 declare const removeThreatListeners: () => void;
-declare const startFreeRASP: <T extends NativeEventEmitterActions>(config: FreeraspConfig, reactions: T & Record<Exclude<keyof T, "privilegedAccess" | "debug" | "simulator" | "appIntegrity" | "unofficialStore" | "hooks" | "deviceBinding" | "deviceID" | "passcode" | "secureHardwareNotAvailable" | "obfuscationIssues" | "devMode" | "systemVPN" | "malware" | "adbEnabled" | "screenshot" | "screenRecording">, []>) => Promise<boolean>;
+declare const startFreeRASP: <T extends NativeEventEmitterActions>(config: FreeraspConfig, reactions: T & Record<Exclude<keyof T, keyof NativeEventEmitterActions>, []>) => Promise<boolean>;
 declare const addToWhitelist: (packageName: string) => Promise<boolean>;
 declare const getAppIcon: (packageName: string) => Promise<string>;
 declare const blockScreenCapture: (enable: boolean) => Promise<boolean>;
