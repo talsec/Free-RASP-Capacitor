@@ -86,7 +86,6 @@ class FreeraspPlugin : Plugin() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             ScreenProtector.unregister(activity)
         }
-
     }
 
     override fun handleOnDestroy() {

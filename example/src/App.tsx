@@ -196,7 +196,7 @@ const App: React.FC = () => {
         ),
       );
     },
- // Android & iOS
+    // Android & iOS
     screenshot: () => {
       setAppChecks(currentState =>
         currentState.map(threat =>
