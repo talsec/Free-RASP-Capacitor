@@ -18,7 +18,6 @@ import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
 import org.json.JSONArray
-import java.lang.Exception
 
 @CapacitorPlugin(name = "Freerasp")
 class FreeraspPlugin : Plugin() {
@@ -182,7 +181,7 @@ class FreeraspPlugin : Plugin() {
             try {
                 Talsec.blockScreenCapture(context, enable)
                 call.resolve(JSObject().put("result", true))
-            } catch (e: kotlin.Exception) {
+            } catch (e: Exception) {
                 call.reject(
                     "Error while setting screen capture: ${e.message}", "BlockScreenCaptureError"
                 )
@@ -200,7 +199,7 @@ class FreeraspPlugin : Plugin() {
         try {
             val isBlocked = Talsec.isScreenCaptureBlocked()
             call.resolve(JSObject().put("result", isBlocked))
-        } catch (e: kotlin.Exception) {
+        } catch (e: Exception) {
             call.reject(
                 "Error while checking if screen capture is blocked: ${e.message}",
                 "IsScreenCaptureBlockedError"
