@@ -61,4 +61,13 @@ internal class TalsecThreatHandler(private val instance: FreeraspPlugin) :
     override fun onSystemVPNDetected() {
         instance.notifyListeners(Threat.SystemVPN)
     }
+
+    override fun onScreenshotDetected() {
+        instance.notifyListeners(Threat.Screenshot)
+    }
+
+    override fun onScreenRecordingDetected() {
+        instance.notifyListeners(Threat.ScreenRecording)
+    }
+
 }

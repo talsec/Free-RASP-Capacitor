@@ -1,5 +1,6 @@
 package com.aheaditec.freerasp
 
+import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -17,7 +18,6 @@ import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
 import org.json.JSONArray
-import java.lang.Exception
 
 @CapacitorPlugin(name = "Freerasp")
 class FreeraspPlugin : Plugin() {
@@ -38,14 +38,29 @@ class FreeraspPlugin : Plugin() {
             listener.registerListener(context)
             bridge.activity.runOnUiThread {
                 Talsec.start(context, talsecConfig)
+                mainHandler.post {
+                    talsecStarted = true
+                    // This code must be called only AFTER Talsec.start
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        ScreenProtector.register(activity)
+                    }
+                    call.resolve(JSObject().put("started", true))
+                }
             }
-            call.resolve(JSObject().put("started", true))
+
         } catch (e: Exception) {
             call.reject(
                 "Error during Talsec Native plugin initialization - ${e.message}",
                 "TalsecInitializationError",
                 e
             )
+        }
+    }
+
+    override fun handleOnStart() {
+        super.handleOnStart()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ScreenProtector.register(activity)
         }
     }
 
@@ -62,6 +77,13 @@ class FreeraspPlugin : Plugin() {
         if (!registered) {
             registered = true
             listener.registerListener(context)
+        }
+    }
+
+    override fun handleOnStop() {
+        super.handleOnStop()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ScreenProtector.unregister(activity)
         }
     }
 
@@ -142,6 +164,49 @@ class FreeraspPlugin : Plugin() {
         }
     }
 
+    /**
+     * Method to set screen capture state
+     * @param enable Pass `true` to block screen capture, `false` to enable it
+     */
+    @PluginMethod
+    fun blockScreenCapture(call: PluginCall) {
+        val enable = call.getBoolean("enable") ?: run {
+            call.reject(
+                "Enable argument is missing or not a boolean.", "MissingArgumentError"
+            )
+            return
+        }
+
+        activity?.runOnUiThread {
+            try {
+                Talsec.blockScreenCapture(context, enable)
+                call.resolve(JSObject().put("result", true))
+            } catch (e: Exception) {
+                call.reject(
+                    "Error while setting screen capture: ${e.message}", "BlockScreenCaptureError"
+                )
+            }
+        } ?: run {
+            call.reject("Cannot block screen capture, activity is null.", "BlockScreenCaptureError")
+        }
+    }
+
+    /**
+     * Method to check if screen capturing is currently blocked
+     */
+    @PluginMethod
+    fun isScreenCaptureBlocked(call: PluginCall) {
+        try {
+            val isBlocked = Talsec.isScreenCaptureBlocked()
+            call.resolve(JSObject().put("result", isBlocked))
+        } catch (e: Exception) {
+            call.reject(
+                "Error while checking if screen capture is blocked: ${e.message}",
+                "IsScreenCaptureBlockedError"
+            )
+        }
+    }
+
     internal fun notifyListeners(threat: Threat) {
         notifyListeners(THREAT_CHANNEL_NAME, JSObject().put(THREAT_CHANNEL_KEY, threat.value), true)
     }
@@ -179,6 +244,7 @@ class FreeraspPlugin : Plugin() {
         return talsecBuilder.build()
     }
 
+
     companion object {
         private val THREAT_CHANNEL_NAME = (10000..999999999).random()
             .toString() // name of the channel over which threat callbacks are sent
@@ -189,5 +255,7 @@ class FreeraspPlugin : Plugin() {
         private val backgroundHandlerThread = HandlerThread("BackgroundThread").apply { start() }
         private val backgroundHandler = Handler(backgroundHandlerThread.looper)
         private val mainHandler = Handler(Looper.getMainLooper())
+
+        internal var talsecStarted = false
     }
 }

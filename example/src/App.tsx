@@ -196,6 +196,26 @@ const App: React.FC = () => {
         ),
       );
     },
+    // Android & iOS
+    screenshot: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Screenshot'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
+    // Android & iOS
+    screenRecording: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Screen Recording'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
   };
 
   // start freeRASP

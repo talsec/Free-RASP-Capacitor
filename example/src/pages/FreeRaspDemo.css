@@ -5,3 +5,13 @@
 ion-label {
   font-weight: 600;
 }
+
+.button {
+  max-width: 100%;
+}
+
+.centered-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -5,5 +5,7 @@ declare const removeThreatListeners: () => void;
 declare const startFreeRASP: <T extends NativeEventEmitterActions>(config: FreeraspConfig, reactions: T & Record<Exclude<keyof T, keyof NativeEventEmitterActions>, []>) => Promise<boolean>;
 declare const addToWhitelist: (packageName: string) => Promise<boolean>;
 declare const getAppIcon: (packageName: string) => Promise<string>;
+declare const blockScreenCapture: (enable: boolean) => Promise<boolean>;
+declare const isScreenCaptureBlocked: () => Promise<boolean>;
 export * from './definitions';
-export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, getAppIcon, };
+export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, getAppIcon, blockScreenCapture, isScreenCaptureBlocked, };

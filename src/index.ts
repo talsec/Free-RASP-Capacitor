@@ -120,6 +120,12 @@ const setThreatListeners = async <T extends NativeEventEmitterActions>(
       case Threat.ADBEnabled.value:
         callbacks.adbEnabled?.();
         break;
+      case Threat.Screenshot.value:
+        callbacks.screenshot?.();
+        break;
+      case Threat.ScreenRecording.value:
+        callbacks.screenRecording?.();
+        break;
       default:
         onInvalidCallback();
         break;
@@ -163,6 +169,22 @@ const getAppIcon = async (packageName: string): Promise<string> => {
   return result;
 };
 
+const blockScreenCapture = async (enable: boolean): Promise<boolean> => {
+  if (Capacitor.getPlatform() === 'ios') {
+    return Promise.reject('Block Screen Capture is not available on iOS');
+  }
+  const { result } = await Freerasp.blockScreenCapture({ enable });
+  return result;
+};
+
+const isScreenCaptureBlocked = async (): Promise<boolean> => {
+  if (Capacitor.getPlatform() === 'ios') {
+    return Promise.reject('Screen Capture Status is not available on iOS');
+  }
+  const { result } = await Freerasp.isScreenCaptureBlocked();
+  return result;
+};
+
 export * from './definitions';
 export {
   Freerasp,
@@ -171,4 +193,6 @@ export {
   removeThreatListeners,
   addToWhitelist,
   getAppIcon,
+  blockScreenCapture,
+  isScreenCaptureBlocked,
 };

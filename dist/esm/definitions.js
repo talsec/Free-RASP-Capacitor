@@ -21,6 +21,8 @@ export class Threat {
                 this.DevMode,
                 this.Malware,
                 this.ADBEnabled,
+                this.Screenshot,
+                this.ScreenRecording,
             ]
             : [
                 this.AppIntegrity,
@@ -34,6 +36,8 @@ export class Threat {
                 this.DeviceBinding,
                 this.DeviceID,
                 this.UnofficialStore,
+                this.Screenshot,
+                this.ScreenRecording,
             ];
     }
 }
@@ -53,4 +57,6 @@ Threat.ObfuscationIssues = new Threat(0);
 Threat.DevMode = new Threat(0);
 Threat.Malware = new Threat(0);
 Threat.ADBEnabled = new Threat(0);
+Threat.Screenshot = new Threat(0);
+Threat.ScreenRecording = new Threat(0);
 //# sourceMappingURL=definitions.js.map

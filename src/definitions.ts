@@ -12,6 +12,10 @@ export interface FreeraspPlugin {
     packageName: string;
   }): Promise<{ result: boolean }>;
   getAppIcon(options: { packageName: string }): Promise<{ result: string }>;
+  blockScreenCapture(options: {
+    enable: boolean;
+  }): Promise<{ result: boolean }>;
+  isScreenCaptureBlocked(): Promise<{ result: boolean }>;
 }
 
 export type FreeraspConfig = {
@@ -69,6 +73,8 @@ export type NativeEventEmitterActions = {
   systemVPN?: () => any;
   malware?: (suspiciousApps: SuspiciousAppInfo[]) => any;
   adbEnabled?: () => any;
+  screenshot?: () => any;
+  screenRecording?: () => any;
 };
 
 export class Threat {
@@ -90,6 +96,8 @@ export class Threat {
   static DevMode = new Threat(0);
   static Malware = new Threat(0);
   static ADBEnabled = new Threat(0);
+  static Screenshot = new Threat(0);
+  static ScreenRecording = new Threat(0);
 
   constructor(value: number) {
     this.value = value;
@@ -113,6 +121,8 @@ export class Threat {
           this.DevMode,
           this.Malware,
           this.ADBEnabled,
+          this.Screenshot,
+          this.ScreenRecording,
         ]
       : [
           this.AppIntegrity,
@@ -126,6 +136,8 @@ export class Threat {
           this.DeviceBinding,
           this.DeviceID,
           this.UnofficialStore,
+          this.Screenshot,
+          this.ScreenRecording,
         ];
   }
 }

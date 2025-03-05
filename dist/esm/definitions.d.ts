@@ -22,6 +22,14 @@ export interface FreeraspPlugin {
     }): Promise<{
         result: string;
     }>;
+    blockScreenCapture(options: {
+        enable: boolean;
+    }): Promise<{
+        result: boolean;
+    }>;
+    isScreenCaptureBlocked(): Promise<{
+        result: boolean;
+    }>;
 }
 export type FreeraspConfig = {
     androidConfig?: AndroidConfig;
@@ -72,6 +80,8 @@ export type NativeEventEmitterActions = {
     systemVPN?: () => any;
     malware?: (suspiciousApps: SuspiciousAppInfo[]) => any;
     adbEnabled?: () => any;
+    screenshot?: () => any;
+    screenRecording?: () => any;
 };
 export declare class Threat {
     value: number;
@@ -91,6 +101,8 @@ export declare class Threat {
     static DevMode: Threat;
     static Malware: Threat;
     static ADBEnabled: Threat;
+    static Screenshot: Threat;
+    static ScreenRecording: Threat;
     constructor(value: number);
     static getValues(): Threat[];
 }

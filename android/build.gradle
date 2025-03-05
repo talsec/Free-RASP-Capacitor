@@ -27,19 +27,17 @@ apply plugin: 'kotlinx-serialization'
 
 android {
     namespace "com.aheaditec.freerasp"
-    compileSdkVersion project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 33
+    compileSdk 35
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion project.hasProperty('targetSdkVersion') ? rootProject.ext.targetSdkVersion : 33
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        // now, the rule skips all classes of Capacitor plugin for freeRASP
-        consumerProguardFiles 'consumer-rules.pro'
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -78,5 +76,5 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     
-    implementation 'com.aheaditec.talsec.security:TalsecSecurity-Community-Capacitor:13.2.0'
+    implementation 'com.aheaditec.talsec.security:TalsecSecurity-Community-Capacitor:14.0.1'
 }
