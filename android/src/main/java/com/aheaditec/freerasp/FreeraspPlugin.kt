@@ -207,6 +207,25 @@ class FreeraspPlugin : Plugin() {
         }
     }
 
+    @PluginMethod
+    fun storeExternalId(call: PluginCall) {
+        val externalId = call.getString("data")
+        if (externalId.isNullOrEmpty()) {
+            call.reject(
+                "External ID not provided", "MissingArgumentError"
+            )
+        }
+        try {
+            Talsec.storeExternalId(context, externalId)
+            call.resolve(JSObject().put("result", true))
+        } catch (e: Exception) {
+            call.reject(
+                "Error during storeExternalId operation in freeRASP Native Plugin",
+                "NativePluginError"
+            )
+        }
+    }
+
     internal fun notifyListeners(threat: Threat) {
         notifyListeners(THREAT_CHANNEL_NAME, JSObject().put(THREAT_CHANNEL_KEY, threat.value), true)
     }

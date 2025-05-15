@@ -140,19 +140,17 @@ const getAppIcon = async (packageName) => {
     return result;
 };
 const blockScreenCapture = async (enable) => {
-    if (Capacitor.getPlatform() === 'ios') {
-        return Promise.reject('Block Screen Capture is not available on iOS');
-    }
     const { result } = await Freerasp.blockScreenCapture({ enable });
     return result;
 };
 const isScreenCaptureBlocked = async () => {
-    if (Capacitor.getPlatform() === 'ios') {
-        return Promise.reject('Screen Capture Status is not available on iOS');
-    }
     const { result } = await Freerasp.isScreenCaptureBlocked();
     return result;
 };
+const storeExternalId = async (data) => {
+    const { result } = await Freerasp.storeExternalId({ data });
+    return result;
+};
 export * from './definitions';
-export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, getAppIcon, blockScreenCapture, isScreenCaptureBlocked, };
+export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, getAppIcon, blockScreenCapture, isScreenCaptureBlocked, storeExternalId, };
 //# sourceMappingURL=index.js.map
