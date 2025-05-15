@@ -7,5 +7,6 @@ declare const addToWhitelist: (packageName: string) => Promise<boolean>;
 declare const getAppIcon: (packageName: string) => Promise<string>;
 declare const blockScreenCapture: (enable: boolean) => Promise<boolean>;
 declare const isScreenCaptureBlocked: () => Promise<boolean>;
+declare const storeExternalId: (data: string) => Promise<boolean>;
 export * from './definitions';
-export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, getAppIcon, blockScreenCapture, isScreenCaptureBlocked, };
+export { Freerasp, startFreeRASP, setThreatListeners, removeThreatListeners, addToWhitelist, getAppIcon, blockScreenCapture, isScreenCaptureBlocked, storeExternalId, };

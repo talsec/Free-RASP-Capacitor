@@ -16,6 +16,7 @@ export interface FreeraspPlugin {
     enable: boolean;
   }): Promise<{ result: boolean }>;
   isScreenCaptureBlocked(): Promise<{ result: boolean }>;
+  storeExternalId(options: { data: string }): Promise<{ result: boolean }>;
 }
 
 export type FreeraspConfig = {

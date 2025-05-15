@@ -31,6 +31,56 @@ public class FreeraspPlugin: CAPPlugin {
             "started": true
         ])
     }
+
+    @objc func storeExternalId(_ call: CAPPluginCall) -> Void {
+        guard let externalId = call.getString("data") else {
+            call.reject("Missing external ID data parameter in freeRASP Native Plugin", "MissingArgumentError")
+            return
+        }
+        UserDefaults.standard.set(externalId, forKey: "app.talsec.externalid")
+        call.resolve(["result": true])
+    }
+
+    @objc func blockScreenCapture(_ call: CAPPluginCall) -> Void {
+        guard let enable = call.getBool("enable") else {
+            call.reject("Enable argument is missing or empty in the call", "MissingArgumentError")
+            return
+        }
+        
+        getProtectedWindow { window in
+            if let window = window {
+                Talsec.blockScreenCapture(enable: enable, window: window)
+                call.resolve(["result": true])
+            } else {
+                call.reject("No windows found to block screen capture", "BlockScreenCaptureError")
+            }
+        }
+    }
+    
+    @objc func isScreenCaptureBlocked(_ call: CAPPluginCall) -> Void {
+        getProtectedWindow { window in
+            if let window = window {
+                let isBlocked = Talsec.isScreenCaptureBlocked(in: window)
+                call.resolve(["result": isBlocked])
+            } else {
+                call.reject("Error while checking if screen capture is blocked", "IsScreenCaptureBlockedError")
+            }
+        }
+    }
+    
+    private func getProtectedWindow(completion: @escaping (UIWindow?) -> Void) {
+        DispatchQueue.main.async {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                if let window = windowScene.windows.first {
+                    completion(window)
+                } else {
+                    completion(nil)
+                }
+            } else {
+                completion(nil)
+            }
+        }
+    }
     
     /**
      * Method to setup the message passing between native and React Native

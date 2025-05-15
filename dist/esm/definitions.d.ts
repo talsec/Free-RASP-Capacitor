@@ -30,6 +30,11 @@ export interface FreeraspPlugin {
     isScreenCaptureBlocked(): Promise<{
         result: boolean;
     }>;
+    storeExternalId(options: {
+        data: string;
+    }): Promise<{
+        result: boolean;
+    }>;
 }
 export type FreeraspConfig = {
     androidConfig?: AndroidConfig;
