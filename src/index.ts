@@ -170,18 +170,17 @@ const getAppIcon = async (packageName: string): Promise<string> => {
 };
 
 const blockScreenCapture = async (enable: boolean): Promise<boolean> => {
-  if (Capacitor.getPlatform() === 'ios') {
-    return Promise.reject('Block Screen Capture is not available on iOS');
-  }
   const { result } = await Freerasp.blockScreenCapture({ enable });
   return result;
 };
 
 const isScreenCaptureBlocked = async (): Promise<boolean> => {
-  if (Capacitor.getPlatform() === 'ios') {
-    return Promise.reject('Screen Capture Status is not available on iOS');
-  }
   const { result } = await Freerasp.isScreenCaptureBlocked();
+  return result;
+};
+
+const storeExternalId = async (data: string): Promise<boolean> => {
+  const { result } = await Freerasp.storeExternalId({ data });
   return result;
 };
 
@@ -195,4 +194,5 @@ export {
   getAppIcon,
   blockScreenCapture,
   isScreenCaptureBlocked,
+  storeExternalId,
 };

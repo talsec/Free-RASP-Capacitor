@@ -16,6 +16,11 @@ import {
   IonButton,
   IonTitle,
   IonToolbar,
+  IonToast,
+  IonModal,
+  IonFooter,
+  IonInput,
+  IonButtons,
 } from '@ionic/react';
 
 import {
@@ -23,6 +28,7 @@ import {
   addToWhitelist,
   blockScreenCapture,
   isScreenCaptureBlocked,
+  storeExternalId,
 } from 'capacitor-freerasp';
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
@@ -36,13 +42,20 @@ const FreeRaspDemo: React.FC<{
   suspiciousApps: SuspiciousAppInfo[];
 }> = ({ checks, suspiciousApps }) => {
   const [screenCaptureBlocked, setScreenCaptureBlocked] = React.useState(false);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [showToast, setShowToast] = React.useState(false);
+  const [externalIdValue, setExternalIdValue] = React.useState('');
+  const [toastMessage, setToastMessage] = React.useState('');
+  const [toastColor, setToastColor] = React.useState<'success' | 'warning'>(
+    'success',
+  );
   const platform = Capacitor.getPlatform();
   useEffect(() => {
     (async () => {
       if (platform === 'android') {
         await addItemsToMalwareWhitelist();
-        await updateScreenCaptureStatus();
       }
+      await updateScreenCaptureStatus();
     })();
   }, []);
 
@@ -86,8 +99,69 @@ const FreeRaspDemo: React.FC<{
     }
   };
 
+  const handleModalSend = async () => {
+    try {
+      await storeExternalId(externalIdValue);
+      setToastColor('success');
+      setToastMessage('External ID stored');
+    } catch (error: any) {
+      setToastColor('warning');
+      setToastMessage(`Error while storing external ID: ${error.message}`);
+    }
+
+    setIsModalOpen(false);
+    setShowToast(true);
+  };
+
+  const handleModalDismiss = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <IonContent scrollY={true}>
+      <IonModal isOpen={isModalOpen} onDidDismiss={handleModalDismiss}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Set External ID</IonTitle>
+            <IonButtons slot="end">
+              <IonButton onClick={handleModalDismiss}>Dismiss</IonButton>
+            </IonButtons>
+          </IonToolbar>
+        </IonHeader>
+
+        <IonContent>
+          <div className="content-padding">
+            <IonInput
+              labelPlacement="floating"
+              fill="solid"
+              value={externalIdValue}
+              placeholder="Type something..."
+              onIonInput={input => setExternalIdValue(input.detail.value ?? '')}
+            >
+              <div slot="label">External ID</div>
+            </IonInput>
+          </div>
+
+          <div className="centered-div">
+            <IonButton onClick={handleModalSend}>Send</IonButton>
+          </div>
+        </IonContent>
+
+        <IonFooter>
+          <IonToolbar></IonToolbar>
+        </IonFooter>
+      </IonModal>
+
+      <IonToast
+        isOpen={showToast}
+        message={toastMessage}
+        duration={4000}
+        position="bottom"
+        color={toastColor}
+        swipeGesture="vertical"
+        onDidDismiss={() => setShowToast(false)}
+      />
+
       <IonHeader>
         <IonToolbar>
           <IonTitle>Capacitor Demo</IonTitle>
@@ -95,21 +169,23 @@ const FreeRaspDemo: React.FC<{
       </IonHeader>
 
       <IonList>
-        {platform === 'android' && (
-          <>
-            <IonRow className="centered-row">
-              <IonButton
-                className="ion-text-wrap button"
-                color={screenCaptureBlocked ? 'success' : 'danger'}
-                onClick={() => handleScreenCapture(!screenCaptureBlocked)}
-              >
-                {screenCaptureBlocked
-                  ? 'Unblock Screen Capture'
-                  : 'Block Screen Capture'}
-              </IonButton>
-            </IonRow>
-          </>
-        )}
+        <IonRow className="centered-row">
+          <IonButton
+            className="ion-text-wrap features-button"
+            color={screenCaptureBlocked ? 'danger' : 'primary'}
+            onClick={() => handleScreenCapture(!screenCaptureBlocked)}
+          >
+            {screenCaptureBlocked
+              ? 'Unblock Screen Capture'
+              : 'Block Screen Capture'}
+          </IonButton>
+          <IonButton
+            className="ion-text-wrap features-button"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Store External ID
+          </IonButton>
+        </IonRow>
         <IonListHeader>
           <h1>freeRASP checks:</h1>
         </IonListHeader>
@@ -125,7 +201,9 @@ const FreeRaspDemo: React.FC<{
             <IonItem key={idx}>
               <IonLabel color={check.isSecure ? 'success' : 'danger'}>
                 {check.name}
-                <p>{check.isSecure ? 'secure' : 'danger'} </p>
+                <p className="checkDescription">
+                  {check.isSecure ? 'secure' : 'danger'}{' '}
+                </p>
               </IonLabel>
 
               {check.name === 'Malware' && (
