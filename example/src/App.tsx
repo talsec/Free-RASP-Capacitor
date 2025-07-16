@@ -216,6 +216,16 @@ const App: React.FC = () => {
         ),
       );
     },
+    // Android only
+    multiInstance: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Multi Instance'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
   };
 
   // start freeRASP

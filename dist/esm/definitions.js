@@ -23,6 +23,7 @@ export class Threat {
                 this.ADBEnabled,
                 this.Screenshot,
                 this.ScreenRecording,
+                this.MultiInstance,
             ]
             : [
                 this.AppIntegrity,
@@ -59,4 +60,5 @@ Threat.Malware = new Threat(0);
 Threat.ADBEnabled = new Threat(0);
 Threat.Screenshot = new Threat(0);
 Threat.ScreenRecording = new Threat(0);
+Threat.MultiInstance = new Threat(0);
 //# sourceMappingURL=definitions.js.map
