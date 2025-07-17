@@ -70,4 +70,7 @@ internal class TalsecThreatHandler(private val instance: FreeraspPlugin) :
         instance.notifyListeners(Threat.ScreenRecording)
     }
 
+    override fun onMultiInstanceDetected() {
+        instance.notifyListeners(Threat.MultiInstance)
+    }
 }

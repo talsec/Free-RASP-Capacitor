@@ -27,6 +27,7 @@ internal sealed class Threat(val value: Int) {
     object ADBEnabled : Threat((10000..999999999).random())
     object Screenshot : Threat((10000..999999999).random())
     object ScreenRecording : Threat((10000..999999999).random())
+    object MultiInstance : Threat((10000..999999999).random())
 
     companion object {
         internal fun getThreatValues(): JSONArray {
@@ -48,7 +49,8 @@ internal sealed class Threat(val value: Int) {
                     Malware.value,
                     ADBEnabled.value,
                     Screenshot.value,
-                    ScreenRecording.value
+                    ScreenRecording.value,
+                    MultiInstance.value
                 ))
             )
         }
