@@ -214,6 +214,7 @@ class FreeraspPlugin : Plugin() {
             call.reject(
                 "External ID not provided", "MissingArgumentError"
             )
+            return
         }
         try {
             Talsec.storeExternalId(context, externalId)
