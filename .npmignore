@@ -73,7 +73,6 @@ captures
 android/gradle/
 android/gradlew
 android/gradlew.bat
-android/proguard-rules.pro
 android/settings.gradle
 android/src/androidTest
 ios/Plugin.xcodeproj
