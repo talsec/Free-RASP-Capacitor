@@ -16,6 +16,7 @@
     "@types/node": "^12.19.15",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
+    "capacitor-freerasp": "file:..",
     "history": "^4.9.0",
     "ionicons": "^7.0.0",
     "react": "^18.2.0",
@@ -35,11 +36,10 @@
     "workbox-range-requests": "^5.1.4",
     "workbox-routing": "^5.1.4",
     "workbox-strategies": "^5.1.4",
-    "workbox-streams": "^5.1.4",
-    "capacitor-freerasp": "file:.."
+    "workbox-streams": "^5.1.4"
   },
   "devDependencies": {
-    "@capacitor/cli": "5.0.5",
+    "@capacitor/cli": "5.6.0",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
     "eslint": "^8.35.0",

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { IonApp, setupIonicReact } from '@ionic/react';
 import FreeRaspDemo from './pages/FreeRaspDemo';
 import { Capacitor } from '@capacitor/core';
+import { Geolocation } from '@capacitor/geolocation';
 
 import { startFreeRASP, SuspiciousAppInfo } from 'capacitor-freerasp';
 import { androidChecks, commonChecks, iosChecks } from './utils/checks';
