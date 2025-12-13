@@ -15,6 +15,7 @@
   "bugs": {
     "url": "https://github.com/talsec/Free-RASP-Capacitor/issues"
   },
+  "homepage": "https://docs.talsec.app/freerasp",
   "keywords": [
     "capacitor",
     "plugin",
