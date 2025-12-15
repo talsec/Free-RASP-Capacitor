@@ -23,7 +23,7 @@ internal object ScreenProtector {
     private var registered = false
     private val cachedThreats = mutableSetOf<ThreatEvent>()
 
-    private val screenCaptureCallback = ScreenCaptureCallback { handleThreat(Talsec.Screenshot) }
+    private val screenCaptureCallback = ScreenCaptureCallback { handleThreat(ThreatEvent.Screenshot) }
     private val screenRecordCallback: Consumer<Int> = Consumer<Int> { state ->
         if (state == SCREEN_RECORDING_STATE_VISIBLE) {
             handleThreat(ThreatEvent.ScreenRecording)

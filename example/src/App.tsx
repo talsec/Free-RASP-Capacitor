@@ -4,7 +4,7 @@ import FreeRaspDemo from './pages/FreeRaspDemo';
 import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
 
-import { startFreeRASP, SuspiciousAppInfo } from 'capacitor-freerasp';
+import { startFreeRASP, SuspiciousAppInfo, addToWhitelist } from 'capacitor-freerasp';
 import { androidChecks, commonChecks, iosChecks } from './utils/checks';
 
 /* Core CSS required for Ionic components to work properly */
@@ -29,6 +29,10 @@ const App: React.FC = () => {
   const [suspiciousApps, setSuspiciousApps] = React.useState<
     SuspiciousAppInfo[]
   >([]);
+
+  const [allChecksStatus, setAllChecksStatus] = useState<
+    'in progress' | 'completed'
+    >('in progress');
 
   const config = {
     androidConfig: {
@@ -55,6 +59,7 @@ const App: React.FC = () => {
     },
     watcherMail: 'your_email_address@example.com',
     isProd: true,
+    killOnBypass: true,
   };
 
   const actions = {
@@ -227,15 +232,61 @@ const App: React.FC = () => {
         ),
       );
     },
+  // Android only
+    timeSpoofing: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Time spoofing'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
+    // Android only
+    locationSpoofing: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Location spoofing'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
+    // Android only
+    unsecureWifi: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Unsecure Wi-Fi'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
+  
+  };
+  
+
+  const raspExecutionStateActions = {
+    allChecksFinished: () => {
+      setAllChecksStatus('completed');
+      console.log('freeRASP: All checks finished');
+    }
   };
 
   // start freeRASP
   useEffect(() => {
     (async () => {
-      const response = await startFreeRASP(config, actions);
+      const response = await startFreeRASP(config, actions, raspExecutionStateActions);
       // eslint-disable-next-line no-console
       console.log('Talsec started:', response);
     })();
+
+    if (Capacitor.getPlatform() === 'android') {
+      addToWhitelist('com.example.myApp');
+      Geolocation.requestPermissions().then((permission) => {
+        console.log('Location permissions:', permission);
+      });
+    }
   }, []);
 
   return (

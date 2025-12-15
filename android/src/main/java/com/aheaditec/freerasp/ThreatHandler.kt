@@ -2,12 +2,11 @@ package com.aheaditec.freerasp
 
 import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.aheaditec.talsec_security.security.api.ThreatListener
-import com.aheaditec.talsec_security.security.api.RaspExecutionState
 import com.aheaditec.freerasp.events.RaspExecutionStateEvent
-import ccom.aheaditec.freerasp.events.ThreatEvent
+import com.aheaditec.freerasp.events.ThreatEvent
 
 internal class TalsecThreatHandler(private val instance: FreeraspPlugin) :
-    ThreatListener.ThreatDetected, ThreatListener.DeviceState, RaspExecutionState() {
+    ThreatListener.ThreatDetected, ThreatListener.DeviceState, ThreatListener.RaspExecutionState() {
 
     override fun onRootDetected() {
         instance.notifyListeners(ThreatEvent.PrivilegedAccess)
@@ -41,7 +40,7 @@ internal class TalsecThreatHandler(private val instance: FreeraspPlugin) :
         instance.notifyListeners(ThreatEvent.ObfuscationIssues)
     }
 
-    override fun onMalwareDetected(suspiciousAppInfos: MutableList<SuspiciousAppInfo>?) {
+    override fun onMalwareDetected(suspiciousAppInfos: MutableList<SuspiciousAppInfo>) {
         instance.notifyMalware(suspiciousAppInfos ?: mutableListOf())
     }
 
@@ -85,7 +84,7 @@ internal class TalsecThreatHandler(private val instance: FreeraspPlugin) :
         instance.notifyListeners(ThreatEvent.TimeSpoofing)
     }
 
-    override onLocationSpoofingDetected() {
+    override fun onLocationSpoofingDetected() {
         instance.notifyListeners(ThreatEvent.LocationSpoofing)
     }
 

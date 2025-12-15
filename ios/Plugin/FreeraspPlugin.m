@@ -6,6 +6,8 @@
 CAP_PLUGIN(FreeraspPlugin, "Freerasp",
            CAP_PLUGIN_METHOD(getThreatChannelData, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(getThreatIdentifiers, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(getRaspExecutionStateChannelData, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(getRaspExecutionStateIdentifiers, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(onInvalidCallback, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(talsecStart, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(storeExternalId, CAPPluginReturnPromise);

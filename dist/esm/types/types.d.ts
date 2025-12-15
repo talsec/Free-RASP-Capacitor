@@ -1,10 +1,10 @@
-export interface FreeraspPlugin {
-    addListener(listener: string, callback: (event: any) => void): any;
+export interface TalsecPlugin {
     talsecStart(options: {
-        config: FreeraspConfig;
+        config: TalsecConfig;
     }): Promise<{
         started: boolean;
     }>;
+    addListener(listner: string, callback: any): any;
     onInvalidCallback(): void;
     getThreatIdentifiers(): Promise<{
         ids: number[];
@@ -12,15 +12,21 @@ export interface FreeraspPlugin {
     getThreatChannelData(): Promise<{
         ids: [string, string, string];
     }>;
+    getRaspExecutionStateIdentifiers(): Promise<{
+        ids: number[];
+    }>;
+    getRaspExecutionStateChannelData(): Promise<{
+        ids: [string, string];
+    }>;
+    storeExternalId(options: {
+        data: string;
+    }): Promise<{
+        result: boolean;
+    }>;
     addToWhitelist(options: {
         packageName: string;
     }): Promise<{
         result: boolean;
-    }>;
-    getAppIcon(options: {
-        packageName: string;
-    }): Promise<{
-        result: string;
     }>;
     blockScreenCapture(options: {
         enable: boolean;
@@ -30,29 +36,30 @@ export interface FreeraspPlugin {
     isScreenCaptureBlocked(): Promise<{
         result: boolean;
     }>;
-    storeExternalId(options: {
-        data: string;
+    getAppIcon(options: {
+        packageName: string;
     }): Promise<{
-        result: boolean;
+        result: string;
     }>;
 }
-export declare type FreeraspConfig = {
-    androidConfig?: AndroidConfig;
-    iosConfig?: IOSConfig;
+export declare type TalsecConfig = {
+    androidConfig?: TalsecAndroidConfig;
+    iosConfig?: TalsecIosConfig;
     watcherMail: string;
     isProd?: boolean;
+    killOnBypass?: boolean;
 };
-export declare type AndroidConfig = {
+export declare type TalsecAndroidConfig = {
     packageName: string;
     certificateHashes: string[];
     supportedAlternativeStores?: string[];
-    malwareConfig?: MalwareConfig;
+    malwareConfig?: TalsecMalwareConfig;
 };
-export declare type IOSConfig = {
+export declare type TalsecIosConfig = {
     appBundleId: string;
     appTeamId: string;
 };
-export declare type MalwareConfig = {
+export declare type TalsecMalwareConfig = {
     blacklistedHashes?: string[];
     blacklistedPackageNames?: string[];
     suspiciousPermissions?: string[][];
@@ -61,6 +68,7 @@ export declare type MalwareConfig = {
 export declare type SuspiciousAppInfo = {
     packageInfo: PackageInfo;
     reason: string;
+    permissions?: string[];
 };
 export declare type PackageInfo = {
     packageName: string;
@@ -69,7 +77,7 @@ export declare type PackageInfo = {
     appIcon?: string;
     installerStore?: string;
 };
-export declare type NativeEventEmitterActions = {
+export declare type ThreatEventActions = {
     privilegedAccess?: () => any;
     debug?: () => any;
     simulator?: () => any;
@@ -88,28 +96,13 @@ export declare type NativeEventEmitterActions = {
     screenshot?: () => any;
     screenRecording?: () => any;
     multiInstance?: () => any;
+    timeSpoofing?: () => any;
+    locationSpoofing?: () => any;
+    unsecureWifi?: () => any;
 };
-export declare class Threat {
-    value: number;
-    static AppIntegrity: Threat;
-    static PrivilegedAccess: Threat;
-    static Debug: Threat;
-    static Hooks: Threat;
-    static Passcode: Threat;
-    static Simulator: Threat;
-    static SecureHardwareNotAvailable: Threat;
-    static SystemVPN: Threat;
-    static DeviceBinding: Threat;
-    static DeviceID: Threat;
-    static UnofficialStore: Threat;
-    static Overlay: Threat;
-    static ObfuscationIssues: Threat;
-    static DevMode: Threat;
-    static Malware: Threat;
-    static ADBEnabled: Threat;
-    static Screenshot: Threat;
-    static ScreenRecording: Threat;
-    static MultiInstance: Threat;
-    constructor(value: number);
-    static getValues(): Threat[];
-}
+export declare type NativeEvent = {
+    [key: string]: number | string[] | undefined;
+};
+export declare type RaspExecutionStateEventActions = {
+    allChecksFinished?: () => any;
+};

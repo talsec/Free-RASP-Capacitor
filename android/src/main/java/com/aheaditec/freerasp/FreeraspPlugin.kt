@@ -144,7 +144,7 @@ class FreeraspPlugin : Plugin() {
      * Therefore, if this happens, we want to kill the app.
      */
     @PluginMethod
-    fun onInvalidCallback() {
+    fun onInvalidCallback(call: PluginCall) {
         android.os.Process.killProcess(android.os.Process.myPid())
     }
 
@@ -279,6 +279,7 @@ class FreeraspPlugin : Plugin() {
             .watcherMail(configJson.getString("watcherMail"))
             .supportedAlternativeStores(androidConfig.getArraySafe("supportedAlternativeStores"))
             .prod(configJson.getBool("isProd") ?: true)
+            .killOnBypass(configJson.getBool("killOnBypass") ?: false)
 
         if (androidConfig.has("malwareConfig")) {
             val malwareConfig = androidConfig.getJSONObject("malwareConfig")

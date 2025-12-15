@@ -14,7 +14,6 @@ export class Threat {
     static DeviceBinding = new Threat(0);
     static DeviceID = new Threat(0);
     static UnofficialStore = new Threat(0);
-    static Overlay = new Threat(0);
     static ObfuscationIssues = new Threat(0);
     static DevMode = new Threat(0);
     static Malware = new Threat(0);
@@ -42,7 +41,6 @@ export class Threat {
             this.SystemVPN,
             this.DeviceBinding,
             this.UnofficialStore,
-            this.Overlay,
             this.ObfuscationIssues,
             this.DevMode,
             this.Malware,

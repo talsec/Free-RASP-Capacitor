@@ -1,4 +1,5 @@
 import { onInvalidCallback } from '../methods/native';
+import { RaspExecutionState } from '../../models/raspExecutionState';
 import { RaspExecutionStateEventActions } from '../../types/types';
 import {
     getRaspExecutionStateChannelData,

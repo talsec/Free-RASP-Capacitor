@@ -1,6 +1,6 @@
 import { getThreatCount, itemsHaveType } from '../utils/utils';
 import { Threat } from '../models/threat';
-import { onInvaliddCallback } from '../api/methods/native';
+import { onInvalidCallback } from '../api/methods/native';
 import { Talsec } from '../api/nativeModules';
 import { Capacitor } from '@capacitor/core';
 
@@ -10,7 +10,8 @@ export const getThreatIdentifiers = async() : Promise<number[]> => {
         ids.length !== getThreatCount() ||
         !itemsHaveType(ids, 'number')
     ) {
-        onInvaliddCallback();
+        console.error(`Threat count mismatch: Native ${ids.length} vs JS ${getThreatCount()}. Items are numbers: ${itemsHaveType(ids, 'number')}`);
+        // onInvalidCallback();
     }
     return ids;
 };
@@ -22,7 +23,7 @@ export const getThreatChannelData = async () : Promise<[string, string, string]>
         ids.length !== dataLength ||
         !itemsHaveType(ids, 'string')
     ) {
-        onInvaliddCallback();
+        onInvalidCallback();
     }
     return ids;
 };

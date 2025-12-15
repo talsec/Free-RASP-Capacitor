@@ -1,4 +1,5 @@
 export interface TalsecPlugin {
+    talsecStart(options: { config: TalsecConfig }): Promise<{ started: boolean }>;
     addListener(listner: string, callback: any): any;
     onInvalidCallback(): void;
     getThreatIdentifiers(): Promise<{ ids: number[] }>;
@@ -11,6 +12,33 @@ export interface TalsecPlugin {
     isScreenCaptureBlocked(): Promise<{ result: boolean }>;
     getAppIcon(options: { packageName: string }): Promise<{ result: string }>;
 }
+
+export type TalsecConfig = {
+    androidConfig?: TalsecAndroidConfig;
+    iosConfig?: TalsecIosConfig;
+    watcherMail: string;
+    isProd?: boolean;
+    killOnBypass?: boolean;
+};
+
+export type TalsecAndroidConfig = {
+    packageName: string;
+    certificateHashes: string[];
+    supportedAlternativeStores?: string[];
+    malwareConfig?: TalsecMalwareConfig;
+};
+
+export type TalsecIosConfig = {
+    appBundleId: string;
+    appTeamId: string;
+};
+
+export type TalsecMalwareConfig = {
+    blacklistedHashes?: string[];
+    blacklistedPackageNames?: string[];
+    suspiciousPermissions?: string[][];
+    whitelistedInstallationSources?: string[];
+};
 
 export type SuspiciousAppInfo = {
     packageInfo: PackageInfo;
@@ -36,7 +64,6 @@ export type ThreatEventActions = {
     deviceBinding?: () => any;
     deviceID?: () => any;
     passcode?: () => any;
-    overlay?: () => any;
     secureHardwareNotAvailable?: () => any;
     obfuscationIssues?: () => any;
     devMode?: () => any;

@@ -1,4 +1,4 @@
-import { onInvaliddCallback } from '../methods/native';
+import { onInvalidCallback } from '../methods/native';
 import { Threat } from '../../models/threat';
 import type { ThreatEventActions } from '../../types/types';
 import { parseMalwareData } from '../../utils/malware';
@@ -11,15 +11,15 @@ import { Talsec } from '../nativeModules';
 export const registerThreatListener = async(
     config: ThreatEventActions,
 ) : Promise<void> => {
-    const [channel, key] = await getThreatChannelData();
+    const [channel, key, malwareKey] = await getThreatChannelData();
     await prepareThreatMapping();
 
     await Talsec.addListener(channel, async (event: any) => {
         if(event[key] == undefined) {
-            onInvaliddCallback();
+            onInvalidCallback();
         }
         switch (event[key]) {
-            case Threat.PrvilegedAccess.value:
+            case Threat.PrivilegedAccess.value:
                 config.privilegedAccess?.();
                 break;
             case Threat.Debug.value:
@@ -42,9 +42,6 @@ export const registerThreatListener = async(
                 break;
             case Threat.Passcode.value:
                 config.passcode?.();
-                break;
-            case Threat.Overlay.value:
-                config.overlay?.();
                 break;
             case Threat.SecureHardwareNotAvailable.value:
                 config.secureHardwareNotAvailable?.();
@@ -82,10 +79,12 @@ export const registerThreatListener = async(
             case Threat.LocationSpoofing.value:
                 config.locationSpoofing?.();
                 break;
-            case Threat.UnsecureWiFi.value:
-                config.unsecureWiFi?.();
+            case Threat.UnsecureWifi.value:
+                config.unsecureWifi?.();
                 break;
             default:
-                onInvaliddCallback();
+                onInvalidCallback();
                 break;
         }
+    });
+};

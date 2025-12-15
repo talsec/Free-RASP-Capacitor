@@ -4,27 +4,28 @@ export class Threat {
         this.value = value;
     }
     static getValues() {
-        return Capacitor.getPlatform() === 'android'
-            ? [
-                this.AppIntegrity,
-                this.PrivilegedAccess,
-                this.Debug,
-                this.Hooks,
-                this.Passcode,
-                this.Simulator,
-                this.SecureHardwareNotAvailable,
-                this.SystemVPN,
-                this.DeviceBinding,
-                this.UnofficialStore,
-                this.Overlay,
-                this.ObfuscationIssues,
-                this.DevMode,
-                this.Malware,
-                this.ADBEnabled,
-                this.Screenshot,
-                this.ScreenRecording,
-                this.MultiInstance,
-            ]
+        return Capacitor.getPlatform() === 'android' ? [
+            this.AppIntegrity,
+            this.PrivilegedAccess,
+            this.Debug,
+            this.Hooks,
+            this.Passcode,
+            this.Simulator,
+            this.SecureHardwareNotAvailable,
+            this.SystemVPN,
+            this.DeviceBinding,
+            this.UnofficialStore,
+            this.ObfuscationIssues,
+            this.DevMode,
+            this.Malware,
+            this.ADBEnabled,
+            this.Screenshot,
+            this.ScreenRecording,
+            this.MultiInstance,
+            this.TimeSpoofing,
+            this.LocationSpoofing,
+            this.UnsecureWifi,
+        ]
             : [
                 this.AppIntegrity,
                 this.PrivilegedAccess,
@@ -53,7 +54,6 @@ Threat.SystemVPN = new Threat(0);
 Threat.DeviceBinding = new Threat(0);
 Threat.DeviceID = new Threat(0);
 Threat.UnofficialStore = new Threat(0);
-Threat.Overlay = new Threat(0);
 Threat.ObfuscationIssues = new Threat(0);
 Threat.DevMode = new Threat(0);
 Threat.Malware = new Threat(0);
@@ -61,4 +61,7 @@ Threat.ADBEnabled = new Threat(0);
 Threat.Screenshot = new Threat(0);
 Threat.ScreenRecording = new Threat(0);
 Threat.MultiInstance = new Threat(0);
-//# sourceMappingURL=definitions.js.map
+Threat.TimeSpoofing = new Threat(0);
+Threat.LocationSpoofing = new Threat(0);
+Threat.UnsecureWifi = new Threat(0);
+//# sourceMappingURL=threat.js.map

@@ -23,7 +23,6 @@ internal sealed class ThreatEvent(override val value: Int) : BaseRaspEvent {
     data object SecureHardwareNotAvailable : ThreatEvent(RandomGenerator.next())
     data object DeviceBinding : ThreatEvent(RandomGenerator.next())
     data object UnofficialStore : ThreatEvent(RandomGenerator.next())
-    data object Overlay : ThreatEvent(RandomGenerator.next())
     data object ObfuscationIssues : ThreatEvent(RandomGenerator.next())
     data object SystemVPN : ThreatEvent(RandomGenerator.next())
     data object DevMode : ThreatEvent(RandomGenerator.next())
@@ -42,31 +41,29 @@ internal sealed class ThreatEvent(override val value: Int) : BaseRaspEvent {
         internal val CHANNEL_KEY = RandomGenerator.next().toString()
         internal val MALWARE_CHANNEL_KEY = RandomGenerator.next().toString()
 
-        internal val ALL_EVENTS = JSONArray {
+        internal val ALL_EVENTS = JSONArray(
             listOf(
-                AppIntegrity
-                PrivilegedAccess
-                Debug
-                Hooks
-                Passcode
-                Simulator
-                SecureHardwareNotAvailable
-                SystemVPN
-                DeviceBinding
-                UnofficialStore
-                Overlay
-                ObfuscationIssues
-                DevMode
-                Malware
-                ADBEnabled
-                Screenshot
-                ScreenRecording
-                MultiInstance
-                TimeSpoofing
-                LocationSpoofing
+                AppIntegrity,
+                PrivilegedAccess,
+                Debug,
+                Hooks,
+                Passcode,
+                Simulator,
+                SecureHardwareNotAvailable,
+                SystemVPN,
+                DeviceBinding,
+                UnofficialStore,
+                ObfuscationIssues,
+                DevMode,
+                Malware,
+                ADBEnabled,
+                Screenshot,
+                ScreenRecording,
+                MultiInstance,
+                TimeSpoofing,
+                LocationSpoofing,
                 UnsecureWifi
             ).map { it.value }
-            
-        }
+        )
     }
 }
