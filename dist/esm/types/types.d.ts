@@ -42,42 +42,42 @@ export interface TalsecPlugin {
         result: string;
     }>;
 }
-export declare type TalsecConfig = {
+export type TalsecConfig = {
     androidConfig?: TalsecAndroidConfig;
     iosConfig?: TalsecIosConfig;
     watcherMail: string;
     isProd?: boolean;
     killOnBypass?: boolean;
 };
-export declare type TalsecAndroidConfig = {
+export type TalsecAndroidConfig = {
     packageName: string;
     certificateHashes: string[];
     supportedAlternativeStores?: string[];
     malwareConfig?: TalsecMalwareConfig;
 };
-export declare type TalsecIosConfig = {
+export type TalsecIosConfig = {
     appBundleId: string;
     appTeamId: string;
 };
-export declare type TalsecMalwareConfig = {
+export type TalsecMalwareConfig = {
     blacklistedHashes?: string[];
     blacklistedPackageNames?: string[];
     suspiciousPermissions?: string[][];
     whitelistedInstallationSources?: string[];
 };
-export declare type SuspiciousAppInfo = {
+export type SuspiciousAppInfo = {
     packageInfo: PackageInfo;
     reason: string;
     permissions?: string[];
 };
-export declare type PackageInfo = {
+export type PackageInfo = {
     packageName: string;
     appName?: string;
     version?: string;
     appIcon?: string;
     installerStore?: string;
 };
-export declare type ThreatEventActions = {
+export type ThreatEventActions = {
     privilegedAccess?: () => any;
     debug?: () => any;
     simulator?: () => any;
@@ -100,9 +100,9 @@ export declare type ThreatEventActions = {
     locationSpoofing?: () => any;
     unsecureWifi?: () => any;
 };
-export declare type NativeEvent = {
+export type NativeEvent = {
     [key: string]: number | string[] | undefined;
 };
-export declare type RaspExecutionStateEventActions = {
+export type RaspExecutionStateEventActions = {
     allChecksFinished?: () => any;
 };
