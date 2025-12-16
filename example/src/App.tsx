@@ -291,7 +291,7 @@ const App: React.FC = () => {
 
   return (
     <IonApp>
-      <FreeRaspDemo checks={appChecks} suspiciousApps={suspiciousApps} />
+      <FreeRaspDemo checks={appChecks} suspiciousApps={suspiciousApps} allChecksStatus={allChecksStatus} />
     </IonApp>
   );
 };

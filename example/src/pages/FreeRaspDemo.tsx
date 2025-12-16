@@ -40,7 +40,8 @@ const FreeRaspDemo: React.FC<{
     isSecure: boolean;
   }[];
   suspiciousApps: SuspiciousAppInfo[];
-}> = ({ checks, suspiciousApps }) => {
+  allChecksStatus: 'in progress' | 'completed';
+}> = ({ checks, suspiciousApps, allChecksStatus }) => {
   const [screenCaptureBlocked, setScreenCaptureBlocked] = React.useState(false);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [showToast, setShowToast] = React.useState(false);
@@ -229,6 +230,20 @@ const FreeRaspDemo: React.FC<{
             </IonItem>
           ),
         )}
+
+        <IonItem>
+            <IonLabel color={allChecksStatus === 'completed' ? 'success' : 'warning'}>
+                All Checks Finished
+                <p className="checkDescription">
+                  {allChecksStatus}
+                </p>
+            </IonLabel>
+            <IonIcon
+                icon={allChecksStatus === 'completed' ? shieldCheckmarkOutline : alertCircleOutline}
+                color={allChecksStatus === 'completed' ? 'success' : 'warning'}
+                size="large"
+            />
+        </IonItem>
       </IonList>
       <IonRow>
         <IonImg className="talsecLogo" src={TalsecLogo} alt="Talsec logo" />

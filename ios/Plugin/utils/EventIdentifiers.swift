@@ -5,7 +5,7 @@ struct EventIdentifiers {
             numbers.append(RandomGenerator.next())
         }
         return numbers
-    }
+    }()
 
     static let threatChannelKey: String = String(generatedNumbers[0])
     static let threatChannelName: String = String(generatedNumbers[1])
