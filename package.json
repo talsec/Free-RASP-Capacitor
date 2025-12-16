@@ -59,7 +59,7 @@
     "@ionic/swiftlint-config": "^1.1.2",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
-    "eslint": "^9.39.1",
+    "eslint": "^8.57.0",
     "prettier": "^3.7.4",
     "prettier-plugin-java": "~1.0.2",
     "rimraf": "^3.0.2",
