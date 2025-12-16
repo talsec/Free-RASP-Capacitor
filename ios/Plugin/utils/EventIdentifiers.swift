@@ -1,5 +1,11 @@
 struct EventIdentifiers {
-    static var generatedNumbers = RandomGenerator.generateRandomIdentifiers(length: 19)
+    static var generatedNumbers: [Int] = {
+        var numbers = [Int]()
+        for _ in 0..<19 {
+            numbers.append(RandomGenerator.next())
+        }
+        return numbers
+    }
 
     static let threatChannelKey: String = String(generatedNumbers[0])
     static let threatChannelName: String = String(generatedNumbers[1])

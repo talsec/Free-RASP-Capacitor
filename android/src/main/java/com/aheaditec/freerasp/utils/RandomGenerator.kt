@@ -1,13 +1,24 @@
 package com.aheaditec.freerasp.utils
 
+import java.security.SecureRandom
+import java.util.concurrent.ConcurrentHashMap
+
 internal object RandomGenerator {
-    private val generatedNumbers = mutableSetOf<Int>()
+    private val secureRandom = SecureRandom()
+
+    private val generatedNumbers = ConcurrentHashMap.newKeySet<Int>()
 
     internal fun next(): Int {
-        var nextNumber = (10000..999999999).random()
-        while (!generatedNumbers.add(nextNumber)) {
-            nextNumber = (10000..999999999).random()
-        }
+        val min = 10_000_000
+        val max = 999_999_999
+        val range = (max - min) + 1
+
+        var nextNumber: Int
+        do {
+            nextNumber = secureRandom.nextInt(range) + min
+        } while (!generatedNumbers.add(nextNumber))
+
         return nextNumber
     }
+
 }
