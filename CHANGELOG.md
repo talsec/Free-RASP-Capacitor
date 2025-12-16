@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Fixed
 
+- Root detection related bugs causing false positives
 - ANR issue caused by `registerScreenCaptureCallback()` method on the main thread
 - `NullPointerException` when checking key alias in Keystore on Android 7
 - `JaCoCo` issue causing `MethodTooLargeException` during instrumentation
@@ -47,8 +48,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AndroidKeyStore` crashes causing `java.util.concurrent.TimeoutException` when calling `finalize()` method on `Cipher` (GC issues)
 - Fixed issue with late initializers and `TalsecMode` coroutines scopes
 
+
 #### Changed
 
+- Deprecated Nexus repository removed (GCP artifact registry is the main supported distribution repository)
 - Shortened the value of threat detection interval
 - Refactoring of internal architecture of SDK that newly uses Coroutines to manage threading
 - Update of internal dependencies and security libraries
