@@ -1,11 +1,11 @@
-import { onInvalidCallback } from '../methods/native';
-import { Threat } from '../../models/threat';
-import type { ThreatEventActions } from '../../types/types';
-import { parseMalwareData } from '../../utils/malware';
 import {
     getThreatChannelData,
     prepareThreatMapping,
 } from '../../channels/threat';
+import { Threat } from '../../models/threat';
+import type { ThreatEventActions } from '../../types/types';
+import { parseMalwareData } from '../../utils/malware';
+import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
 
 export const registerThreatListener = async(

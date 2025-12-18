@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+
 import { Talsec } from '../nativeModules';
 
 export const addToWhitelist = async(packageName: string) : Promise<boolean> => {

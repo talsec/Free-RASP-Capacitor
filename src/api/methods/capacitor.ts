@@ -1,9 +1,9 @@
-import { Talsec } from '../nativeModules';
-import { registerThreatListener } from '../listeners/threat';
+import type { TalsecConfig, ThreatEventActions, RaspExecutionStateEventActions } from '../../types/types';
 import { registerRaspExecutionStateListener } from '../listeners/raspExecutionState';
-import { TalsecConfig, ThreatEventActions, RaspExecutionStateEventActions } from '../../types/types';
+import { registerThreatListener } from '../listeners/threat';
+import { Talsec } from '../nativeModules';
 
-export const startFreeRASP = async (config: TalsecConfig, actions: ThreatEventActions, raspExecutionStateActions?: RaspExecutionStateEventActions) => {
+export const startFreeRASP = async (config: TalsecConfig, actions: ThreatEventActions, raspExecutionStateActions?: RaspExecutionStateEventActions): Promise<{ started: boolean }> => {
     await registerThreatListener(actions);
     if (raspExecutionStateActions) {
         await registerRaspExecutionStateListener(raspExecutionStateActions);

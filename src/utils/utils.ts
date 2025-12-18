@@ -9,6 +9,6 @@ export const getRaspExecutionStateCount = (): number => {
     return RaspExecutionState.getValues().length;
 };
 
-export const itemsHaveType = (data: any[], expectedType: string) => {
+export const itemsHaveType = (data: any[], expectedType: string): boolean => {
     return data.every(item => typeof item === expectedType);
 };

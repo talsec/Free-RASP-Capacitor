@@ -1,10 +1,10 @@
-import { onInvalidCallback } from '../methods/native';
-import { RaspExecutionState } from '../../models/raspExecutionState';
-import { RaspExecutionStateEventActions } from '../../types/types';
 import {
     getRaspExecutionStateChannelData,
     prepareRaspExecutionStateMapping,
 } from '../../channels/raspExecutionState';
+import { RaspExecutionState } from '../../models/raspExecutionState';
+import type { RaspExecutionStateEventActions } from '../../types/types';
+import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
 
 export const registerRaspExecutionStateListener = async(

@@ -1,8 +1,10 @@
-import { getThreatCount, itemsHaveType } from '../utils/utils';
-import { Threat } from '../models/threat';
+import { Capacitor } from '@capacitor/core';
+
 import { onInvalidCallback } from '../api/methods/native';
 import { Talsec } from '../api/nativeModules';
-import { Capacitor } from '@capacitor/core';
+import { Threat } from '../models/threat';
+import { getThreatCount, itemsHaveType } from '../utils/utils';
+
 
 export const getThreatIdentifiers = async() : Promise<number[]> => {
     const { ids } = await Talsec.getThreatIdentifiers();

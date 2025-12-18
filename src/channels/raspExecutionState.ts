@@ -1,7 +1,7 @@
-import { getRaspExecutionStateCount, itemsHaveType } from '../utils/utils';
 import { onInvalidCallback } from '../api/methods/native';
-import { RaspExecutionState } from '../models/raspExecutionState';
 import { Talsec } from '../api/nativeModules';
+import { RaspExecutionState } from '../models/raspExecutionState';
+import { getRaspExecutionStateCount, itemsHaveType } from '../utils/utils';
 
 export const getRaspExecutionStateIdentifiers = async() : Promise<number[]> => {
     const { ids } = await Talsec.getRaspExecutionStateIdentifiers();
