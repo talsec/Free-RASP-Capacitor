@@ -16,7 +16,6 @@ export class Threat {
                 this.SystemVPN,
                 this.DeviceBinding,
                 this.UnofficialStore,
-                this.Overlay,
                 this.ObfuscationIssues,
                 this.DevMode,
                 this.Malware,
@@ -24,6 +23,9 @@ export class Threat {
                 this.Screenshot,
                 this.ScreenRecording,
                 this.MultiInstance,
+                this.TimeSpoofing,
+                this.LocationSpoofing,
+                this.UnsecureWifi,
             ]
             : [
                 this.AppIntegrity,
@@ -53,7 +55,6 @@ Threat.SystemVPN = new Threat(0);
 Threat.DeviceBinding = new Threat(0);
 Threat.DeviceID = new Threat(0);
 Threat.UnofficialStore = new Threat(0);
-Threat.Overlay = new Threat(0);
 Threat.ObfuscationIssues = new Threat(0);
 Threat.DevMode = new Threat(0);
 Threat.Malware = new Threat(0);
@@ -61,4 +62,7 @@ Threat.ADBEnabled = new Threat(0);
 Threat.Screenshot = new Threat(0);
 Threat.ScreenRecording = new Threat(0);
 Threat.MultiInstance = new Threat(0);
-//# sourceMappingURL=definitions.js.map
+Threat.TimeSpoofing = new Threat(0);
+Threat.LocationSpoofing = new Threat(0);
+Threat.UnsecureWifi = new Threat(0);
+//# sourceMappingURL=threat.js.map

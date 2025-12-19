@@ -57,6 +57,7 @@ internal fun SuspiciousAppInfo.toCapSuspiciousAppInfo(context: Context): CapSusp
     return CapSuspiciousAppInfo(
         packageInfo = this.packageInfo.toCapPackageInfo(context),
         reason = this.reason,
+        permissions = this.permissions
     )
 }
 

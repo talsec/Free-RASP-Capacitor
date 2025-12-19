@@ -11,6 +11,7 @@ import android.view.WindowManager.SCREEN_RECORDING_STATE_VISIBLE
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.aheaditec.talsec_security.security.api.Talsec
+import com.aheaditec.freerasp.events.ThreatEvent
 import java.util.function.Consumer
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -18,12 +19,33 @@ internal object ScreenProtector {
     private const val TAG = "TalsecScreenProtector"
     private const val SCREEN_CAPTURE_PERMISSION = "android.permission.DETECT_SCREEN_CAPTURE"
     private const val SCREEN_RECORDING_PERMISSION = "android.permission.DETECT_SCREEN_RECORDING"
+
     private var registered = false
-    private val screenCaptureCallback = ScreenCaptureCallback { Talsec.onScreenshotDetected() }
+    private val cachedThreats = mutableSetOf<ThreatEvent>()
+
+    private val screenCaptureCallback = ScreenCaptureCallback { handleThreat(ThreatEvent.Screenshot) }
     private val screenRecordCallback: Consumer<Int> = Consumer<Int> { state ->
         if (state == SCREEN_RECORDING_STATE_VISIBLE) {
-            Talsec.onScreenRecordingDetected()
+            handleThreat(ThreatEvent.ScreenRecording)
         }
+    }
+
+    private fun handleThreat(threat: ThreatEvent) {
+        if(!FreeraspPlugin.talsecStarted) {
+            cachedThreats.add(threat)
+            return
+        }
+
+        when (threat) {
+            ThreatEvent.Screenshot -> Talsec.onScreenshotDetected()
+            ThreatEvent.ScreenRecording -> Talsec.onScreenRecordingDetected()
+            else -> throw IllegalArgumentException("Unexpected Threat type: $threat")
+        }
+    }
+
+    internal fun flushCache() {
+        cachedThreats.forEach { handleThreat(it) }
+        cachedThreats.clear()
     }
 
     /**

@@ -1,6 +1,38 @@
 var capacitorFreerasp = (function (exports, core) {
     'use strict';
 
+    const Talsec = core.registerPlugin('Freerasp', {});
+
+    const addToWhitelist = async (packageName) => {
+        if (core.Capacitor.getPlatform() === 'ios') {
+            return Promise.reject('Malware detection is not available on iOS');
+        }
+        const { result } = await Talsec.addToWhitelist({ packageName });
+        return result;
+    };
+    const blockScreenCapture = async (enable) => {
+        const { result } = await Talsec.blockScreenCapture({ enable });
+        return result;
+    };
+    const isScreenCaptureBlocked = async () => {
+        const { result } = await Talsec.isScreenCaptureBlocked();
+        return result;
+    };
+    const storeExternalId = async (data) => {
+        const { result } = await Talsec.storeExternalId({ data });
+        return result;
+    };
+    const getAppIcon = async (packageName) => {
+        if (core.Capacitor.getPlatform() === 'ios') {
+            return Promise.reject('App icon retrieval for Malware detection is not available on iOS');
+        }
+        const { result } = await Talsec.getAppIcon({ packageName });
+        return result;
+    };
+    const onInvalidCallback = () => {
+        Talsec.onInvalidCallback();
+    };
+
     class Threat {
         constructor(value) {
             this.value = value;
@@ -18,13 +50,16 @@ var capacitorFreerasp = (function (exports, core) {
                     this.SystemVPN,
                     this.DeviceBinding,
                     this.UnofficialStore,
-                    this.Overlay,
                     this.ObfuscationIssues,
                     this.DevMode,
                     this.Malware,
                     this.ADBEnabled,
                     this.Screenshot,
                     this.ScreenRecording,
+                    this.MultiInstance,
+                    this.TimeSpoofing,
+                    this.LocationSpoofing,
+                    this.UnsecureWifi,
                 ]
                 : [
                     this.AppIntegrity,
@@ -54,53 +89,71 @@ var capacitorFreerasp = (function (exports, core) {
     Threat.DeviceBinding = new Threat(0);
     Threat.DeviceID = new Threat(0);
     Threat.UnofficialStore = new Threat(0);
-    Threat.Overlay = new Threat(0);
     Threat.ObfuscationIssues = new Threat(0);
     Threat.DevMode = new Threat(0);
     Threat.Malware = new Threat(0);
     Threat.ADBEnabled = new Threat(0);
     Threat.Screenshot = new Threat(0);
     Threat.ScreenRecording = new Threat(0);
+    Threat.MultiInstance = new Threat(0);
+    Threat.TimeSpoofing = new Threat(0);
+    Threat.LocationSpoofing = new Threat(0);
+    Threat.UnsecureWifi = new Threat(0);
+
+    class RaspExecutionState {
+        constructor(value) {
+            this.value = value;
+        }
+        static getValues() {
+            return [this.AllChecksFinished];
+        }
+    }
+    RaspExecutionState.AllChecksFinished = new RaspExecutionState(0);
 
     const getThreatCount = () => {
         return Threat.getValues().length;
     };
-    const itemsHaveType = (data, desiredType) => {
-        return data.every(item => typeof item === desiredType);
+    const getRaspExecutionStateCount = () => {
+        return RaspExecutionState.getValues().length;
+    };
+    const itemsHaveType = (data, expectedType) => {
+        return data.every((item) => typeof item === expectedType);
     };
 
-    const activeListeners = [];
-    const Freerasp = core.registerPlugin('Freerasp', {});
-    const onInvalidCallback = () => {
-        Freerasp.onInvalidCallback();
-    };
     const getThreatIdentifiers = async () => {
-        const { ids } = await Freerasp.getThreatIdentifiers();
+        const { ids } = await Talsec.getThreatIdentifiers();
         if (ids.length !== getThreatCount() || !itemsHaveType(ids, 'number')) {
-            onInvalidCallback();
+            console.error(`Threat count mismatch: Native ${ids.length} vs JS ${getThreatCount()}. Items are numbers: ${itemsHaveType(ids, 'number')}`);
+            // onInvalidCallback();
         }
         return ids;
     };
     const getThreatChannelData = async () => {
         const dataLength = core.Capacitor.getPlatform() === 'ios' ? 2 : 3;
-        const { ids } = await Freerasp.getThreatChannelData();
+        const { ids } = await Talsec.getThreatChannelData();
         if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
             onInvalidCallback();
         }
         return ids;
     };
-    const prepareMapping = async () => {
+    const prepareThreatMapping = async () => {
         const newValues = await getThreatIdentifiers();
         const threats = Threat.getValues();
-        threats.map((threat, index) => {
-            threat.value = newValues[index];
-        });
+        try {
+            threats.map((threat, index) => {
+                threat.value = newValues[index];
+            });
+        }
+        catch (err) {
+            console.error('Could not map Talsec threats', err);
+        }
     };
+
     // parses base64-encoded malware data to SuspiciousAppInfo[]
     const parseMalwareData = async (data) => {
         return new Promise((resolve, reject) => {
             try {
-                const suspiciousAppData = data.map(entry => toSuspiciousAppInfo(entry));
+                const suspiciousAppData = data.map((entry) => toSuspiciousAppInfo(entry));
                 resolve(suspiciousAppData);
             }
             catch (error) {
@@ -111,67 +164,84 @@ var capacitorFreerasp = (function (exports, core) {
     const toSuspiciousAppInfo = (base64Value) => {
         const data = JSON.parse(atob(base64Value));
         const packageInfo = data.packageInfo;
-        return { packageInfo, reason: data.reason };
+        return {
+            packageInfo,
+            reason: data.reason,
+            permissions: data.permissions,
+        };
     };
-    const setThreatListeners = async (callbacks) => {
+
+    const registerThreatListener = async (config) => {
         const [channel, key, malwareKey] = await getThreatChannelData();
-        await prepareMapping();
-        await Freerasp.addListener(channel, async (event) => {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
-            if (event[key] === undefined) {
+        await prepareThreatMapping();
+        await Talsec.addListener(channel, async (event) => {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w;
+            if (event[key] == undefined) {
                 onInvalidCallback();
             }
             switch (event[key]) {
                 case Threat.PrivilegedAccess.value:
-                    (_a = callbacks.privilegedAccess) === null || _a === void 0 ? void 0 : _a.call(callbacks);
+                    (_a = config.privilegedAccess) === null || _a === void 0 ? void 0 : _a.call(config);
                     break;
                 case Threat.Debug.value:
-                    (_b = callbacks.debug) === null || _b === void 0 ? void 0 : _b.call(callbacks);
+                    (_b = config.debug) === null || _b === void 0 ? void 0 : _b.call(config);
                     break;
                 case Threat.Simulator.value:
-                    (_c = callbacks.simulator) === null || _c === void 0 ? void 0 : _c.call(callbacks);
+                    (_c = config.simulator) === null || _c === void 0 ? void 0 : _c.call(config);
                     break;
                 case Threat.AppIntegrity.value:
-                    (_d = callbacks.appIntegrity) === null || _d === void 0 ? void 0 : _d.call(callbacks);
+                    (_d = config.appIntegrity) === null || _d === void 0 ? void 0 : _d.call(config);
                     break;
                 case Threat.UnofficialStore.value:
-                    (_e = callbacks.unofficialStore) === null || _e === void 0 ? void 0 : _e.call(callbacks);
+                    (_e = config.unofficialStore) === null || _e === void 0 ? void 0 : _e.call(config);
                     break;
                 case Threat.Hooks.value:
-                    (_f = callbacks.hooks) === null || _f === void 0 ? void 0 : _f.call(callbacks);
+                    (_f = config.hooks) === null || _f === void 0 ? void 0 : _f.call(config);
                     break;
                 case Threat.DeviceBinding.value:
-                    (_g = callbacks.deviceBinding) === null || _g === void 0 ? void 0 : _g.call(callbacks);
+                    (_g = config.deviceBinding) === null || _g === void 0 ? void 0 : _g.call(config);
                     break;
                 case Threat.Passcode.value:
-                    (_h = callbacks.passcode) === null || _h === void 0 ? void 0 : _h.call(callbacks);
+                    (_h = config.passcode) === null || _h === void 0 ? void 0 : _h.call(config);
                     break;
                 case Threat.SecureHardwareNotAvailable.value:
-                    (_j = callbacks.secureHardwareNotAvailable) === null || _j === void 0 ? void 0 : _j.call(callbacks);
+                    (_j = config.secureHardwareNotAvailable) === null || _j === void 0 ? void 0 : _j.call(config);
                     break;
                 case Threat.ObfuscationIssues.value:
-                    (_k = callbacks.obfuscationIssues) === null || _k === void 0 ? void 0 : _k.call(callbacks);
+                    (_k = config.obfuscationIssues) === null || _k === void 0 ? void 0 : _k.call(config);
                     break;
                 case Threat.DeviceID.value:
-                    (_l = callbacks.deviceID) === null || _l === void 0 ? void 0 : _l.call(callbacks);
+                    (_l = config.deviceID) === null || _l === void 0 ? void 0 : _l.call(config);
                     break;
                 case Threat.DevMode.value:
-                    (_m = callbacks.devMode) === null || _m === void 0 ? void 0 : _m.call(callbacks);
+                    (_m = config.devMode) === null || _m === void 0 ? void 0 : _m.call(config);
                     break;
                 case Threat.SystemVPN.value:
-                    (_o = callbacks.systemVPN) === null || _o === void 0 ? void 0 : _o.call(callbacks);
+                    (_o = config.systemVPN) === null || _o === void 0 ? void 0 : _o.call(config);
                     break;
                 case Threat.Malware.value:
-                    (_p = callbacks.malware) === null || _p === void 0 ? void 0 : _p.call(callbacks, await parseMalwareData(event[malwareKey]));
+                    (_p = config.malware) === null || _p === void 0 ? void 0 : _p.call(config, await parseMalwareData(event[malwareKey]));
                     break;
                 case Threat.ADBEnabled.value:
-                    (_q = callbacks.adbEnabled) === null || _q === void 0 ? void 0 : _q.call(callbacks);
+                    (_q = config.adbEnabled) === null || _q === void 0 ? void 0 : _q.call(config);
                     break;
                 case Threat.Screenshot.value:
-                    (_r = callbacks.screenshot) === null || _r === void 0 ? void 0 : _r.call(callbacks);
+                    (_r = config.screenshot) === null || _r === void 0 ? void 0 : _r.call(config);
                     break;
                 case Threat.ScreenRecording.value:
-                    (_s = callbacks.screenRecording) === null || _s === void 0 ? void 0 : _s.call(callbacks);
+                    (_s = config.screenRecording) === null || _s === void 0 ? void 0 : _s.call(config);
+                    break;
+                case Threat.MultiInstance.value:
+                    (_t = config.multiInstance) === null || _t === void 0 ? void 0 : _t.call(config);
+                    break;
+                case Threat.TimeSpoofing.value:
+                    (_u = config.timeSpoofing) === null || _u === void 0 ? void 0 : _u.call(config);
+                    break;
+                case Threat.LocationSpoofing.value:
+                    (_v = config.locationSpoofing) === null || _v === void 0 ? void 0 : _v.call(config);
+                    break;
+                case Threat.UnsecureWifi.value:
+                    (_w = config.unsecureWifi) === null || _w === void 0 ? void 0 : _w.call(config);
                     break;
                 default:
                     onInvalidCallback();
@@ -179,58 +249,67 @@ var capacitorFreerasp = (function (exports, core) {
             }
         });
     };
-    const removeThreatListeners = () => {
-        activeListeners.forEach(listener => listener.remove());
+
+    const getRaspExecutionStateIdentifiers = async () => {
+        const { ids } = await Talsec.getRaspExecutionStateIdentifiers();
+        if (ids.length !== getRaspExecutionStateCount() || !itemsHaveType(ids, 'number')) {
+            onInvalidCallback();
+        }
+        return ids;
     };
-    const startFreeRASP = async (config, reactions) => {
-        await setThreatListeners(reactions);
-        try {
-            const { started } = await Freerasp.talsecStart({ config });
-            return started;
+    const getRaspExecutionStateChannelData = async () => {
+        const dataLength = 2;
+        const { ids } = await Talsec.getRaspExecutionStateChannelData();
+        if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
+            onInvalidCallback();
         }
-        catch (e) {
-            console.error(`${e.code}: ${e.message}`);
-            return Promise.reject(`${e.code}: ${e.message}`);
-        }
+        return ids;
     };
-    const addToWhitelist = async (packageName) => {
-        if (core.Capacitor.getPlatform() === 'ios') {
-            return Promise.reject('Malware detection not available on iOS');
-        }
-        const { result } = await Freerasp.addToWhitelist({ packageName });
-        return result;
-    };
-    const getAppIcon = async (packageName) => {
-        if (core.Capacitor.getPlatform() === 'ios') {
-            return Promise.reject('App icon retrieval for Malware detection not available on iOS');
-        }
-        const { result } = await Freerasp.getAppIcon({ packageName });
-        return result;
-    };
-    const blockScreenCapture = async (enable) => {
-        if (core.Capacitor.getPlatform() === 'ios') {
-            return Promise.reject('Block Screen Capture is not available on iOS');
-        }
-        const { result } = await Freerasp.blockScreenCapture({ enable });
-        return result;
-    };
-    const isScreenCaptureBlocked = async () => {
-        if (core.Capacitor.getPlatform() === 'ios') {
-            return Promise.reject('Screen Capture Status is not available on iOS');
-        }
-        const { result } = await Freerasp.isScreenCaptureBlocked();
-        return result;
+    const prepareRaspExecutionStateMapping = async () => {
+        const newValues = await getRaspExecutionStateIdentifiers();
+        const threats = RaspExecutionState.getValues();
+        threats.map((threat, index) => {
+            threat.value = newValues[index];
+        });
     };
 
-    exports.Freerasp = Freerasp;
-    exports.Threat = Threat;
+    const registerRaspExecutionStateListener = async (config) => {
+        const [channel, key] = await getRaspExecutionStateChannelData();
+        await prepareRaspExecutionStateMapping();
+        await Talsec.addListener(channel, async (event) => {
+            var _a;
+            if (event[key] == undefined) {
+                onInvalidCallback();
+            }
+            switch (event[key]) {
+                case RaspExecutionState.AllChecksFinished.value:
+                    (_a = config.allChecksFinished) === null || _a === void 0 ? void 0 : _a.call(config);
+                    break;
+                default:
+                    onInvalidCallback();
+                    break;
+            }
+        });
+    };
+
+    const startFreeRASP = async (config, actions, raspExecutionStateActions) => {
+        await registerThreatListener(actions);
+        if (raspExecutionStateActions) {
+            await registerRaspExecutionStateListener(raspExecutionStateActions);
+        }
+        return Talsec.talsecStart({ config });
+    };
+
+    exports.abortApp = onInvalidCallback;
     exports.addToWhitelist = addToWhitelist;
     exports.blockScreenCapture = blockScreenCapture;
     exports.getAppIcon = getAppIcon;
     exports.isScreenCaptureBlocked = isScreenCaptureBlocked;
-    exports.removeThreatListeners = removeThreatListeners;
-    exports.setThreatListeners = setThreatListeners;
+    exports.onInvalidCallback = onInvalidCallback;
+    exports.registerRaspExecutionStateListener = registerRaspExecutionStateListener;
+    exports.registerThreatListener = registerThreatListener;
     exports.startFreeRASP = startFreeRASP;
+    exports.storeExternalId = storeExternalId;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

@@ -12,6 +12,9 @@ import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.aheaditec.talsec_security.security.api.Talsec
 import com.aheaditec.talsec_security.security.api.TalsecConfig
 import com.aheaditec.talsec_security.security.api.ThreatListener
+import com.aheaditec.freerasp.events.BaseRaspEvent
+import com.aheaditec.freerasp.events.RaspExecutionStateEvent
+import com.aheaditec.freerasp.events.ThreatEvent
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
@@ -23,7 +26,7 @@ import org.json.JSONArray
 class FreeraspPlugin : Plugin() {
 
     private val threatHandler = TalsecThreatHandler(this)
-    private val listener = ThreatListener(threatHandler, threatHandler)
+    private val listener = ThreatListener(threatHandler, threatHandler, threatHandler)
     private var registered = true
 
     @PluginMethod
@@ -97,29 +100,51 @@ class FreeraspPlugin : Plugin() {
      */
     @PluginMethod
     fun getThreatIdentifiers(call: PluginCall) {
-        call.resolve(JSObject().put("ids", Threat.getThreatValues()))
+        call.resolve(JSObject().put("ids", ThreatEvent.ALL_EVENTS))
     }
 
     /**
-     * Method to setup the message passing between native and React Native
-     * @return list of [THREAT_CHANNEL_NAME, THREAT_CHANNEL_KEY]
+     * Method to get the random identifiers of callbacks
+     */
+    @PluginMethod
+    fun getRaspExecutionStateIdentifiers(call: PluginCall) {
+        call.resolve(JSObject().put("ids", RaspExecutionStateEvent.ALL_EVENTS))
+    }
+
+    /**
+     * Method to setup the message passing between native and Capacitor
+     * @return list of [CHANNEL_NAME, CHANNEL_KEY, MALWARE_CHANNEL_KEY]
      */
     @PluginMethod
     fun getThreatChannelData(call: PluginCall) {
         val channelData = JSONArray(
             (listOf(
-                THREAT_CHANNEL_NAME, THREAT_CHANNEL_KEY, MALWARE_CHANNEL_KEY
+                ThreatEvent.CHANNEL_NAME, ThreatEvent.CHANNEL_KEY, ThreatEvent.MALWARE_CHANNEL_KEY
             ))
         )
         call.resolve(JSObject().put("ids", channelData))
     }
 
     /**
+     * Method to setup the execution state message passing between native and Capacitor
+     * @return list of [CHANNEL_NAME, CHANNEL_KEY]
+     */
+     @PluginMethod
+     fun getRaspExecutionStateChannelData(call: PluginCall) {
+        val channelData = JSONArray(
+            (listOf(
+                RaspExecutionStateEvent.CHANNEL_NAME, RaspExecutionStateEvent.CHANNEL_KEY
+            ))
+        )
+        call.resolve(JSObject().put("ids", channelData))
+     }
+
+    /**
      * We never send an invalid callback over our channel.
      * Therefore, if this happens, we want to kill the app.
      */
     @PluginMethod
-    fun onInvalidCallback() {
+    fun onInvalidCallback(call: PluginCall) {
         android.os.Process.killProcess(android.os.Process.myPid())
     }
 
@@ -179,7 +204,7 @@ class FreeraspPlugin : Plugin() {
 
         activity?.runOnUiThread {
             try {
-                Talsec.blockScreenCapture(context, enable)
+                Talsec.blockScreenCapture(activity, enable)
                 call.resolve(JSObject().put("result", true))
             } catch (e: Exception) {
                 call.reject(
@@ -224,11 +249,12 @@ class FreeraspPlugin : Plugin() {
                 "Error during storeExternalId operation in freeRASP Native Plugin",
                 "NativePluginError"
             )
+            return
         }
     }
 
-    internal fun notifyListeners(threat: Threat) {
-        notifyListeners(THREAT_CHANNEL_NAME, JSObject().put(THREAT_CHANNEL_KEY, threat.value), true)
+    internal fun notifyListeners(event: BaseRaspEvent) {
+        notifyListeners(event.channelName, JSObject().put(event.channelKey, event.value), true)
     }
 
     internal fun notifyMalware(suspiciousApps: MutableList<SuspiciousAppInfo>) {
@@ -238,9 +264,9 @@ class FreeraspPlugin : Plugin() {
             val encodedSuspiciousApps = suspiciousApps.toEncodedJSArray(context)
             mainHandler.post {
                 val params = JSObject()
-                    .put(THREAT_CHANNEL_KEY, Threat.Malware.value)
-                    .put(MALWARE_CHANNEL_KEY, encodedSuspiciousApps)
-                notifyListeners(THREAT_CHANNEL_NAME, params, true)
+                    .put(ThreatEvent.CHANNEL_KEY, ThreatEvent.Malware.value)
+                    .put(ThreatEvent.MALWARE_CHANNEL_KEY, encodedSuspiciousApps)
+                notifyListeners(ThreatEvent.CHANNEL_NAME, params, true)
             }
         }
     }
@@ -253,6 +279,7 @@ class FreeraspPlugin : Plugin() {
             .watcherMail(configJson.getString("watcherMail"))
             .supportedAlternativeStores(androidConfig.getArraySafe("supportedAlternativeStores"))
             .prod(configJson.getBool("isProd") ?: true)
+            .killOnBypass(configJson.getBool("killOnBypass") ?: false)
 
         if (androidConfig.has("malwareConfig")) {
             val malwareConfig = androidConfig.getJSONObject("malwareConfig")
@@ -266,12 +293,6 @@ class FreeraspPlugin : Plugin() {
 
 
     companion object {
-        private val THREAT_CHANNEL_NAME = (10000..999999999).random()
-            .toString() // name of the channel over which threat callbacks are sent
-        private val THREAT_CHANNEL_KEY = (10000..999999999).random()
-            .toString() // key of the argument map under which threats are expected
-        private val MALWARE_CHANNEL_KEY = (10000..999999999).random()
-            .toString() // key of the argument map under which malware data is expected
         private val backgroundHandlerThread = HandlerThread("BackgroundThread").apply { start() }
         private val backgroundHandler = Handler(backgroundHandlerThread.looper)
         private val mainHandler = Handler(Looper.getMainLooper())

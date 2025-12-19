@@ -6,12 +6,21 @@ import TalsecRuntime
 public class FreeraspPlugin: CAPPlugin {
 
     public static var shared: FreeraspPlugin?
-    
-    let threatChannelKey = String(Int.random(in: 100_000..<999_999_999)) // key of the argument map under which threats are expected
-    let threatChannelName = String(Int.random(in: 100_000..<999_999_999)) // name of the channel over which threat callbacks are sent
+
+    static var threatCache = Set<SecurityThreat>()
+    static var executionStateCache = Set<RaspExecutionStates>()
     
     override public func load() {
         FreeraspPlugin.shared = self
+        FreeraspPlugin.flushCache()
+    }
+
+    private static func flushCache() {
+        FreeraspPlugin.threatCache.forEach(FreeraspPlugin.dispatchEvent)
+        FreeraspPlugin.threatCache.removeAll()
+
+        FreeraspPlugin.executionStateCache.forEach(FreeraspPlugin.dispatchRaspExecutionStateEvent)
+        FreeraspPlugin.executionStateCache.removeAll()
     }
     
     /// Runs Talsec with given configuration
@@ -67,29 +76,38 @@ public class FreeraspPlugin: CAPPlugin {
             }
         }
     }
-    
-    private func getProtectedWindow(completion: @escaping (UIWindow?) -> Void) {
-        DispatchQueue.main.async {
-            if #available(iOS 13.0, *) {
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                    if let window = windowScene.windows.first {
-                        completion(window)
-                    } else {
-                        completion(nil)
-                    }
-                } else {
-                    completion(nil)
-                }
-            }
+
+    static func dispatchEvent(securityThreat: SecurityThreat) {
+        if let instance = FreeraspPlugin.shared {
+            instance.notifyListeners(EventIdentifiers.threatChannelName, data: [EventIdentifiers.threatChannelKey: securityThreat.callbackIdentifier], retainUntilConsumed: true)
+        } else {
+            FreeraspPlugin.threatCache.insert(securityThreat)
+        }
+    }
+
+    static func dispatchRaspExecutionStateEvent(event: RaspExecutionStates) -> Void {
+        if let instance = FreeraspPlugin.shared {
+            instance.notifyListeners(EventIdentifiers.raspExecutionStateChannelName, data: [EventIdentifiers.raspExecutionStateChannelKey: event.callbackIdentifier], retainUntilConsumed: true)
+        } else {
+            FreeraspPlugin.executionStateCache.insert(event)
         }
     }
     
     /**
-     * Method to setup the message passing between native and React Native
+     * Method to setup the message passing between native and Capacitor
      */
     @objc func getThreatChannelData(_ call: CAPPluginCall) -> Void {
         call.resolve([
-                    "ids": [threatChannelName, threatChannelKey]
+                    "ids": [EventIdentifiers.threatChannelName, EventIdentifiers.threatChannelKey]
+                ])
+    }
+
+    /**
+     * Method to setup the message passing between native and Capacitor
+     */
+    @objc func getRaspExecutionStateChannelData(_ call: CAPPluginCall) -> Void {
+        call.resolve([
+                    "ids": [EventIdentifiers.raspExecutionStateChannelName, EventIdentifiers.raspExecutionStateChannelKey]
                 ])
     }
     
@@ -98,8 +116,14 @@ public class FreeraspPlugin: CAPPlugin {
      */
     @objc func getThreatIdentifiers(_ call: CAPPluginCall) -> Void {
         call.resolve([
-                    "ids": getThreatIdentifiers()
+                    "ids": getThreatIdentifiersList()
                 ])
+    }
+
+    @objc func getRaspExecutionStateIdentifiers(_ call: CAPPluginCall) -> Void {
+        call.resolve([
+            "ids": getRaspExecutionStateIdentifiersList()
+        ])
     }
     
     /**
@@ -108,16 +132,6 @@ public class FreeraspPlugin: CAPPlugin {
      */
     @objc func onInvalidCallback() -> Void {
         abort()
-    }
-    
-    private func getThreatIdentifiers() -> [Int] {
-        return SecurityThreat.allCases
-            .filter {
-                threat in threat.rawValue != "passcodeChange"
-            }
-            .map {
-                threat in threat.callbackIdentifier
-            }
     }
     
     private func initializeTalsec(talsecConfig: JSObject) throws {
@@ -140,56 +154,17 @@ public class FreeraspPlugin: CAPPlugin {
     }
 }
 
-extension SecurityThreatCenter: SecurityThreatHandler {
+extension SecurityThreatCenter:  @retroactive SecurityThreatHandler, @retroactive RaspExecutionState {
     
     public func threatDetected(_ securityThreat: TalsecRuntime.SecurityThreat) {
         if (securityThreat.rawValue == "passcodeChange") {
             return
         }
 
-        FreeraspPlugin.shared!.notifyListeners(FreeraspPlugin.shared!.threatChannelName, data: [FreeraspPlugin.shared!.threatChannelKey: securityThreat.callbackIdentifier], retainUntilConsumed: true)
+        FreeraspPlugin.dispatchEvent(securityThreat: securityThreat)
     }
-}
-
-struct ThreatIdentifiers {
-    static let threatIdentifierList: [Int] = (1...14).map { _ in Int.random(in: 100_000..<999_999_999) }
-}
-
-/// An extension to unify callback names with Capacitor ones.
-extension SecurityThreat {
-
-    var callbackIdentifier: Int {
-        switch self {
-            case .signature:
-                return ThreatIdentifiers.threatIdentifierList[0]
-            case .jailbreak:
-                return ThreatIdentifiers.threatIdentifierList[1]
-            case .debugger:
-                return ThreatIdentifiers.threatIdentifierList[2]
-            case .runtimeManipulation:
-                return ThreatIdentifiers.threatIdentifierList[3]
-            case .passcode:
-                return ThreatIdentifiers.threatIdentifierList[4]
-            case .passcodeChange:
-                return ThreatIdentifiers.threatIdentifierList[5]
-            case .simulator:
-                return ThreatIdentifiers.threatIdentifierList[6]
-            case .missingSecureEnclave:
-                return ThreatIdentifiers.threatIdentifierList[7]
-            case .systemVPN:
-                return ThreatIdentifiers.threatIdentifierList[8]
-            case .deviceChange:
-                return ThreatIdentifiers.threatIdentifierList[9]
-            case .deviceID:
-                return ThreatIdentifiers.threatIdentifierList[10]
-            case .unofficialStore:
-                return ThreatIdentifiers.threatIdentifierList[11]
-            case .screenshot:
-                return ThreatIdentifiers.threatIdentifierList[12]
-            case .screenRecording:
-                return ThreatIdentifiers.threatIdentifierList[13]
-            @unknown default:
-                abort()
-        }
+    
+    public func onAllChecksFinished() {
+        FreeraspPlugin.dispatchRaspExecutionStateEvent(event: RaspExecutionStates.allChecksFinished)
     }
 }
