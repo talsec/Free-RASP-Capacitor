@@ -1,6 +1,6 @@
-import { onInvalidCallback } from '../methods/native';
+import { getRaspExecutionStateChannelData, prepareRaspExecutionStateMapping } from '../../channels/raspExecutionState';
 import { RaspExecutionState } from '../../models/raspExecutionState';
-import { getRaspExecutionStateChannelData, prepareRaspExecutionStateMapping, } from '../../channels/raspExecutionState';
+import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
 export const registerRaspExecutionStateListener = async (config) => {
     const [channel, key] = await getRaspExecutionStateChannelData();

@@ -4,28 +4,29 @@ export class Threat {
         this.value = value;
     }
     static getValues() {
-        return Capacitor.getPlatform() === 'android' ? [
-            this.AppIntegrity,
-            this.PrivilegedAccess,
-            this.Debug,
-            this.Hooks,
-            this.Passcode,
-            this.Simulator,
-            this.SecureHardwareNotAvailable,
-            this.SystemVPN,
-            this.DeviceBinding,
-            this.UnofficialStore,
-            this.ObfuscationIssues,
-            this.DevMode,
-            this.Malware,
-            this.ADBEnabled,
-            this.Screenshot,
-            this.ScreenRecording,
-            this.MultiInstance,
-            this.TimeSpoofing,
-            this.LocationSpoofing,
-            this.UnsecureWifi,
-        ]
+        return Capacitor.getPlatform() === 'android'
+            ? [
+                this.AppIntegrity,
+                this.PrivilegedAccess,
+                this.Debug,
+                this.Hooks,
+                this.Passcode,
+                this.Simulator,
+                this.SecureHardwareNotAvailable,
+                this.SystemVPN,
+                this.DeviceBinding,
+                this.UnofficialStore,
+                this.ObfuscationIssues,
+                this.DevMode,
+                this.Malware,
+                this.ADBEnabled,
+                this.Screenshot,
+                this.ScreenRecording,
+                this.MultiInstance,
+                this.TimeSpoofing,
+                this.LocationSpoofing,
+                this.UnsecureWifi,
+            ]
             : [
                 this.AppIntegrity,
                 this.PrivilegedAccess,

@@ -1,7 +1,7 @@
-import { onInvalidCallback } from '../methods/native';
+import { getThreatChannelData, prepareThreatMapping } from '../../channels/threat';
 import { Threat } from '../../models/threat';
 import { parseMalwareData } from '../../utils/malware';
-import { getThreatChannelData, prepareThreatMapping, } from '../../channels/threat';
+import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
 export const registerThreatListener = async (config) => {
     const [channel, key, malwareKey] = await getThreatChannelData();

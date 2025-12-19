@@ -3,9 +3,7 @@ export class RaspExecutionState {
         this.value = value;
     }
     static getValues() {
-        return [
-            this.AllChecksFinished,
-        ];
+        return [this.AllChecksFinished];
     }
 }
 RaspExecutionState.AllChecksFinished = new RaspExecutionState(0);

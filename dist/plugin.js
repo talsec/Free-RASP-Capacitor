@@ -38,28 +38,29 @@ var capacitorFreerasp = (function (exports, core) {
             this.value = value;
         }
         static getValues() {
-            return core.Capacitor.getPlatform() === 'android' ? [
-                this.AppIntegrity,
-                this.PrivilegedAccess,
-                this.Debug,
-                this.Hooks,
-                this.Passcode,
-                this.Simulator,
-                this.SecureHardwareNotAvailable,
-                this.SystemVPN,
-                this.DeviceBinding,
-                this.UnofficialStore,
-                this.ObfuscationIssues,
-                this.DevMode,
-                this.Malware,
-                this.ADBEnabled,
-                this.Screenshot,
-                this.ScreenRecording,
-                this.MultiInstance,
-                this.TimeSpoofing,
-                this.LocationSpoofing,
-                this.UnsecureWifi,
-            ]
+            return core.Capacitor.getPlatform() === 'android'
+                ? [
+                    this.AppIntegrity,
+                    this.PrivilegedAccess,
+                    this.Debug,
+                    this.Hooks,
+                    this.Passcode,
+                    this.Simulator,
+                    this.SecureHardwareNotAvailable,
+                    this.SystemVPN,
+                    this.DeviceBinding,
+                    this.UnofficialStore,
+                    this.ObfuscationIssues,
+                    this.DevMode,
+                    this.Malware,
+                    this.ADBEnabled,
+                    this.Screenshot,
+                    this.ScreenRecording,
+                    this.MultiInstance,
+                    this.TimeSpoofing,
+                    this.LocationSpoofing,
+                    this.UnsecureWifi,
+                ]
                 : [
                     this.AppIntegrity,
                     this.PrivilegedAccess,
@@ -99,36 +100,12 @@ var capacitorFreerasp = (function (exports, core) {
     Threat.LocationSpoofing = new Threat(0);
     Threat.UnsecureWifi = new Threat(0);
 
-    // parses base64-encoded malware data to SuspiciousAppInfo[]
-    const parseMalwareData = async (data) => {
-        return new Promise((resolve, reject) => {
-            try {
-                const suspiciousAppData = data.map(entry => toSuspiciousAppInfo(entry));
-                resolve(suspiciousAppData);
-            }
-            catch (error) {
-                reject(`Parsing app data failed: ${error}`);
-            }
-        });
-    };
-    const toSuspiciousAppInfo = (base64Value) => {
-        const data = JSON.parse(atob(base64Value));
-        const packageInfo = data.packageInfo;
-        return {
-            packageInfo,
-            reason: data.reason,
-            permissions: data.permissions,
-        };
-    };
-
     class RaspExecutionState {
         constructor(value) {
             this.value = value;
         }
         static getValues() {
-            return [
-                this.AllChecksFinished,
-            ];
+            return [this.AllChecksFinished];
         }
     }
     RaspExecutionState.AllChecksFinished = new RaspExecutionState(0);
@@ -140,13 +117,12 @@ var capacitorFreerasp = (function (exports, core) {
         return RaspExecutionState.getValues().length;
     };
     const itemsHaveType = (data, expectedType) => {
-        return data.every(item => typeof item === expectedType);
+        return data.every((item) => typeof item === expectedType);
     };
 
     const getThreatIdentifiers = async () => {
         const { ids } = await Talsec.getThreatIdentifiers();
-        if (ids.length !== getThreatCount() ||
-            !itemsHaveType(ids, 'number')) {
+        if (ids.length !== getThreatCount() || !itemsHaveType(ids, 'number')) {
             console.error(`Threat count mismatch: Native ${ids.length} vs JS ${getThreatCount()}. Items are numbers: ${itemsHaveType(ids, 'number')}`);
             // onInvalidCallback();
         }
@@ -155,8 +131,7 @@ var capacitorFreerasp = (function (exports, core) {
     const getThreatChannelData = async () => {
         const dataLength = core.Capacitor.getPlatform() === 'ios' ? 2 : 3;
         const { ids } = await Talsec.getThreatChannelData();
-        if (ids.length !== dataLength ||
-            !itemsHaveType(ids, 'string')) {
+        if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
             onInvalidCallback();
         }
         return ids;
@@ -172,6 +147,28 @@ var capacitorFreerasp = (function (exports, core) {
         catch (err) {
             console.error('Could not map Talsec threats', err);
         }
+    };
+
+    // parses base64-encoded malware data to SuspiciousAppInfo[]
+    const parseMalwareData = async (data) => {
+        return new Promise((resolve, reject) => {
+            try {
+                const suspiciousAppData = data.map((entry) => toSuspiciousAppInfo(entry));
+                resolve(suspiciousAppData);
+            }
+            catch (error) {
+                reject(`Parsing app data failed: ${error}`);
+            }
+        });
+    };
+    const toSuspiciousAppInfo = (base64Value) => {
+        const data = JSON.parse(atob(base64Value));
+        const packageInfo = data.packageInfo;
+        return {
+            packageInfo,
+            reason: data.reason,
+            permissions: data.permissions,
+        };
     };
 
     const registerThreatListener = async (config) => {
@@ -255,8 +252,7 @@ var capacitorFreerasp = (function (exports, core) {
 
     const getRaspExecutionStateIdentifiers = async () => {
         const { ids } = await Talsec.getRaspExecutionStateIdentifiers();
-        if (ids.length !== getRaspExecutionStateCount() ||
-            !itemsHaveType(ids, 'number')) {
+        if (ids.length !== getRaspExecutionStateCount() || !itemsHaveType(ids, 'number')) {
             onInvalidCallback();
         }
         return ids;
@@ -264,8 +260,7 @@ var capacitorFreerasp = (function (exports, core) {
     const getRaspExecutionStateChannelData = async () => {
         const dataLength = 2;
         const { ids } = await Talsec.getRaspExecutionStateChannelData();
-        if (ids.length !== dataLength ||
-            !itemsHaveType(ids, 'string')) {
+        if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
             onInvalidCallback();
         }
         return ids;

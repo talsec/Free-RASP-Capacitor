@@ -1,6 +1,6 @@
-import { Talsec } from '../nativeModules';
-import { registerThreatListener } from '../listeners/threat';
 import { registerRaspExecutionStateListener } from '../listeners/raspExecutionState';
+import { registerThreatListener } from '../listeners/threat';
+import { Talsec } from '../nativeModules';
 export const startFreeRASP = async (config, actions, raspExecutionStateActions) => {
     await registerThreatListener(actions);
     if (raspExecutionStateActions) {

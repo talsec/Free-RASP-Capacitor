@@ -7,6 +7,6 @@ export const getRaspExecutionStateCount = () => {
     return RaspExecutionState.getValues().length;
 };
 export const itemsHaveType = (data, expectedType) => {
-    return data.every(item => typeof item === expectedType);
+    return data.every((item) => typeof item === expectedType);
 };
 //# sourceMappingURL=utils.js.map
