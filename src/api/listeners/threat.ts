@@ -77,6 +77,9 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
       case Threat.UnsecureWifi.value:
         config.unsecureWifi?.();
         break;
+      case Threat.Automation.value:
+        config.automation?.();
+        break;
       default:
         onInvalidCallback();
         break;

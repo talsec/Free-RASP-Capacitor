@@ -262,6 +262,16 @@ const App: React.FC = () => {
         ),
       );
     },
+    // Android only
+    automation: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Automation'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
   
   };
   

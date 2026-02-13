@@ -29,6 +29,7 @@ import {
   blockScreenCapture,
   isScreenCaptureBlocked,
   storeExternalId,
+  removeExternalId,
 } from 'capacitor-freerasp';
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
@@ -114,8 +115,16 @@ const FreeRaspDemo: React.FC<{
     setShowToast(true);
   };
 
-  const handleModalDismiss = () => {
-    setIsModalOpen(false);
+  const handleRemoveExternalId = async () => {
+    try {
+      await removeExternalId();
+      setToastColor('success');
+      setToastMessage('External ID removed');
+    } catch (error: any) {
+      setToastColor('warning');
+      setToastMessage(`Error while removing external ID: ${error.message}`);
+    }
+    setShowToast(true);
   };
 
   return (
@@ -185,6 +194,12 @@ const FreeRaspDemo: React.FC<{
             onClick={() => setIsModalOpen(true)}
           >
             Store External ID
+          </IonButton>
+          <IonButton
+            className="ion-text-wrap features-button"
+            onClick={handleRemoveExternalId}
+          >
+            Remove External ID
           </IonButton>
         </IonRow>
         <IonListHeader>

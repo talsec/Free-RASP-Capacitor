@@ -34,6 +34,7 @@ internal sealed class ThreatEvent(override val value: Int) : BaseRaspEvent {
     object TimeSpoofing : ThreatEvent(RandomGenerator.next())
     object LocationSpoofing : ThreatEvent(RandomGenerator.next())
     object UnsecureWifi : ThreatEvent(RandomGenerator.next())
+    object Automation : ThreatEvent(RandomGenerator.next())
 
     companion object {
 
@@ -62,7 +63,8 @@ internal sealed class ThreatEvent(override val value: Int) : BaseRaspEvent {
                 MultiInstance,
                 TimeSpoofing,
                 LocationSpoofing,
-                UnsecureWifi
+                UnsecureWifi,
+                Automation
             ).map { it.value }
         )
     }

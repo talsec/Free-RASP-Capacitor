@@ -6,21 +6,17 @@ import TalsecRuntime
 public class FreeraspPlugin: CAPPlugin {
 
     public static var shared: FreeraspPlugin?
-
-    static var threatCache = Set<SecurityThreat>()
-    static var executionStateCache = Set<RaspExecutionStates>()
     
     override public func load() {
         FreeraspPlugin.shared = self
-        FreeraspPlugin.flushCache()
-    }
-
-    private static func flushCache() {
-        FreeraspPlugin.threatCache.forEach(FreeraspPlugin.dispatchEvent)
-        FreeraspPlugin.threatCache.removeAll()
-
-        FreeraspPlugin.executionStateCache.forEach(FreeraspPlugin.dispatchRaspExecutionStateEvent)
-        FreeraspPlugin.executionStateCache.removeAll()
+        
+        ThreatDispatcher.shared.listener = { [weak self] threat in
+            self?.notifyListeners(EventIdentifiers.threatChannelName, data: [EventIdentifiers.threatChannelKey: threat.callbackIdentifier], retainUntilConsumed: true)
+        }
+        
+        ExecutionStateDispatcher.shared.listener = { [weak self] event in
+            self?.notifyListeners(EventIdentifiers.raspExecutionStateChannelName, data: [EventIdentifiers.raspExecutionStateChannelKey: event.callbackIdentifier], retainUntilConsumed: true)
+        }
     }
     
     /// Runs Talsec with given configuration
@@ -49,6 +45,11 @@ public class FreeraspPlugin: CAPPlugin {
         UserDefaults.standard.set(externalId, forKey: "app.talsec.externalid")
         call.resolve(["result": true])
     }
+    
+    @objc func removeExternalId(_ call: CAPPluginCall) -> Void {
+        UserDefaults.standard.removeObject(forKey: "app.talsec.externalid")
+        call.resolve(["result": true])
+    }
 
     @objc func blockScreenCapture(_ call: CAPPluginCall) -> Void {
         guard let enable = call.getBool("enable") else {
@@ -74,22 +75,6 @@ public class FreeraspPlugin: CAPPlugin {
             } else {
                 call.reject("Error while checking if screen capture is blocked", "IsScreenCaptureBlockedError")
             }
-        }
-    }
-
-    static func dispatchEvent(securityThreat: SecurityThreat) {
-        if let instance = FreeraspPlugin.shared {
-            instance.notifyListeners(EventIdentifiers.threatChannelName, data: [EventIdentifiers.threatChannelKey: securityThreat.callbackIdentifier], retainUntilConsumed: true)
-        } else {
-            FreeraspPlugin.threatCache.insert(securityThreat)
-        }
-    }
-
-    static func dispatchRaspExecutionStateEvent(event: RaspExecutionStates) -> Void {
-        if let instance = FreeraspPlugin.shared {
-            instance.notifyListeners(EventIdentifiers.raspExecutionStateChannelName, data: [EventIdentifiers.raspExecutionStateChannelKey: event.callbackIdentifier], retainUntilConsumed: true)
-        } else {
-            FreeraspPlugin.executionStateCache.insert(event)
         }
     }
     
@@ -160,11 +145,10 @@ extension SecurityThreatCenter:  @retroactive SecurityThreatHandler, @retroactiv
         if (securityThreat.rawValue == "passcodeChange") {
             return
         }
-
-        FreeraspPlugin.dispatchEvent(securityThreat: securityThreat)
+        ThreatDispatcher.shared.dispatch(threat: securityThreat)
     }
     
     public func onAllChecksFinished() {
-        FreeraspPlugin.dispatchRaspExecutionStateEvent(event: RaspExecutionStates.allChecksFinished)
+        ExecutionStateDispatcher.shared.dispatch(event: RaspExecutionStates.allChecksFinished)
     }
 }

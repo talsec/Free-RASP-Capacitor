@@ -1,5 +1,6 @@
 package com.aheaditec.freerasp
 
+import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
@@ -11,10 +12,11 @@ import com.aheaditec.freerasp.utils.toEncodedJSArray
 import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.aheaditec.talsec_security.security.api.Talsec
 import com.aheaditec.talsec_security.security.api.TalsecConfig
-import com.aheaditec.talsec_security.security.api.ThreatListener
 import com.aheaditec.freerasp.events.BaseRaspEvent
 import com.aheaditec.freerasp.events.RaspExecutionStateEvent
 import com.aheaditec.freerasp.events.ThreatEvent
+import com.aheaditec.freerasp.interfaces.PluginExecutionStateListener
+import com.aheaditec.freerasp.interfaces.PluginThreatListener
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
@@ -25,9 +27,15 @@ import org.json.JSONArray
 @CapacitorPlugin(name = "Freerasp")
 class FreeraspPlugin : Plugin() {
 
-    private val threatHandler = TalsecThreatHandler(this)
-    private val listener = ThreatListener(threatHandler, threatHandler, threatHandler)
     private var registered = true
+
+    override fun load() {
+        super.load()
+        pluginContext = context
+        notifyListenersCallback = { eventName, data ->
+            notifyListeners(eventName, data, true)
+        }
+    }
 
     @PluginMethod
     fun talsecStart(call: PluginCall) {
@@ -38,7 +46,11 @@ class FreeraspPlugin : Plugin() {
         }
         try {
             val talsecConfig = buildTalsecConfigThrowing(config)
-            listener.registerListener(context)
+            
+            TalsecThreatHandler.threatDispatcher.listener = PluginListener
+            TalsecThreatHandler.executionStateDispatcher.listener = PluginListener
+            TalsecThreatHandler.registerListener(context)
+
             bridge.activity.runOnUiThread {
                 Talsec.start(context, talsecConfig)
                 mainHandler.post {
@@ -70,7 +82,7 @@ class FreeraspPlugin : Plugin() {
     override fun handleOnPause() {
         super.handleOnPause()
         if (activity.isFinishing) {
-            listener.unregisterListener(context)
+            TalsecThreatHandler.unregisterListener(context)
             registered = false
         }
     }
@@ -79,7 +91,7 @@ class FreeraspPlugin : Plugin() {
         super.handleOnResume()
         if (!registered) {
             registered = true
-            listener.registerListener(context)
+            TalsecThreatHandler.registerListener(context)
         }
     }
 
@@ -253,21 +265,17 @@ class FreeraspPlugin : Plugin() {
         }
     }
 
-    internal fun notifyListeners(event: BaseRaspEvent) {
-        notifyListeners(event.channelName, JSObject().put(event.channelKey, event.value), true)
-    }
-
-    internal fun notifyMalware(suspiciousApps: MutableList<SuspiciousAppInfo>) {
-        // Perform the malware encoding on a background thread
-        backgroundHandler.post {
-
-            val encodedSuspiciousApps = suspiciousApps.toEncodedJSArray(context)
-            mainHandler.post {
-                val params = JSObject()
-                    .put(ThreatEvent.CHANNEL_KEY, ThreatEvent.Malware.value)
-                    .put(ThreatEvent.MALWARE_CHANNEL_KEY, encodedSuspiciousApps)
-                notifyListeners(ThreatEvent.CHANNEL_NAME, params, true)
-            }
+    @PluginMethod
+    fun removeExternalId(call: PluginCall) {
+        try {
+            Talsec.removeExternalId(context)
+            call.resolve(JSObject().put("result", true))
+        } catch (e: Exception) {
+            call.reject(
+                "Error during removeExternalId operation in freeRASP Native Plugin",
+                "NativePluginError"
+            )
+            return
         }
     }
 
@@ -298,5 +306,41 @@ class FreeraspPlugin : Plugin() {
         private val mainHandler = Handler(Looper.getMainLooper())
 
         internal var talsecStarted = false
+        private var pluginContext: Context? = null
+        private var notifyListenersCallback: ((String, JSObject) -> Unit)? = null
+
+        internal fun notifyListeners(event: BaseRaspEvent) {
+             val params = JSObject().put(event.channelKey, event.value)
+             notifyListenersCallback?.invoke(event.channelName, params)
+        }
+
+        internal fun notifyMalware(suspiciousApps: MutableList<SuspiciousAppInfo>) {
+            // Perform the malware encoding on a background thread
+            backgroundHandler.post {
+                pluginContext?.let { context ->
+                    val encodedSuspiciousApps = suspiciousApps.toEncodedJSArray(context)
+                    mainHandler.post {
+                        val params = JSObject()
+                            .put(ThreatEvent.CHANNEL_KEY, ThreatEvent.Malware.value)
+                            .put(ThreatEvent.MALWARE_CHANNEL_KEY, encodedSuspiciousApps)
+                        notifyListenersCallback?.invoke(ThreatEvent.CHANNEL_NAME, params)
+                    }
+                }
+            }
+        }
+    }
+
+    internal object PluginListener : PluginThreatListener, PluginExecutionStateListener {
+        override fun threatDetected(threatEventType: ThreatEvent) {
+            notifyListeners(threatEventType)
+        }
+
+        override fun malwareDetected(suspiciousApps: MutableList<SuspiciousAppInfo>) {
+            notifyMalware(suspiciousApps)
+        }
+
+        override fun raspExecutionStateChanged(event: RaspExecutionStateEvent) {
+            notifyListeners(event)
+        }
     }
 }
