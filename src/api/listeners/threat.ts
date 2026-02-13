@@ -4,12 +4,26 @@ import type { ThreatEventActions } from '../../types/types';
 import { parseMalwareData } from '../../utils/malware';
 import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
+import type { PluginListenerHandle } from '@capacitor/core';
+
+let eventsListener: PluginListenerHandle | null = null;
+let isInitializing = false;
 
 export const registerThreatListener = async (config: ThreatEventActions): Promise<void> => {
+  if (isInitializing) {
+    return;
+  }
+  isInitializing = true;
+
+  if (eventsListener) {
+    await eventsListener.remove();
+    eventsListener = null;
+  }
+
   const [channel, key, malwareKey] = await getThreatChannelData();
   await prepareThreatMapping();
 
-  await Talsec.addListener(channel, async (event: any) => {
+  eventsListener = await Talsec.addListener(channel, async (event: any) => {
     if (event[key] == undefined) {
       onInvalidCallback();
     }
@@ -85,4 +99,12 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
         break;
     }
   });
+  isInitializing = false;
+};
+
+export const removeThreatListener = async (): Promise<void> => {
+  if (eventsListener) {
+    await eventsListener.remove();
+    eventsListener = null;
+  }
 };
