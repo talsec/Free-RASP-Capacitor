@@ -1,10 +1,11 @@
+import type { PluginListenerHandle } from '@capacitor/core';
+
 import { getThreatChannelData, prepareThreatMapping } from '../../channels/threat';
 import { Threat } from '../../models/threat';
 import type { ThreatEventActions } from '../../types/types';
 import { parseMalwareData } from '../../utils/malware';
 import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
-import type { PluginListenerHandle } from '@capacitor/core';
 
 let eventsListener: PluginListenerHandle | null = null;
 let isInitializing = false;

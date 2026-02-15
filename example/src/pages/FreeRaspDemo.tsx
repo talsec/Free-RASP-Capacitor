@@ -67,10 +67,12 @@ const FreeRaspDemo: React.FC<{
       appsToWhitelist.map(async app => {
         try {
           const whitelistResponse = await addToWhitelist(app);
+          // eslint-disable-next-line no-console
           console.info(
             `${app} stored to Malware Whitelist: ${whitelistResponse}`,
           );
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.info('Malware whitelist failed: ', error);
         }
       }),
@@ -82,6 +84,7 @@ const FreeRaspDemo: React.FC<{
       const isBlocked = await isScreenCaptureBlocked();
       setScreenCaptureBlocked(isBlocked);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error fetching screen capture status:', error);
     }
   };
@@ -89,16 +92,22 @@ const FreeRaspDemo: React.FC<{
   const handleScreenCapture = async (enable: boolean) => {
     try {
       const blockScreenCaptureResponse = await blockScreenCapture(enable);
+      // eslint-disable-next-line no-console
       console.info(
         'Changing Screen Capture Status:',
         blockScreenCaptureResponse,
       );
       await updateScreenCaptureStatus();
-    } catch (e: any) {
+    } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(
-        `Failed to ${enable ? 'block' : 'enable'} screen capture: ${e.message}`,
+        `Failed to ${enable ? 'block' : 'enable'} screen capture: ${(e as Error).message}`,
       );
     }
+  };
+
+  const handleModalDismiss = () => {
+    setIsModalOpen(false);
   };
 
   const handleModalSend = async () => {
@@ -106,9 +115,9 @@ const FreeRaspDemo: React.FC<{
       await storeExternalId(externalIdValue);
       setToastColor('success');
       setToastMessage('External ID stored');
-    } catch (error: any) {
+    } catch (error) {
       setToastColor('warning');
-      setToastMessage(`Error while storing external ID: ${error.message}`);
+      setToastMessage(`Error while storing external ID: ${(error as Error).message}`);
     }
 
     setIsModalOpen(false);
@@ -120,9 +129,9 @@ const FreeRaspDemo: React.FC<{
       await removeExternalId();
       setToastColor('success');
       setToastMessage('External ID removed');
-    } catch (error: any) {
+    } catch (error) {
       setToastColor('warning');
-      setToastMessage(`Error while removing external ID: ${error.message}`);
+      setToastMessage(`Error while removing external ID: ${(error as Error).message}`);
     }
     setShowToast(true);
   };

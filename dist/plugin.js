@@ -22,6 +22,10 @@ var capacitorFreerasp = (function (exports, core) {
         const { result } = await Talsec.storeExternalId({ data });
         return result;
     };
+    const removeExternalId = async () => {
+        const { result } = await Talsec.removeExternalId();
+        return result;
+    };
     const getAppIcon = async (packageName) => {
         if (core.Capacitor.getPlatform() === 'ios') {
             return Promise.reject('App icon retrieval for Malware detection is not available on iOS');
@@ -60,6 +64,7 @@ var capacitorFreerasp = (function (exports, core) {
                     this.TimeSpoofing,
                     this.LocationSpoofing,
                     this.UnsecureWifi,
+                    this.Automation,
                 ]
                 : [
                     this.AppIntegrity,
@@ -75,6 +80,7 @@ var capacitorFreerasp = (function (exports, core) {
                     this.UnofficialStore,
                     this.Screenshot,
                     this.ScreenRecording,
+                    this.Automation,
                 ];
         }
     }
@@ -99,6 +105,7 @@ var capacitorFreerasp = (function (exports, core) {
     Threat.TimeSpoofing = new Threat(0);
     Threat.LocationSpoofing = new Threat(0);
     Threat.UnsecureWifi = new Threat(0);
+    Threat.Automation = new Threat(0);
 
     class RaspExecutionState {
         constructor(value) {
@@ -171,11 +178,21 @@ var capacitorFreerasp = (function (exports, core) {
         };
     };
 
+    let eventsListener$1 = null;
+    let isInitializing$1 = false;
     const registerThreatListener = async (config) => {
+        if (isInitializing$1) {
+            return;
+        }
+        isInitializing$1 = true;
+        if (eventsListener$1) {
+            await eventsListener$1.remove();
+            eventsListener$1 = null;
+        }
         const [channel, key, malwareKey] = await getThreatChannelData();
         await prepareThreatMapping();
-        await Talsec.addListener(channel, async (event) => {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w;
+        eventsListener$1 = await Talsec.addListener(channel, async (event) => {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
             if (event[key] == undefined) {
                 onInvalidCallback();
             }
@@ -243,11 +260,21 @@ var capacitorFreerasp = (function (exports, core) {
                 case Threat.UnsecureWifi.value:
                     (_w = config.unsecureWifi) === null || _w === void 0 ? void 0 : _w.call(config);
                     break;
+                case Threat.Automation.value:
+                    (_x = config.automation) === null || _x === void 0 ? void 0 : _x.call(config);
+                    break;
                 default:
                     onInvalidCallback();
                     break;
             }
         });
+        isInitializing$1 = false;
+    };
+    const removeThreatListener = async () => {
+        if (eventsListener$1) {
+            await eventsListener$1.remove();
+            eventsListener$1 = null;
+        }
     };
 
     const getRaspExecutionStateIdentifiers = async () => {
@@ -273,10 +300,20 @@ var capacitorFreerasp = (function (exports, core) {
         });
     };
 
+    let eventsListener = null;
+    let isInitializing = false;
     const registerRaspExecutionStateListener = async (config) => {
+        if (isInitializing) {
+            return;
+        }
+        isInitializing = true;
+        if (eventsListener) {
+            await eventsListener.remove();
+            eventsListener = null;
+        }
         const [channel, key] = await getRaspExecutionStateChannelData();
         await prepareRaspExecutionStateMapping();
-        await Talsec.addListener(channel, async (event) => {
+        eventsListener = await Talsec.addListener(channel, async (event) => {
             var _a;
             if (event[key] == undefined) {
                 onInvalidCallback();
@@ -290,6 +327,13 @@ var capacitorFreerasp = (function (exports, core) {
                     break;
             }
         });
+        isInitializing = false;
+    };
+    const removeRaspExecutionStateListener = async () => {
+        if (eventsListener) {
+            await eventsListener.remove();
+            eventsListener = null;
+        }
     };
 
     const startFreeRASP = async (config, actions, raspExecutionStateActions) => {
@@ -308,6 +352,9 @@ var capacitorFreerasp = (function (exports, core) {
     exports.onInvalidCallback = onInvalidCallback;
     exports.registerRaspExecutionStateListener = registerRaspExecutionStateListener;
     exports.registerThreatListener = registerThreatListener;
+    exports.removeExternalId = removeExternalId;
+    exports.removeRaspExecutionStateListener = removeRaspExecutionStateListener;
+    exports.removeThreatListener = removeThreatListener;
     exports.startFreeRASP = startFreeRASP;
     exports.storeExternalId = storeExternalId;
 

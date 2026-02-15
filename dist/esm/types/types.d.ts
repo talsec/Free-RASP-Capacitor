@@ -23,6 +23,9 @@ export interface TalsecPlugin {
     }): Promise<{
         result: boolean;
     }>;
+    removeExternalId(): Promise<{
+        result: boolean;
+    }>;
     addToWhitelist(options: {
         packageName: string;
     }): Promise<{
@@ -99,6 +102,7 @@ export type ThreatEventActions = {
     timeSpoofing?: () => any;
     locationSpoofing?: () => any;
     unsecureWifi?: () => any;
+    automation?: () => any;
 };
 export type NativeEvent = {
     [key: string]: number | string[] | undefined;
