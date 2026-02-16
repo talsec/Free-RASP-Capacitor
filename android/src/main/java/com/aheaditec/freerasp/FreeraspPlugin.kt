@@ -29,14 +29,6 @@ class FreeraspPlugin : Plugin() {
 
     private var registered = true
 
-    override fun load() {
-        super.load()
-        pluginContext = context
-        notifyListenersCallback = { eventName, data ->
-            notifyListeners(eventName, data, true)
-        }
-    }
-
     @PluginMethod
     fun talsecStart(call: PluginCall) {
         val config = call.getObject("config")
@@ -46,9 +38,13 @@ class FreeraspPlugin : Plugin() {
         }
         try {
             val talsecConfig = buildTalsecConfigThrowing(config)
-            
-            TalsecThreatHandler.threatDispatcher.listener = PluginListener
-            TalsecThreatHandler.executionStateDispatcher.listener = PluginListener
+
+            val pluginCallback = { eventName: String, data: JSObject ->
+                notifyListeners(eventName, data, true)
+            }
+
+            TalsecThreatHandler.threatDispatcher.listener = PluginListener(context, pluginCallback)
+            TalsecThreatHandler.executionStateDispatcher.listener = PluginListener(context, pluginCallback)
             TalsecThreatHandler.registerListener(context)
 
             bridge.activity.runOnUiThread {
@@ -141,15 +137,15 @@ class FreeraspPlugin : Plugin() {
      * Method to setup the execution state message passing between native and Capacitor
      * @return list of [CHANNEL_NAME, CHANNEL_KEY]
      */
-     @PluginMethod
-     fun getRaspExecutionStateChannelData(call: PluginCall) {
+    @PluginMethod
+    fun getRaspExecutionStateChannelData(call: PluginCall) {
         val channelData = JSONArray(
             (listOf(
                 RaspExecutionStateEvent.CHANNEL_NAME, RaspExecutionStateEvent.CHANNEL_KEY
             ))
         )
         call.resolve(JSObject().put("ids", channelData))
-     }
+    }
 
     /**
      * We never send an invalid callback over our channel.
@@ -306,41 +302,49 @@ class FreeraspPlugin : Plugin() {
         private val mainHandler = Handler(Looper.getMainLooper())
 
         internal var talsecStarted = false
-        private var pluginContext: Context? = null
-        private var notifyListenersCallback: ((String, JSObject) -> Unit)? = null
 
-        internal fun notifyListeners(event: BaseRaspEvent) {
-             val params = JSObject().put(event.channelKey, event.value)
-             notifyListenersCallback?.invoke(event.channelName, params)
+        internal fun notifyEvent(
+            event: BaseRaspEvent,
+            notifyListenersCallback: ((String, JSObject) -> Unit)
+        ) {
+            val params = JSObject().put(event.channelKey, event.value)
+            notifyListenersCallback(event.channelName, params)
         }
 
-        internal fun notifyMalware(suspiciousApps: MutableList<SuspiciousAppInfo>) {
+        internal fun notifyMalware(
+            suspiciousApps: MutableList<SuspiciousAppInfo>,
+            context: Context,
+            notifyListenersCallback: ((String, JSObject) -> Unit)
+        ) {
             // Perform the malware encoding on a background thread
             backgroundHandler.post {
-                pluginContext?.let { context ->
-                    val encodedSuspiciousApps = suspiciousApps.toEncodedJSArray(context)
-                    mainHandler.post {
-                        val params = JSObject()
-                            .put(ThreatEvent.CHANNEL_KEY, ThreatEvent.Malware.value)
-                            .put(ThreatEvent.MALWARE_CHANNEL_KEY, encodedSuspiciousApps)
-                        notifyListenersCallback?.invoke(ThreatEvent.CHANNEL_NAME, params)
-                    }
+
+                val encodedSuspiciousApps = suspiciousApps.toEncodedJSArray(context)
+                mainHandler.post {
+                    val params = JSObject()
+                        .put(ThreatEvent.CHANNEL_KEY, ThreatEvent.Malware.value)
+                        .put(ThreatEvent.MALWARE_CHANNEL_KEY, encodedSuspiciousApps)
+                    notifyListenersCallback.invoke(ThreatEvent.CHANNEL_NAME, params)
                 }
+
             }
         }
     }
 
-    internal object PluginListener : PluginThreatListener, PluginExecutionStateListener {
+    internal class PluginListener(
+        private val context: Context,
+        private val pluginCallback: ((String, JSObject) -> Unit)
+    ) : PluginThreatListener, PluginExecutionStateListener {
         override fun threatDetected(threatEventType: ThreatEvent) {
-            notifyListeners(threatEventType)
+            notifyEvent(threatEventType, pluginCallback)
         }
 
         override fun malwareDetected(suspiciousApps: MutableList<SuspiciousAppInfo>) {
-            notifyMalware(suspiciousApps)
+            notifyMalware(suspiciousApps, context, pluginCallback)
         }
 
         override fun raspExecutionStateChanged(event: RaspExecutionStateEvent) {
-            notifyListeners(event)
+            notifyEvent(event, pluginCallback)
         }
     }
 }
