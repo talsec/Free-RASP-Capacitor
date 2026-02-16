@@ -24,6 +24,8 @@ import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
 import org.json.JSONArray
 
+typealias CapacitorCallback = (String, JSObject) -> Unit
+
 @CapacitorPlugin(name = "Freerasp")
 class FreeraspPlugin : Plugin() {
 
@@ -39,7 +41,7 @@ class FreeraspPlugin : Plugin() {
         try {
             val talsecConfig = buildTalsecConfigThrowing(config)
 
-            val pluginCallback = { eventName: String, data: JSObject ->
+            val pluginCallback: CapacitorCallback = { eventName, data ->
                 notifyListeners(eventName, data, true)
             }
 
@@ -305,7 +307,7 @@ class FreeraspPlugin : Plugin() {
 
         internal fun notifyEvent(
             event: BaseRaspEvent,
-            notifyListenersCallback: ((String, JSObject) -> Unit)
+            notifyListenersCallback: CapacitorCallback
         ) {
             val params = JSObject().put(event.channelKey, event.value)
             notifyListenersCallback(event.channelName, params)
@@ -314,7 +316,7 @@ class FreeraspPlugin : Plugin() {
         internal fun notifyMalware(
             suspiciousApps: MutableList<SuspiciousAppInfo>,
             context: Context,
-            notifyListenersCallback: ((String, JSObject) -> Unit)
+            notifyListenersCallback: CapacitorCallback
         ) {
             // Perform the malware encoding on a background thread
             backgroundHandler.post {
@@ -333,7 +335,7 @@ class FreeraspPlugin : Plugin() {
 
     internal class PluginListener(
         private val context: Context,
-        private val pluginCallback: ((String, JSObject) -> Unit)
+        private val pluginCallback: CapacitorCallback
     ) : PluginThreatListener, PluginExecutionStateListener {
         override fun threatDetected(threatEventType: ThreatEvent) {
             notifyEvent(threatEventType, pluginCallback)
