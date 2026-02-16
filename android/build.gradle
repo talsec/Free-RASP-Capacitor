@@ -27,7 +27,7 @@ apply plugin: 'kotlinx-serialization'
 
 android {
     namespace "com.aheaditec.freerasp"
-    compileSdk Math.max(36, project.hasProperty('rootProject.ext.compileSdkVersion') ? rootProject.ext.compileSdkVersion as int : 36)
+    compileSdk Math.max(36, project.hasProperty('rootProject.ext.compileSdk') ? rootProject.ext.compileSdk as int : 36)
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 36
