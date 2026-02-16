@@ -8,7 +8,7 @@ import com.aheaditec.freerasp.dispatchers.ThreatDispatcher
 import com.aheaditec.freerasp.events.RaspExecutionStateEvent
 import com.aheaditec.freerasp.events.ThreatEvent
 
-internal object TalsecThreatHandler {
+internal object PluginThreatHandler {
 
     internal val threatDispatcher = ThreatDispatcher()
     internal val executionStateDispatcher = ExecutionStateDispatcher()

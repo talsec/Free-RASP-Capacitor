@@ -45,9 +45,9 @@ class FreeraspPlugin : Plugin() {
                 notifyListeners(eventName, data, true)
             }
 
-            TalsecThreatHandler.threatDispatcher.listener = PluginListener(context, pluginCallback)
-            TalsecThreatHandler.executionStateDispatcher.listener = PluginListener(context, pluginCallback)
-            TalsecThreatHandler.registerListener(context)
+            PluginThreatHandler.threatDispatcher.listener = PluginListener(context, pluginCallback)
+            PluginThreatHandler.executionStateDispatcher.listener = PluginListener(context, pluginCallback)
+            PluginThreatHandler.registerListener(context)
 
             bridge.activity.runOnUiThread {
                 Talsec.start(context, talsecConfig)
@@ -80,7 +80,7 @@ class FreeraspPlugin : Plugin() {
     override fun handleOnPause() {
         super.handleOnPause()
         if (activity.isFinishing) {
-            TalsecThreatHandler.unregisterListener(context)
+            PluginThreatHandler.unregisterListener(context)
             registered = false
         }
     }
@@ -89,7 +89,7 @@ class FreeraspPlugin : Plugin() {
         super.handleOnResume()
         if (!registered) {
             registered = true
-            TalsecThreatHandler.registerListener(context)
+            PluginThreatHandler.registerListener(context)
         }
     }
 
