@@ -15,15 +15,16 @@ internal class ExecutionStateDispatcher {
         }
 
     fun dispatch(event: RaspExecutionStateEvent) {
-        val currentListener = listener
-        if (currentListener != null) {
-            currentListener.raspExecutionStateChanged(event)
-        } else {
-            synchronized(cache) {
-                val checkedListener = listener
-                checkedListener?.raspExecutionStateChanged(event) ?: cache.add(event)
+        val checkedListener = synchronized(cache) {
+            val currentListener = listener
+            if (currentListener != null) {
+                currentListener
+            } else {
+                cache.add(event)
+                null
             }
         }
+        checkedListener?.raspExecutionStateChanged(event)
     }
 
     private fun flushCache(registeredListener: PluginExecutionStateListener) {

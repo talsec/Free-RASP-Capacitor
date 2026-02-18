@@ -17,27 +17,29 @@ internal class ThreatDispatcher {
         }
 
     fun dispatchThreat(event: ThreatEvent) {
-        val currentListener = listener
-        if (currentListener != null) {
-            currentListener.threatDetected(event)
-        } else {
-            synchronized(threatCache) {
-                val checkedListener = listener
-                checkedListener?.threatDetected(event) ?: threatCache.add(event)
+        val checkedListener = synchronized(threatCache) {
+            val currentListener = listener
+            if (currentListener != null) {
+                currentListener
+            } else {
+                threatCache.add(event)
+                null
             }
         }
+        checkedListener?.threatDetected(event)
     }
 
     fun dispatchMalware(apps: MutableList<SuspiciousAppInfo>) {
-        val currentListener = listener
-        if (currentListener != null) {
-            currentListener.malwareDetected(apps)
-        } else {
-            synchronized(malwareCache) {
-                val checkedListener = listener
-                checkedListener?.malwareDetected(apps) ?: malwareCache.addAll(apps)
+        val checkedListener = synchronized(malwareCache) {
+            val currentListener = listener
+            if (currentListener != null) {
+                currentListener
+            } else {
+                malwareCache.addAll(apps)
+                null
             }
         }
+        checkedListener?.malwareDetected(apps)
     }
 
     private fun flushCache(registeredListener: PluginThreatListener) {
