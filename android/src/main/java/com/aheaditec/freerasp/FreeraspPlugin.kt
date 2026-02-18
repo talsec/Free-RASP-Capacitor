@@ -82,6 +82,8 @@ class FreeraspPlugin : Plugin() {
         if (activity.isFinishing) {
             PluginThreatHandler.unregisterListener(context)
             registered = false
+            PluginThreatHandler.threatDispatcher.listener = null
+            PluginThreatHandler.executionStateDispatcher.listener = null
         }
     }
 
