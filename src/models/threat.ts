@@ -69,7 +69,6 @@ export class Threat {
           this.UnofficialStore,
           this.Screenshot,
           this.ScreenRecording,
-          this.Automation,
         ];
   }
 }
