@@ -21,6 +21,7 @@ import {
   IonFooter,
   IonInput,
   IonButtons,
+  IonSpinner,
 } from '@ionic/react';
 
 import {
@@ -29,6 +30,7 @@ import {
   blockScreenCapture,
   isScreenCaptureBlocked,
   storeExternalId,
+  removeExternalId,
 } from 'capacitor-freerasp';
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
@@ -47,9 +49,7 @@ const FreeRaspDemo: React.FC<{
   const [showToast, setShowToast] = React.useState(false);
   const [externalIdValue, setExternalIdValue] = React.useState('');
   const [toastMessage, setToastMessage] = React.useState('');
-  const [toastColor, setToastColor] = React.useState<'success' | 'warning'>(
-    'success',
-  );
+  const [toastColor, setToastColor] = React.useState<'success' | 'warning'>('success');
   const platform = Capacitor.getPlatform();
   useEffect(() => {
     (async () => {
@@ -63,13 +63,13 @@ const FreeRaspDemo: React.FC<{
   const addItemsToMalwareWhitelist = async () => {
     const appsToWhitelist = ['io.ionic.starter', 'com.example.myApp'];
     await Promise.all(
-      appsToWhitelist.map(async app => {
+      appsToWhitelist.map(async (app) => {
         try {
           const whitelistResponse = await addToWhitelist(app);
-          console.info(
-            `${app} stored to Malware Whitelist: ${whitelistResponse}`,
-          );
+          // eslint-disable-next-line no-console
+          console.info(`${app} stored to Malware Whitelist: ${whitelistResponse}`);
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.info('Malware whitelist failed: ', error);
         }
       }),
@@ -81,6 +81,7 @@ const FreeRaspDemo: React.FC<{
       const isBlocked = await isScreenCaptureBlocked();
       setScreenCaptureBlocked(isBlocked);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error fetching screen capture status:', error);
     }
   };
@@ -88,16 +89,17 @@ const FreeRaspDemo: React.FC<{
   const handleScreenCapture = async (enable: boolean) => {
     try {
       const blockScreenCaptureResponse = await blockScreenCapture(enable);
-      console.info(
-        'Changing Screen Capture Status:',
-        blockScreenCaptureResponse,
-      );
+      // eslint-disable-next-line no-console
+      console.info('Changing Screen Capture Status:', blockScreenCaptureResponse);
       await updateScreenCaptureStatus();
-    } catch (e: any) {
-      console.error(
-        `Failed to ${enable ? 'block' : 'enable'} screen capture: ${e.message}`,
-      );
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to ${enable ? 'block' : 'enable'} screen capture: ${(e as Error).message}`);
     }
+  };
+
+  const handleModalDismiss = () => {
+    setIsModalOpen(false);
   };
 
   const handleModalSend = async () => {
@@ -105,17 +107,25 @@ const FreeRaspDemo: React.FC<{
       await storeExternalId(externalIdValue);
       setToastColor('success');
       setToastMessage('External ID stored');
-    } catch (error: any) {
+    } catch (error) {
       setToastColor('warning');
-      setToastMessage(`Error while storing external ID: ${error.message}`);
+      setToastMessage(`Error while storing external ID: ${(error as Error).message}`);
     }
 
     setIsModalOpen(false);
     setShowToast(true);
   };
 
-  const handleModalDismiss = () => {
-    setIsModalOpen(false);
+  const handleRemoveExternalId = async () => {
+    try {
+      await removeExternalId();
+      setToastColor('success');
+      setToastMessage('External ID removed');
+    } catch (error) {
+      setToastColor('warning');
+      setToastMessage(`Error while removing external ID: ${(error as Error).message}`);
+    }
+    setShowToast(true);
   };
 
   return (
@@ -137,7 +147,7 @@ const FreeRaspDemo: React.FC<{
               fill="solid"
               value={externalIdValue}
               placeholder="Type something..."
-              onIonInput={input => setExternalIdValue(input.detail.value ?? '')}
+              onIonInput={(input) => setExternalIdValue(input.detail.value ?? '')}
             >
               <div slot="label">External ID</div>
             </IonInput>
@@ -176,17 +186,29 @@ const FreeRaspDemo: React.FC<{
             color={screenCaptureBlocked ? 'danger' : 'primary'}
             onClick={() => handleScreenCapture(!screenCaptureBlocked)}
           >
-            {screenCaptureBlocked
-              ? 'Unblock Screen Capture'
-              : 'Block Screen Capture'}
+            {screenCaptureBlocked ? 'Unblock Screen Capture' : 'Block Screen Capture'}
           </IonButton>
-          <IonButton
-            className="ion-text-wrap features-button"
-            onClick={() => setIsModalOpen(true)}
-          >
+          <IonButton className="ion-text-wrap features-button" onClick={() => setIsModalOpen(true)}>
             Store External ID
           </IonButton>
+          <IonButton className="ion-text-wrap features-button" onClick={handleRemoveExternalId}>
+            Remove External ID
+          </IonButton>
         </IonRow>
+        <IonListHeader>
+          <h1>RASP Execution State:</h1>
+        </IonListHeader>
+        <IonItem>
+          <IonLabel color={allChecksStatus === 'completed' ? 'success' : 'primary'}>
+            All checks finished
+            <p className="checkDescription">{allChecksStatus}</p>
+          </IonLabel>
+          {allChecksStatus === 'completed' ? (
+            <IonIcon icon={shieldCheckmarkOutline} color="success" size="large" slot="end" />
+          ) : (
+            <IonSpinner color="primary" slot="end" />
+          )}
+        </IonItem>
         <IonListHeader>
           <h1>freeRASP checks:</h1>
         </IonListHeader>
@@ -202,48 +224,19 @@ const FreeRaspDemo: React.FC<{
             <IonItem key={idx}>
               <IonLabel color={check.isSecure ? 'success' : 'danger'}>
                 {check.name}
-                <p className="checkDescription">
-                  {check.isSecure ? 'secure' : 'danger'}{' '}
-                </p>
+                <p className="checkDescription">{check.isSecure ? 'secure' : 'danger'} </p>
               </IonLabel>
 
-              {check.name === 'Malware' && (
-                <MalwareModal
-                  isDisabled={check.isSecure}
-                  suspiciousApps={suspiciousApps}
-                />
-              )}
+              {check.name === 'Malware' && <MalwareModal isDisabled={check.isSecure} suspiciousApps={suspiciousApps} />}
 
               {check.isSecure ? (
-                <IonIcon
-                  icon={shieldCheckmarkOutline}
-                  color="success"
-                  size="large"
-                />
+                <IonIcon icon={shieldCheckmarkOutline} color="success" size="large" />
               ) : (
-                <IonIcon
-                  icon={alertCircleOutline}
-                  color="danger"
-                  size="large"
-                />
+                <IonIcon icon={alertCircleOutline} color="danger" size="large" />
               )}
             </IonItem>
           ),
         )}
-
-        <IonItem>
-            <IonLabel color={allChecksStatus === 'completed' ? 'success' : 'warning'}>
-                All Checks Finished
-                <p className="checkDescription">
-                  {allChecksStatus}
-                </p>
-            </IonLabel>
-            <IonIcon
-                icon={allChecksStatus === 'completed' ? shieldCheckmarkOutline : alertCircleOutline}
-                color={allChecksStatus === 'completed' ? 'success' : 'warning'}
-                size="large"
-            />
-        </IonItem>
       </IonList>
       <IonRow>
         <IonImg className="talsecLogo" src={TalsecLogo} alt="Talsec logo" />

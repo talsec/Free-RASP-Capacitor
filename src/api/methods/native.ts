@@ -25,6 +25,11 @@ export const storeExternalId = async (data: string): Promise<boolean> => {
   return result;
 };
 
+export const removeExternalId = async (): Promise<boolean> => {
+  const { result } = await Talsec.removeExternalId();
+  return result;
+};
+
 export const getAppIcon = async (packageName: string): Promise<string> => {
   if (Capacitor.getPlatform() === 'ios') {
     return Promise.reject('App icon retrieval for Malware detection is not available on iOS');

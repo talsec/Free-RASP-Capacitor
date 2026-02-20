@@ -2,10 +2,20 @@ import { getRaspExecutionStateChannelData, prepareRaspExecutionStateMapping } fr
 import { RaspExecutionState } from '../../models/raspExecutionState';
 import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
+let eventsListener = null;
+let isInitializing = false;
 export const registerRaspExecutionStateListener = async (config) => {
+    if (isInitializing) {
+        return;
+    }
+    isInitializing = true;
+    if (eventsListener) {
+        await eventsListener.remove();
+        eventsListener = null;
+    }
     const [channel, key] = await getRaspExecutionStateChannelData();
     await prepareRaspExecutionStateMapping();
-    await Talsec.addListener(channel, async (event) => {
+    eventsListener = await Talsec.addListener(channel, async (event) => {
         var _a;
         if (event[key] == undefined) {
             onInvalidCallback();
@@ -19,5 +29,12 @@ export const registerRaspExecutionStateListener = async (config) => {
                 break;
         }
     });
+    isInitializing = false;
+};
+export const removeRaspExecutionStateListener = async () => {
+    if (eventsListener) {
+        await eventsListener.remove();
+        eventsListener = null;
+    }
 };
 //# sourceMappingURL=raspExecutionState.js.map

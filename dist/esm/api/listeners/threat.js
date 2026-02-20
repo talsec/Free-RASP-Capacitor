@@ -3,11 +3,21 @@ import { Threat } from '../../models/threat';
 import { parseMalwareData } from '../../utils/malware';
 import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
+let eventsListener = null;
+let isInitializing = false;
 export const registerThreatListener = async (config) => {
+    if (isInitializing) {
+        return;
+    }
+    isInitializing = true;
+    if (eventsListener) {
+        await eventsListener.remove();
+        eventsListener = null;
+    }
     const [channel, key, malwareKey] = await getThreatChannelData();
     await prepareThreatMapping();
-    await Talsec.addListener(channel, async (event) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w;
+    eventsListener = await Talsec.addListener(channel, async (event) => {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
         if (event[key] == undefined) {
             onInvalidCallback();
         }
@@ -75,10 +85,20 @@ export const registerThreatListener = async (config) => {
             case Threat.UnsecureWifi.value:
                 (_w = config.unsecureWifi) === null || _w === void 0 ? void 0 : _w.call(config);
                 break;
+            case Threat.Automation.value:
+                (_x = config.automation) === null || _x === void 0 ? void 0 : _x.call(config);
+                break;
             default:
                 onInvalidCallback();
                 break;
         }
     });
+    isInitializing = false;
+};
+export const removeThreatListener = async () => {
+    if (eventsListener) {
+        await eventsListener.remove();
+        eventsListener = null;
+    }
 };
 //# sourceMappingURL=threat.js.map

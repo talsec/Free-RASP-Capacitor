@@ -26,6 +26,7 @@ export class Threat {
                 this.TimeSpoofing,
                 this.LocationSpoofing,
                 this.UnsecureWifi,
+                this.Automation,
             ]
             : [
                 this.AppIntegrity,
@@ -65,4 +66,5 @@ Threat.MultiInstance = new Threat(0);
 Threat.TimeSpoofing = new Threat(0);
 Threat.LocationSpoofing = new Threat(0);
 Threat.UnsecureWifi = new Threat(0);
+Threat.Automation = new Threat(0);
 //# sourceMappingURL=threat.js.map

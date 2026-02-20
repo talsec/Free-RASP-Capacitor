@@ -262,6 +262,16 @@ const App: React.FC = () => {
         ),
       );
     },
+    // Android only
+    automation: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Automation'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
   
   };
   
@@ -269,6 +279,7 @@ const App: React.FC = () => {
   const raspExecutionStateActions = {
     allChecksFinished: () => {
       setAllChecksStatus('completed');
+      // eslint-disable-next-line no-console
       console.log('freeRASP: All checks finished');
     }
   };
@@ -284,6 +295,7 @@ const App: React.FC = () => {
     if (Capacitor.getPlatform() === 'android') {
       addToWhitelist('com.example.myApp');
       Geolocation.requestPermissions().then((permission) => {
+        // eslint-disable-next-line no-console
         console.log('Location permissions:', permission);
       });
     }

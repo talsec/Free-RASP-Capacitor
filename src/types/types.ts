@@ -7,6 +7,7 @@ export interface TalsecPlugin {
   getRaspExecutionStateIdentifiers(): Promise<{ ids: number[] }>;
   getRaspExecutionStateChannelData(): Promise<{ ids: [string, string] }>;
   storeExternalId(options: { data: string }): Promise<{ result: boolean }>;
+  removeExternalId(): Promise<{ result: boolean }>;
   addToWhitelist(options: { packageName: string }): Promise<{ result: boolean }>;
   blockScreenCapture(options: { enable: boolean }): Promise<{ result: boolean }>;
   isScreenCaptureBlocked(): Promise<{ result: boolean }>;
@@ -76,6 +77,7 @@ export type ThreatEventActions = {
   timeSpoofing?: () => any;
   locationSpoofing?: () => any;
   unsecureWifi?: () => any;
+  automation?: () => any;
 };
 
 export type NativeEvent = { [key: string]: number | string[] | undefined };

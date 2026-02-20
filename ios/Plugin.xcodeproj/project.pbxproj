@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2F98D68224C9AAE500613A4C /* Freerasp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F98D68124C9AAE400613A4C /* Freerasp.swift */; };
+
 		50ADFF92201F53D600D50D53 /* Plugin.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50ADFF88201F53D600D50D53 /* Plugin.framework */; };
 		50ADFF97201F53D600D50D53 /* FreeraspTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50ADFF96201F53D600D50D53 /* FreeraspTests.swift */; };
 		50ADFF99201F53D600D50D53 /* FreeraspPlugin.h in Headers */ = {isa = PBXBuildFile; fileRef = 50ADFF8B201F53D600D50D53 /* FreeraspPlugin.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -31,7 +31,7 @@
 /* Begin PBXFileReference section */
 		0782A87D053F837BC2B90B13 /* Pods-PluginTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PluginTests.release.xcconfig"; path = "Target Support Files/Pods-PluginTests/Pods-PluginTests.release.xcconfig"; sourceTree = "<group>"; };
 		0B28BA15B43804D6F3621597 /* Pods-Plugin.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Plugin.debug.xcconfig"; path = "Target Support Files/Pods-Plugin/Pods-Plugin.debug.xcconfig"; sourceTree = "<group>"; };
-		2F98D68124C9AAE400613A4C /* Freerasp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Freerasp.swift; sourceTree = "<group>"; };
+
 		4416CCCF74CB10FDB902DA53 /* Pods_PluginTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PluginTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		50ADFF88201F53D600D50D53 /* Plugin.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Plugin.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		50ADFF8B201F53D600D50D53 /* FreeraspPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FreeraspPlugin.h; sourceTree = "<group>"; };
@@ -104,7 +104,6 @@
 			isa = PBXGroup;
 			children = (
 				50E1A94720377CB70090CE1A /* FreeraspPlugin.swift */,
-				2F98D68124C9AAE400613A4C /* Freerasp.swift */,
 				50ADFF8B201F53D600D50D53 /* FreeraspPlugin.h */,
 				50ADFFA72020EE4F00D50D53 /* FreeraspPlugin.m */,
 				50ADFF8C201F53D600D50D53 /* Info.plist */,
@@ -315,7 +314,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				50E1A94820377CB70090CE1A /* FreeraspPlugin.swift in Sources */,
-				2F98D68224C9AAE500613A4C /* Freerasp.swift in Sources */,
 				50ADFFA82020EE4F00D50D53 /* FreeraspPlugin.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

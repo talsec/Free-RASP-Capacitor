@@ -27,10 +27,10 @@ apply plugin: 'kotlinx-serialization'
 
 android {
     namespace "com.aheaditec.freerasp"
-    compileSdk 35
+    compileSdk Math.max(36, project.hasProperty('rootProject.ext.compileSdk') ? rootProject.ext.compileSdk as int : 36)
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 35
+        targetSdkVersion 36
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -76,5 +76,5 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     
-    implementation 'com.aheaditec.talsec.security:TalsecSecurity-Community-Capacitor:17.0.1'
+    implementation 'com.aheaditec.talsec.security:TalsecSecurity-Community-Capacitor:18.0.2'
 }
