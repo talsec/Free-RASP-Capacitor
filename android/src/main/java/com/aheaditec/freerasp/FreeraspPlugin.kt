@@ -31,6 +31,11 @@ class FreeraspPlugin : Plugin() {
 
     private var registered = true
 
+    override fun load() {
+        initializeEventKeys()
+        super.load()
+    }
+
     @PluginMethod
     fun talsecStart(call: PluginCall) {
         val config = call.getObject("config")
@@ -105,6 +110,12 @@ class FreeraspPlugin : Plugin() {
     override fun handleOnDestroy() {
         super.handleOnDestroy()
         backgroundHandlerThread.quitSafely()
+    }
+
+    // Trigger lazy initialization of the freeRASP events
+    private fun initializeEventKeys() {
+        ThreatEvent.ALL_EVENTS
+        RaspExecutionStateEvent.ALL_EVENTS
     }
 
     /**
