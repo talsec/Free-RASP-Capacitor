@@ -53,10 +53,6 @@ class FreeraspPlugin : Plugin() {
         try {
             val talsecConfig = buildTalsecConfigThrowing(config)
             PluginThreatHandler.registerSDKListener(context)
-            PluginThreatHandler.threatDispatcher.registerListener()
-            PluginThreatHandler.executionStateDispatcher.registerListener()
-            
-            // TODO: override addListener
 
             bridge.activity.runOnUiThread {
                 Talsec.start(context, talsecConfig)
@@ -77,6 +73,17 @@ class FreeraspPlugin : Plugin() {
                 e
             )
         }
+    }
+
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    override fun addListener(call: PluginCall) {
+        if (call.getString("eventName") == ThreatEvent.CHANNEL_NAME) {
+            PluginThreatHandler.threatDispatcher.registerListener()
+        }
+        if (call.getString("eventName") == RaspExecutionStateEvent.CHANNEL_NAME) {
+            PluginThreatHandler.executionStateDispatcher.registerListener()
+        }
+        super.addListener(call)
     }
 
     override fun handleOnPause() {
