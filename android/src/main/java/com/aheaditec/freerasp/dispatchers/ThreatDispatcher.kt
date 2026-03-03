@@ -4,51 +4,67 @@ import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.aheaditec.freerasp.events.ThreatEvent
 import com.aheaditec.freerasp.interfaces.PluginThreatListener
 
-internal class ThreatDispatcher {
+internal class ThreatDispatcher(private val listener: PluginThreatListener) {
     private val threatCache = mutableSetOf<ThreatEvent>()
     private val malwareCache = mutableSetOf<SuspiciousAppInfo>()
 
-    var listener: PluginThreatListener? = null
-        set(value) {
-            field = value
-            if (value != null) {
-                flushCache(value)
-            }
+    private var isAppInForeground = false
+    private var isListenerRegistered = false
+
+    fun registerListener() {
+        isListenerRegistered = true
+        isAppInForeground = true
+        flushCache()
+    }
+
+    fun unregisterListener() {
+        isListenerRegistered = false
+        isAppInForeground = false
+    }
+
+    fun onResume() {
+        isAppInForeground = true
+        if (isListenerRegistered) {
+            flushCache()
         }
+    }
+
+    fun onPause() {
+        isAppInForeground = false
+    }
 
     fun dispatchThreat(event: ThreatEvent) {
-        val checkedListener = synchronized(threatCache) {
-            val currentListener = listener
-            if (currentListener != null) {
-                currentListener
-            } else {
+        if (isAppInForeground && isListenerRegistered) {
+            listener.threatDetected(event)
+        } else {
+            synchronized(threatCache) {
                 threatCache.add(event)
-                null
             }
         }
-        checkedListener?.threatDetected(event)
     }
 
     fun dispatchMalware(apps: MutableList<SuspiciousAppInfo>) {
-        val checkedListener = synchronized(malwareCache) {
-            val currentListener = listener
-            if (currentListener != null) {
-                currentListener
-            } else {
+        if (isAppInForeground && isListenerRegistered) {
+            listener.malwareDetected(apps)
+        }
+        else {
+            synchronized(malwareCache) {
                 malwareCache.addAll(apps)
-                null
             }
         }
-        checkedListener?.malwareDetected(apps)
     }
 
-    private fun flushCache(registeredListener: PluginThreatListener) {
+    private fun flushCache() {
+        if (!isListenerRegistered || !isAppInForeground) {
+            return
+        }
+
         val threats = synchronized(threatCache) {
             val snapshot = threatCache.toSet()
             threatCache.clear()
             snapshot
         }
-        threats.forEach { registeredListener.threatDetected(it) }
+        threats.forEach { listener.threatDetected(it) }
 
         val malware = synchronized(malwareCache) {
             val snapshot = malwareCache.toMutableList()
@@ -56,7 +72,7 @@ internal class ThreatDispatcher {
             snapshot
         }
         if (malware.isNotEmpty()) {
-            registeredListener.malwareDetected(malware)
+            listener.malwareDetected(malware)
         }
     }
 }
