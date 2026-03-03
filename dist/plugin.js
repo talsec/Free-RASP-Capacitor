@@ -80,7 +80,6 @@ var capacitorFreerasp = (function (exports, core) {
                     this.UnofficialStore,
                     this.Screenshot,
                     this.ScreenRecording,
-                    this.Automation,
                 ];
         }
     }
