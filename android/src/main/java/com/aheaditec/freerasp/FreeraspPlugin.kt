@@ -86,6 +86,17 @@ class FreeraspPlugin : Plugin() {
         super.addListener(call)
     }
 
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    fun removeListenerForEvent(call: PluginCall) {
+        val eventName = call.getString("eventName")
+        if (eventName == ThreatEvent.CHANNEL_NAME) {
+            PluginThreatHandler.threatDispatcher.unregisterListener()
+        }
+        if (eventName == RaspExecutionStateEvent.CHANNEL_NAME) {
+            PluginThreatHandler.executionStateDispatcher.unregisterListener()
+        }
+    }
+
     override fun handleOnPause() {
         super.handleOnPause()
         PluginThreatHandler.threatDispatcher.onPause()

@@ -9,13 +9,33 @@ public class FreeraspPlugin: CAPPlugin {
     
     override public func load() {
         FreeraspPlugin.shared = self
-        
-        ThreatDispatcher.shared.listener = { [weak self] threat in
-            self?.notifyListeners(EventIdentifiers.threatChannelName, data: [EventIdentifiers.threatChannelKey: threat.callbackIdentifier], retainUntilConsumed: true)
+    }
+    
+    @objc override public func addListener(_ call: CAPPluginCall) {
+        super.addListener(call)
+        guard let eventName = call.getString("eventName") else {
+            return
         }
-        
-        ExecutionStateDispatcher.shared.listener = { [weak self] event in
-            self?.notifyListeners(EventIdentifiers.raspExecutionStateChannelName, data: [EventIdentifiers.raspExecutionStateChannelKey: event.callbackIdentifier], retainUntilConsumed: true)
+        if eventName == EventIdentifiers.threatChannelName {
+            ThreatDispatcher.shared.listener = { [weak self] threat in
+                self?.notifyListeners(EventIdentifiers.threatChannelName, data: [EventIdentifiers.threatChannelKey: threat.callbackIdentifier], retainUntilConsumed: true)
+            }
+        } else if eventName == EventIdentifiers.raspExecutionStateChannelName {
+            ExecutionStateDispatcher.shared.listener = { [weak self] event in
+                self?.notifyListeners(EventIdentifiers.raspExecutionStateChannelName, data: [EventIdentifiers.raspExecutionStateChannelKey: event.callbackIdentifier], retainUntilConsumed: true)
+            }
+        }
+    }
+    
+    @objc func removeListenerForEvent(_ call: CAPPluginCall) -> Void {
+        guard let eventName = call.getString("eventName") else {
+             call.reject("Event name argument is missing or empty in the call", "MissingArgumentError")
+             return
+        }
+        if eventName == EventIdentifiers.threatChannelName {
+            ThreatDispatcher.shared.listener = nil
+        } else if eventName == EventIdentifiers.raspExecutionStateChannelName {
+            ExecutionStateDispatcher.shared.listener = nil
         }
     }
     

@@ -56,4 +56,7 @@ export const removeRaspExecutionStateListener = async (): Promise<void> => {
     await eventsListener.remove();
     eventsListener = null;
   }
+  if (executionStateChannel) {
+    await Talsec.removeListenerForEvent({ eventName: executionStateChannel })
+  }
 };
