@@ -7,9 +7,10 @@ import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
 
 let eventsListener: PluginListenerHandle | null = null;
-let isInitializing = false;
 let executionStateChannel: string | null = null;
 let executionStateKey: string | null = null;
+
+let isInitializing = false;
 let isMappingPrepared = false;
 
 export const registerRaspExecutionStateListener = async (config: RaspExecutionStateEventActions): Promise<void> => {
@@ -18,28 +19,29 @@ export const registerRaspExecutionStateListener = async (config: RaspExecutionSt
   }
   isInitializing = true;
 
-  if (eventsListener) {
-    await eventsListener.remove();
-    eventsListener = null;
-  }
+  await removeRaspExecutionStateListener();
 
   if (!executionStateChannel || !executionStateKey) {
     [executionStateChannel, executionStateKey] = await getRaspExecutionStateChannelData();
   }
-
-  const channel = executionStateChannel;
-  const key = executionStateKey;
 
   if (!isMappingPrepared) {
     await prepareRaspExecutionStateMapping();
     isMappingPrepared = true;
   }
 
-  eventsListener = await Talsec.addListener(channel, async (event: any) => {
-    if (event[key] == undefined) {
+  if (!executionStateChannel) {
+    onInvalidCallback();
+    return;
+  }
+
+  eventsListener = await Talsec.addListener(executionStateChannel, async (event: any) => {
+    if (!executionStateKey) {
       onInvalidCallback();
+      return;
     }
-    switch (event[key]) {
+
+    switch (event[executionStateKey]) {
       case RaspExecutionState.AllChecksFinished.value:
         config.allChecksFinished?.();
         break;
@@ -52,11 +54,10 @@ export const registerRaspExecutionStateListener = async (config: RaspExecutionSt
 };
 
 export const removeRaspExecutionStateListener = async (): Promise<void> => {
-  if (eventsListener) {
-    await eventsListener.remove();
-    eventsListener = null;
+  if (!eventsListener || !executionStateChannel) {
+    return;
   }
-  if (executionStateChannel) {
-    await Talsec.removeListenerForEvent({ eventName: executionStateChannel })
-  }
+  await eventsListener.remove();
+  eventsListener = null;
+  await Talsec.removeListenerForEvent({ eventName: executionStateChannel })
 };
