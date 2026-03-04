@@ -4,6 +4,9 @@ import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
 let eventsListener = null;
 let isInitializing = false;
+let executionStateChannel = null;
+let executionStateKey = null;
+let isMappingPrepared = false;
 export const registerRaspExecutionStateListener = async (config) => {
     if (isInitializing) {
         return;
@@ -13,8 +16,15 @@ export const registerRaspExecutionStateListener = async (config) => {
         await eventsListener.remove();
         eventsListener = null;
     }
-    const [channel, key] = await getRaspExecutionStateChannelData();
-    await prepareRaspExecutionStateMapping();
+    if (!executionStateChannel || !executionStateKey) {
+        [executionStateChannel, executionStateKey] = await getRaspExecutionStateChannelData();
+    }
+    const channel = executionStateChannel;
+    const key = executionStateKey;
+    if (!isMappingPrepared) {
+        await prepareRaspExecutionStateMapping();
+        isMappingPrepared = true;
+    }
     eventsListener = await Talsec.addListener(channel, async (event) => {
         var _a;
         if (event[key] == undefined) {
@@ -35,6 +45,9 @@ export const removeRaspExecutionStateListener = async () => {
     if (eventsListener) {
         await eventsListener.remove();
         eventsListener = null;
+    }
+    if (executionStateChannel) {
+        await Talsec.removeListenerForEvent({ eventName: executionStateChannel });
     }
 };
 //# sourceMappingURL=raspExecutionState.js.map

@@ -5,6 +5,10 @@ import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
 let eventsListener = null;
 let isInitializing = false;
+let threatChannel = null;
+let threatKey = null;
+let threatMalwareKey = null;
+let isMappingPrepared = false;
 export const registerThreatListener = async (config) => {
     if (isInitializing) {
         return;
@@ -14,8 +18,16 @@ export const registerThreatListener = async (config) => {
         await eventsListener.remove();
         eventsListener = null;
     }
-    const [channel, key, malwareKey] = await getThreatChannelData();
-    await prepareThreatMapping();
+    if (!threatChannel || !threatKey || !threatMalwareKey) {
+        [threatChannel, threatKey, threatMalwareKey] = await getThreatChannelData();
+    }
+    const channel = threatChannel;
+    const key = threatKey;
+    const malwareKey = threatMalwareKey;
+    if (!isMappingPrepared) {
+        await prepareThreatMapping();
+        isMappingPrepared = true;
+    }
     eventsListener = await Talsec.addListener(channel, async (event) => {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
         if (event[key] == undefined) {
@@ -99,6 +111,9 @@ export const removeThreatListener = async () => {
     if (eventsListener) {
         await eventsListener.remove();
         eventsListener = null;
+    }
+    if (threatChannel) {
+        await Talsec.removeListenerForEvent({ eventName: threatChannel });
     }
 };
 //# sourceMappingURL=threat.js.map

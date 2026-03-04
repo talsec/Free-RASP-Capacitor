@@ -6,6 +6,11 @@ export interface TalsecPlugin {
     }>;
     addListener(listner: string, callback: any): any;
     onInvalidCallback(): void;
+    removeListenerForEvent(options: {
+        eventName: string;
+    }): Promise<{
+        result: string;
+    }>;
     getThreatIdentifiers(): Promise<{
         ids: number[];
     }>;
