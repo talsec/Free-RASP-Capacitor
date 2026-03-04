@@ -77,10 +77,11 @@ class FreeraspPlugin : Plugin() {
 
     @PluginMethod(returnType = PluginMethod.RETURN_NONE)
     override fun addListener(call: PluginCall) {
-        if (call.getString("eventName") == ThreatEvent.CHANNEL_NAME) {
+        val eventName = call.getString("eventName")
+        if (eventName == ThreatEvent.CHANNEL_NAME) {
             PluginThreatHandler.threatDispatcher.registerListener()
         }
-        if (call.getString("eventName") == RaspExecutionStateEvent.CHANNEL_NAME) {
+        if (eventName == RaspExecutionStateEvent.CHANNEL_NAME) {
             PluginThreatHandler.executionStateDispatcher.registerListener()
         }
         super.addListener(call)
