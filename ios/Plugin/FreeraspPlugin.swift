@@ -103,7 +103,7 @@ public class FreeraspPlugin: CAPPlugin {
      */
     @objc func getThreatChannelData(_ call: CAPPluginCall) -> Void {
         call.resolve([
-                    "ids": [EventIdentifiers.threatChannelName, EventIdentifiers.threatChannelKey]
+                    "ids": [EventIdentifiers.threatChannelName, EventIdentifiers.threatChannelKey, "0"]
                 ])
     }
 
@@ -135,7 +135,7 @@ public class FreeraspPlugin: CAPPlugin {
      * We never send an invalid callback over our channel.
      * Therefore, if this happens, we want to kill the app.
      */
-    @objc func onInvalidCallback() -> Void {
+    @objc func onInvalidCallback(_ call: CAPPluginCall) -> Void {
         abort()
     }
     

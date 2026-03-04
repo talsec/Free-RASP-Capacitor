@@ -1,5 +1,3 @@
-import { Capacitor } from '@capacitor/core';
-
 import { onInvalidCallback } from '../api/methods/native';
 import { Talsec } from '../api/nativeModules';
 import { Threat } from '../models/threat';
@@ -17,9 +15,8 @@ export const getThreatIdentifiers = async (): Promise<number[]> => {
 };
 
 export const getThreatChannelData = async (): Promise<[string, string, string]> => {
-  const dataLength = Capacitor.getPlatform() === 'ios' ? 2 : 3;
   const { ids } = await Talsec.getThreatChannelData();
-  if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
+  if (ids.length !== 3 || !itemsHaveType(ids, 'string')) {
     onInvalidCallback();
   }
   return ids;
