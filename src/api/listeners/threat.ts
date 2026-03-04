@@ -9,6 +9,10 @@ import { Talsec } from '../nativeModules';
 
 let eventsListener: PluginListenerHandle | null = null;
 let isInitializing = false;
+let threatChannel: string | null = null;
+let threatKey: string | null = null;
+let threatMalwareKey: string | null = null;
+let isMappingPrepared = false;
 
 export const registerThreatListener = async (config: ThreatEventActions): Promise<void> => {
   if (isInitializing) {
@@ -21,8 +25,18 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
     eventsListener = null;
   }
 
-  const [channel, key, malwareKey] = await getThreatChannelData();
-  await prepareThreatMapping();
+  if (!threatChannel || !threatKey || !threatMalwareKey) {
+    [threatChannel, threatKey, threatMalwareKey] = await getThreatChannelData();
+  }
+
+  const channel = threatChannel;
+  const key = threatKey;
+  const malwareKey = threatMalwareKey;
+
+  if (!isMappingPrepared) {
+    await prepareThreatMapping();
+    isMappingPrepared = true;
+  }
 
   eventsListener = await Talsec.addListener(channel, async (event: any) => {
     if (event[key] == undefined) {

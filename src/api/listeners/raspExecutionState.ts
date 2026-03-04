@@ -8,6 +8,9 @@ import { Talsec } from '../nativeModules';
 
 let eventsListener: PluginListenerHandle | null = null;
 let isInitializing = false;
+let executionStateChannel: string | null = null;
+let executionStateKey: string | null = null;
+let isMappingPrepared = false;
 
 export const registerRaspExecutionStateListener = async (config: RaspExecutionStateEventActions): Promise<void> => {
   if (isInitializing) {
@@ -20,8 +23,17 @@ export const registerRaspExecutionStateListener = async (config: RaspExecutionSt
     eventsListener = null;
   }
 
-  const [channel, key] = await getRaspExecutionStateChannelData();
-  await prepareRaspExecutionStateMapping();
+  if (!executionStateChannel || !executionStateKey) {
+    [executionStateChannel, executionStateKey] = await getRaspExecutionStateChannelData();
+  }
+
+  const channel = executionStateChannel;
+  const key = executionStateKey;
+
+  if (!isMappingPrepared) {
+    await prepareRaspExecutionStateMapping();
+    isMappingPrepared = true;
+  }
 
   eventsListener = await Talsec.addListener(channel, async (event: any) => {
     if (event[key] == undefined) {
