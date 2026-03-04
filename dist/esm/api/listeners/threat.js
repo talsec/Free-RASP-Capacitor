@@ -4,36 +4,34 @@ import { parseMalwareData } from '../../utils/malware';
 import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
 let eventsListener = null;
-let isInitializing = false;
 let threatChannel = null;
 let threatKey = null;
 let threatMalwareKey = null;
+let isInitializing = false;
 let isMappingPrepared = false;
 export const registerThreatListener = async (config) => {
     if (isInitializing) {
         return;
     }
     isInitializing = true;
-    if (eventsListener) {
-        await eventsListener.remove();
-        eventsListener = null;
-    }
+    await removeThreatListener();
     if (!threatChannel || !threatKey || !threatMalwareKey) {
         [threatChannel, threatKey, threatMalwareKey] = await getThreatChannelData();
     }
-    const channel = threatChannel;
-    const key = threatKey;
-    const malwareKey = threatMalwareKey;
     if (!isMappingPrepared) {
         await prepareThreatMapping();
         isMappingPrepared = true;
     }
-    eventsListener = await Talsec.addListener(channel, async (event) => {
+    if (!threatChannel) {
+        onInvalidCallback();
+    }
+    eventsListener = await Talsec.addListener(threatChannel, async (event) => {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
-        if (event[key] == undefined) {
+        if (!threatKey || !threatMalwareKey) {
             onInvalidCallback();
+            return;
         }
-        switch (event[key]) {
+        switch (event[threatKey]) {
             case Threat.PrivilegedAccess.value:
                 (_a = config.privilegedAccess) === null || _a === void 0 ? void 0 : _a.call(config);
                 break;
@@ -74,7 +72,7 @@ export const registerThreatListener = async (config) => {
                 (_o = config.systemVPN) === null || _o === void 0 ? void 0 : _o.call(config);
                 break;
             case Threat.Malware.value:
-                (_p = config.malware) === null || _p === void 0 ? void 0 : _p.call(config, await parseMalwareData(event[malwareKey]));
+                (_p = config.malware) === null || _p === void 0 ? void 0 : _p.call(config, await parseMalwareData(event[threatMalwareKey]));
                 break;
             case Threat.ADBEnabled.value:
                 (_q = config.adbEnabled) === null || _q === void 0 ? void 0 : _q.call(config);
@@ -108,12 +106,11 @@ export const registerThreatListener = async (config) => {
     isInitializing = false;
 };
 export const removeThreatListener = async () => {
-    if (eventsListener) {
-        await eventsListener.remove();
-        eventsListener = null;
+    if (!eventsListener || !threatChannel) {
+        return;
     }
-    if (threatChannel) {
-        await Talsec.removeListenerForEvent({ eventName: threatChannel });
-    }
+    await eventsListener.remove();
+    eventsListener = null;
+    await Talsec.removeListenerForEvent({ eventName: threatChannel });
 };
 //# sourceMappingURL=threat.js.map
