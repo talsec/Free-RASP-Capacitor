@@ -123,5 +123,5 @@ export const removeThreatListener = async (): Promise<void> => {
   }
   await eventsListener.remove();
   eventsListener = null;
-  await Talsec.removeListenerForEvent({ eventName: threatChannel })
+  await Talsec.removeListenerForEvent({ eventName: threatChannel });
 };
