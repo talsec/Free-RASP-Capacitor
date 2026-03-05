@@ -3,24 +3,34 @@ import { RaspExecutionState } from '../../models/raspExecutionState';
 import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
 let eventsListener = null;
+let executionStateChannel = null;
+let executionStateKey = null;
 let isInitializing = false;
+let isMappingPrepared = false;
 export const registerRaspExecutionStateListener = async (config) => {
     if (isInitializing) {
         return;
     }
     isInitializing = true;
-    if (eventsListener) {
-        await eventsListener.remove();
-        eventsListener = null;
+    await removeRaspExecutionStateListener();
+    if (!executionStateChannel || !executionStateKey) {
+        [executionStateChannel, executionStateKey] = await getRaspExecutionStateChannelData();
     }
-    const [channel, key] = await getRaspExecutionStateChannelData();
-    await prepareRaspExecutionStateMapping();
-    eventsListener = await Talsec.addListener(channel, async (event) => {
+    if (!isMappingPrepared) {
+        await prepareRaspExecutionStateMapping();
+        isMappingPrepared = true;
+    }
+    if (!executionStateChannel) {
+        onInvalidCallback();
+        return;
+    }
+    eventsListener = await Talsec.addListener(executionStateChannel, async (event) => {
         var _a;
-        if (event[key] == undefined) {
+        if (!executionStateKey) {
             onInvalidCallback();
+            return;
         }
-        switch (event[key]) {
+        switch (event[executionStateKey]) {
             case RaspExecutionState.AllChecksFinished.value:
                 (_a = config.allChecksFinished) === null || _a === void 0 ? void 0 : _a.call(config);
                 break;
@@ -32,9 +42,11 @@ export const registerRaspExecutionStateListener = async (config) => {
     isInitializing = false;
 };
 export const removeRaspExecutionStateListener = async () => {
-    if (eventsListener) {
-        await eventsListener.remove();
-        eventsListener = null;
+    if (!eventsListener || !executionStateChannel) {
+        return;
     }
+    await eventsListener.remove();
+    eventsListener = null;
+    await Talsec.removeListenerForEvent({ eventName: executionStateChannel });
 };
 //# sourceMappingURL=raspExecutionState.js.map

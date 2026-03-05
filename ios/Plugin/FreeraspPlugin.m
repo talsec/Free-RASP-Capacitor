@@ -9,6 +9,7 @@ CAP_PLUGIN(FreeraspPlugin, "Freerasp",
            CAP_PLUGIN_METHOD(getRaspExecutionStateChannelData, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(getRaspExecutionStateIdentifiers, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(onInvalidCallback, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(removeListenerForEvent, CAPPluginReturnNone);
            CAP_PLUGIN_METHOD(talsecStart, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(storeExternalId, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(removeExternalId, CAPPluginReturnPromise);

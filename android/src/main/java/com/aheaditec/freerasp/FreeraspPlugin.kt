@@ -29,15 +29,22 @@ typealias CapacitorCallback = (String, JSObject) -> Unit
 @CapacitorPlugin(name = "Freerasp")
 class FreeraspPlugin : Plugin() {
 
-    private var registered = true
-
     override fun load() {
         initializeEventKeys()
+        val pluginCallback: CapacitorCallback = { eventName, data ->
+            notifyListeners(eventName, data, true)
+        }
+        PluginThreatHandler.initializeDispatchers(PluginListener(context, pluginCallback))
         super.load()
     }
 
     @PluginMethod
     fun talsecStart(call: PluginCall) {
+        if (talsecStarted) {
+            call.resolve(JSObject().put("started", true))
+            return
+        }
+
         val config = call.getObject("config")
         if (config == null) {
             call.reject("Missing config parameter in freeRASP Native Plugin")
@@ -45,14 +52,7 @@ class FreeraspPlugin : Plugin() {
         }
         try {
             val talsecConfig = buildTalsecConfigThrowing(config)
-
-            val pluginCallback: CapacitorCallback = { eventName, data ->
-                notifyListeners(eventName, data, true)
-            }
-
-            PluginThreatHandler.threatDispatcher.listener = PluginListener(context, pluginCallback)
-            PluginThreatHandler.executionStateDispatcher.listener = PluginListener(context, pluginCallback)
-            PluginThreatHandler.registerListener(context)
+            PluginThreatHandler.registerSDKListener(context)
 
             bridge.activity.runOnUiThread {
                 Talsec.start(context, talsecConfig)
@@ -75,35 +75,49 @@ class FreeraspPlugin : Plugin() {
         }
     }
 
-    override fun handleOnStart() {
-        super.handleOnStart()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            ScreenProtector.register(activity)
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    override fun addListener(call: PluginCall) {
+        val eventName = call.getString("eventName")
+        if (eventName == ThreatEvent.CHANNEL_NAME) {
+            PluginThreatHandler.threatDispatcher.registerListener()
+        }
+        if (eventName == RaspExecutionStateEvent.CHANNEL_NAME) {
+            PluginThreatHandler.executionStateDispatcher.registerListener()
+        }
+        super.addListener(call)
+    }
+
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    fun removeListenerForEvent(call: PluginCall) {
+        val eventName = call.getString("eventName")
+        if (eventName == ThreatEvent.CHANNEL_NAME) {
+            PluginThreatHandler.threatDispatcher.unregisterListener()
+        }
+        if (eventName == RaspExecutionStateEvent.CHANNEL_NAME) {
+            PluginThreatHandler.executionStateDispatcher.unregisterListener()
         }
     }
 
     override fun handleOnPause() {
         super.handleOnPause()
+        PluginThreatHandler.threatDispatcher.onPause()
+        PluginThreatHandler.executionStateDispatcher.onPause()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ScreenProtector.unregister(activity)
+        }
         if (activity.isFinishing) {
-            PluginThreatHandler.unregisterListener(context)
-            registered = false
-            PluginThreatHandler.threatDispatcher.listener = null
-            PluginThreatHandler.executionStateDispatcher.listener = null
+            PluginThreatHandler.threatDispatcher.unregisterListener()
+            PluginThreatHandler.executionStateDispatcher.unregisterListener()
+            PluginThreatHandler.unregisterSDKListener(context)
         }
     }
 
     override fun handleOnResume() {
         super.handleOnResume()
-        if (!registered) {
-            registered = true
-            PluginThreatHandler.registerListener(context)
-        }
-    }
-
-    override fun handleOnStop() {
-        super.handleOnStop()
+        PluginThreatHandler.threatDispatcher.onResume()
+        PluginThreatHandler.executionStateDispatcher.onResume()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            ScreenProtector.unregister(activity)
+            ScreenProtector.register(activity)
         }
     }
 
@@ -317,33 +331,6 @@ class FreeraspPlugin : Plugin() {
         private val mainHandler = Handler(Looper.getMainLooper())
 
         internal var talsecStarted = false
-
-        internal fun notifyEvent(
-            event: BaseRaspEvent,
-            notifyListenersCallback: CapacitorCallback
-        ) {
-            val params = JSObject().put(event.channelKey, event.value)
-            notifyListenersCallback(event.channelName, params)
-        }
-
-        internal fun notifyMalware(
-            suspiciousApps: MutableList<SuspiciousAppInfo>,
-            context: Context,
-            notifyListenersCallback: CapacitorCallback
-        ) {
-            // Perform the malware encoding on a background thread
-            backgroundHandler.post {
-
-                val encodedSuspiciousApps = suspiciousApps.toEncodedJSArray(context)
-                mainHandler.post {
-                    val params = JSObject()
-                        .put(ThreatEvent.CHANNEL_KEY, ThreatEvent.Malware.value)
-                        .put(ThreatEvent.MALWARE_CHANNEL_KEY, encodedSuspiciousApps)
-                    notifyListenersCallback.invoke(ThreatEvent.CHANNEL_NAME, params)
-                }
-
-            }
-        }
     }
 
     internal class PluginListener(
@@ -360,6 +347,33 @@ class FreeraspPlugin : Plugin() {
 
         override fun raspExecutionStateChanged(event: RaspExecutionStateEvent) {
             notifyEvent(event, pluginCallback)
+        }
+
+        private fun notifyEvent(
+            event: BaseRaspEvent,
+            notifyListenersCallback: CapacitorCallback
+        ) {
+            val params = JSObject().put(event.channelKey, event.value)
+            notifyListenersCallback(event.channelName, params)
+        }
+
+        private fun notifyMalware(
+            suspiciousApps: MutableList<SuspiciousAppInfo>,
+            context: Context,
+            notifyListenersCallback: CapacitorCallback
+        ) {
+            // Perform the malware encoding on a background thread
+            backgroundHandler.post {
+
+                val encodedSuspiciousApps = suspiciousApps.toEncodedJSArray(context)
+                mainHandler.post {
+                    val params = JSObject()
+                        .put(ThreatEvent.CHANNEL_KEY, ThreatEvent.Malware.value)
+                        .put(ThreatEvent.MALWARE_CHANNEL_KEY, encodedSuspiciousApps)
+                    notifyListenersCallback.invoke(ThreatEvent.CHANNEL_NAME, params)
+                }
+
+            }
         }
     }
 }

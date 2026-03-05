@@ -3,36 +3,53 @@ package com.aheaditec.freerasp.dispatchers
 import com.aheaditec.freerasp.events.RaspExecutionStateEvent
 import com.aheaditec.freerasp.interfaces.PluginExecutionStateListener
 
-internal class ExecutionStateDispatcher {
+internal class ExecutionStateDispatcher(private val listener: PluginExecutionStateListener) {
     private val cache = mutableSetOf<RaspExecutionStateEvent>()
 
-    var listener: PluginExecutionStateListener? = null
-        set(value) {
-            field = value
-            if (value != null) {
-                flushCache(value)
-            }
-        }
+    private var isAppInForeground = false
+    private var isListenerRegistered = false
 
-    fun dispatch(event: RaspExecutionStateEvent) {
-        val checkedListener = synchronized(cache) {
-            val currentListener = listener
-            if (currentListener != null) {
-                currentListener
-            } else {
-                cache.add(event)
-                null
-            }
-        }
-        checkedListener?.raspExecutionStateChanged(event)
+    fun registerListener() {
+        isListenerRegistered = true
+        isAppInForeground = true
+        flushCache()
     }
 
-    private fun flushCache(registeredListener: PluginExecutionStateListener) {
+    fun unregisterListener() {
+        isListenerRegistered = false
+        isAppInForeground = false
+    }
+
+    fun onResume() {
+        isAppInForeground = true
+        if (isListenerRegistered) {
+            flushCache()
+        }
+    }
+
+    fun onPause() {
+        isAppInForeground = false
+    }
+
+    fun dispatch(event: RaspExecutionStateEvent) {
+        if (isAppInForeground && isListenerRegistered) {
+            listener.raspExecutionStateChanged(event)
+        } else {
+            synchronized(cache) {
+                cache.add(event)
+            }
+        }
+    }
+
+    private fun flushCache() {
+        if (!isListenerRegistered || !isAppInForeground) {
+            return
+        }
         val events = synchronized(cache) {
             val snapshot = cache.toSet()
             cache.clear()
             snapshot
         }
-        events.forEach { registeredListener.raspExecutionStateChanged(it) }
+        events.forEach { listener.raspExecutionStateChanged(it) }
     }
 }

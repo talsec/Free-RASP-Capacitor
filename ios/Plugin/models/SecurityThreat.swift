@@ -32,6 +32,8 @@ extension SecurityThreat {
                 return EventIdentifiers.threatIdentifierList[12]
             case .screenRecording:
                 return EventIdentifiers.threatIdentifierList[13]
+            case .timeSpoofing:
+                return EventIdentifiers.threatIdentifierList[14]
             @unknown default:
                 abort()
         }

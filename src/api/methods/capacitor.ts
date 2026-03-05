@@ -3,6 +3,8 @@ import { registerRaspExecutionStateListener } from '../listeners/raspExecutionSt
 import { registerThreatListener } from '../listeners/threat';
 import { Talsec } from '../nativeModules';
 
+let isRaspStarted = false;
+
 export const startFreeRASP = async (
   config: TalsecConfig,
   actions: ThreatEventActions,
@@ -12,5 +14,12 @@ export const startFreeRASP = async (
   if (raspExecutionStateActions) {
     await registerRaspExecutionStateListener(raspExecutionStateActions);
   }
-  return Talsec.talsecStart({ config });
+  if (isRaspStarted) {
+    return { started: true };
+  }
+
+  const response = await Talsec.talsecStart({ config });
+  isRaspStarted = true;
+
+  return response;
 };

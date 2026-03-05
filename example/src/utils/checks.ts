@@ -11,6 +11,7 @@ export const commonChecks = [
   { name: 'Unofficial Store', isSecure: true },
   { name: 'Screenshot', isSecure: true },
   { name: 'Screen Recording', isSecure: true },
+  { name: 'Time spoofing', isSecure: true },
 ];
 
 export const iosChecks = [{ name: 'Device ID', isSecure: true }];
@@ -21,7 +22,6 @@ export const androidChecks = [
   { name: 'Malware', isSecure: true },
   { name: 'ADB Enabled', isSecure: true },
   { name: 'Multi Instance', isSecure: true },
-  { name: 'Time spoofing', isSecure: true },
   { name: 'Location spoofing', isSecure: true },
   { name: 'Unsecure Wi-Fi', isSecure: true },
   { name: 'Automation', isSecure: true },

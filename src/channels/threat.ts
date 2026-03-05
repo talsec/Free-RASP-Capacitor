@@ -1,5 +1,3 @@
-import { Capacitor } from '@capacitor/core';
-
 import { onInvalidCallback } from '../api/methods/native';
 import { Talsec } from '../api/nativeModules';
 import { Threat } from '../models/threat';
@@ -8,18 +6,14 @@ import { getThreatCount, itemsHaveType } from '../utils/utils';
 export const getThreatIdentifiers = async (): Promise<number[]> => {
   const { ids } = await Talsec.getThreatIdentifiers();
   if (ids.length !== getThreatCount() || !itemsHaveType(ids, 'number')) {
-    console.error(
-      `Threat count mismatch: Native ${ids.length} vs JS ${getThreatCount()}. Items are numbers: ${itemsHaveType(ids, 'number')}`,
-    );
-    // onInvalidCallback();
+    onInvalidCallback();
   }
   return ids;
 };
 
 export const getThreatChannelData = async (): Promise<[string, string, string]> => {
-  const dataLength = Capacitor.getPlatform() === 'ios' ? 2 : 3;
   const { ids } = await Talsec.getThreatChannelData();
-  if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
+  if (ids.length !== 3 || !itemsHaveType(ids, 'string')) {
     onInvalidCallback();
   }
   return ids;

@@ -8,7 +8,13 @@ import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
 
 let eventsListener: PluginListenerHandle | null = null;
+
+let threatChannel: string | null = null;
+let threatKey: string | null = null;
+let threatMalwareKey: string | null = null;
+
 let isInitializing = false;
+let isMappingPrepared = false;
 
 export const registerThreatListener = async (config: ThreatEventActions): Promise<void> => {
   if (isInitializing) {
@@ -16,19 +22,28 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
   }
   isInitializing = true;
 
-  if (eventsListener) {
-    await eventsListener.remove();
-    eventsListener = null;
+  await removeThreatListener();
+
+  if (!threatChannel || !threatKey || !threatMalwareKey) {
+    [threatChannel, threatKey, threatMalwareKey] = await getThreatChannelData();
   }
 
-  const [channel, key, malwareKey] = await getThreatChannelData();
-  await prepareThreatMapping();
+  if (!isMappingPrepared) {
+    await prepareThreatMapping();
+    isMappingPrepared = true;
+  }
 
-  eventsListener = await Talsec.addListener(channel, async (event: any) => {
-    if (event[key] == undefined) {
+  if (!threatChannel) {
+    onInvalidCallback();
+    return;
+  }
+
+  eventsListener = await Talsec.addListener(threatChannel, async (event: any) => {
+    if (!threatKey || !threatMalwareKey) {
       onInvalidCallback();
+      return;
     }
-    switch (event[key]) {
+    switch (event[threatKey]) {
       case Threat.PrivilegedAccess.value:
         config.privilegedAccess?.();
         break;
@@ -69,7 +84,7 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
         config.systemVPN?.();
         break;
       case Threat.Malware.value:
-        config.malware?.(await parseMalwareData(event[malwareKey]));
+        config.malware?.(await parseMalwareData(event[threatMalwareKey]));
         break;
       case Threat.ADBEnabled.value:
         config.adbEnabled?.();
@@ -104,8 +119,10 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
 };
 
 export const removeThreatListener = async (): Promise<void> => {
-  if (eventsListener) {
-    await eventsListener.remove();
-    eventsListener = null;
+  if (!eventsListener || !threatChannel) {
+    return;
   }
+  await eventsListener.remove();
+  eventsListener = null;
+  await Talsec.removeListenerForEvent({ eventName: threatChannel });
 };
