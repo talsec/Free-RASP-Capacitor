@@ -1,6 +1,6 @@
 export interface TalsecPlugin {
   talsecStart(options: { config: TalsecConfig }): Promise<{ started: boolean }>;
-  addListener(listner: string, callback: any): any;
+  addListener(listener: string, callback: any): any;
   onInvalidCallback(): void;
   removeListenerForEvent(options: { eventName: string }): Promise<{ result: string }>;
   getThreatIdentifiers(): Promise<{ ids: number[] }>;

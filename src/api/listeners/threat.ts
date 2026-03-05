@@ -35,6 +35,7 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
 
   if (!threatChannel) {
     onInvalidCallback();
+    return;
   }
 
   eventsListener = await Talsec.addListener(threatChannel, async (event: any) => {

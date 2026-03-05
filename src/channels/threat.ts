@@ -6,10 +6,7 @@ import { getThreatCount, itemsHaveType } from '../utils/utils';
 export const getThreatIdentifiers = async (): Promise<number[]> => {
   const { ids } = await Talsec.getThreatIdentifiers();
   if (ids.length !== getThreatCount() || !itemsHaveType(ids, 'number')) {
-    console.error(
-      `Threat count mismatch: Native ${ids.length} vs JS ${getThreatCount()}. Items are numbers: ${itemsHaveType(ids, 'number')}`,
-    );
-    // onInvalidCallback();
+    onInvalidCallback();
   }
   return ids;
 };
