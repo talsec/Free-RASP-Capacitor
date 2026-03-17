@@ -3,7 +3,23 @@ import Capacitor
 import TalsecRuntime
 
 @objc(FreeraspPlugin)
-public class FreeraspPlugin: CAPPlugin {
+public class FreeraspPlugin: CAPPlugin, CAPBridgedPlugin {
+
+    public let identifier = "FreeraspPlugin"
+    public let jsName = "Freerasp"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "talsecStart", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getThreatChannelData", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getThreatIdentifiers", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getRaspExecutionStateChannelData", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getRaspExecutionStateIdentifiers", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "onInvalidCallback", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "storeExternalId", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "removeExternalId", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "blockScreenCapture", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "isScreenCaptureBlocked", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "removeListenerForEvent", returnType: CAPPluginReturnPromise),
+    ]
 
     public static var shared: FreeraspPlugin?
     
