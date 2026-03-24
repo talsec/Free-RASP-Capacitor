@@ -5,7 +5,7 @@ import com.aheaditec.freerasp.events.ThreatEvent
 import com.aheaditec.freerasp.interfaces.PluginThreatListener
 
 internal object ThreatDispatcher {
-    lateinit var listener: PluginThreatListener
+    private lateinit var listener: PluginThreatListener
     private val threatCache = mutableSetOf<ThreatEvent>()
     private val malwareCache = mutableSetOf<SuspiciousAppInfo>()
 

@@ -4,7 +4,7 @@ import com.aheaditec.freerasp.events.RaspExecutionStateEvent
 import com.aheaditec.freerasp.interfaces.PluginExecutionStateListener
 
 internal object ExecutionStateDispatcher {
-    lateinit var listener: PluginExecutionStateListener
+    private lateinit var listener: PluginExecutionStateListener
     private val cache = mutableSetOf<RaspExecutionStateEvent>()
 
     private var isAppInForeground = false
