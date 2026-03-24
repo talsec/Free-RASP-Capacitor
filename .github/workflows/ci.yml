@@ -4,14 +4,14 @@ on:
     branches:
       - main
     paths-ignore:
-      - '**/*.md'
-      - '.github/**'
+      - "**/*.md"
+      - ".github/**"
   pull_request:
     branches:
       - main
     paths-ignore:
-      - '**/*.md'
-      - '.github/**'
+      - "**/*.md"
+      - ".github/**"
 
 jobs:
   static-analysis:
@@ -29,7 +29,7 @@ jobs:
 
       - name: Typecheck files
         run: npm run typecheck
-      
+
       - name: Format check
         run: npm run prettier -- --check
 
@@ -45,3 +45,39 @@ jobs:
 
       - name: Build package
         run: npm run ionic:build
+
+  build-example-android:
+    name: Build Android Example
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Install JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - name: Finalize Android SDK
+        run: |
+          /bin/bash -c "yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null"
+
+      - name: Build Plugin
+        run: npm run build
+
+      - name: Build web assets
+        run: npm run build
+        working-directory: example
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+        working-directory: example
+
+      - name: Build Android App
+        run: ./gradlew assembleDebug
+        working-directory: example/android
