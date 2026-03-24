@@ -3,13 +3,15 @@ package com.aheaditec.freerasp.dispatchers
 import com.aheaditec.freerasp.events.RaspExecutionStateEvent
 import com.aheaditec.freerasp.interfaces.PluginExecutionStateListener
 
-internal class ExecutionStateDispatcher(private val listener: PluginExecutionStateListener) {
+internal object ExecutionStateDispatcher {
+    lateinit var listener: PluginExecutionStateListener
     private val cache = mutableSetOf<RaspExecutionStateEvent>()
 
     private var isAppInForeground = false
     private var isListenerRegistered = false
 
-    fun registerListener() {
+    fun registerListener(newListener: PluginExecutionStateListener) {
+        listener = newListener
         isListenerRegistered = true
         isAppInForeground = true
         flushCache()
