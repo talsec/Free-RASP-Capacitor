@@ -81,3 +81,29 @@ jobs:
       - name: Build Android App
         run: ./gradlew assembleDebug
         working-directory: example/android
+
+  build-example-ios:
+    name: Build iOS Example
+    runs-on: macos-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build Plugin
+        run: npm run build
+
+      - name: Build web assets
+        run: npm run build
+        working-directory: example
+
+      - name: Sync Capacitor
+        run: npx cap sync ios
+        working-directory: example
+
+      - name: Build iOS App
+        run: xcodebuild -workspace ios/App/App.xcworkspace -scheme App -destination 'platform=iOS Simulator,name=iPhone 15' clean build
+        working-directory: example
