@@ -4,22 +4,22 @@ on:
     branches:
       - main
     paths-ignore:
-      - '**/*.md'
-      - '.github/**'
+      - "**/*.md"
+      - ".github/**"
   pull_request:
     branches:
       - main
     paths-ignore:
-      - '**/*.md'
-      - '.github/**'
+      - "**/*.md"
+      - ".github/**"
 
 jobs:
-  static-analysis:
+  lint:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -29,19 +29,82 @@ jobs:
 
       - name: Typecheck files
         run: npm run typecheck
-      
+
       - name: Format check
         run: npm run prettier -- --check
 
-  build:
+  build-library:
     timeout-minutes: 30
     runs-on: ubuntu-latest
+    needs: [lint]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup
         uses: ./.github/actions/setup
 
       - name: Build package
         run: npm run ionic:build
+
+  build-android:
+    name: Build Android Example
+    runs-on: ubuntu-latest
+    needs: build-library
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Install JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: "zulu"
+          java-version: "21"
+
+      - name: Finalize Android SDK
+        run: |
+          /bin/bash -c "yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null"
+
+      - name: Build Plugin
+        run: npm run build
+
+      - name: Build web assets
+        run: npm run build
+        working-directory: example
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+        working-directory: example
+
+      - name: Build Android App
+        run: ./gradlew assembleDebug
+        working-directory: example/android
+
+  build-ios:
+    name: Build iOS Example
+    runs-on: macos-latest
+    needs: build-library
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build Plugin
+        run: npm run build
+
+      - name: Build web assets
+        run: npm run build
+        working-directory: example
+
+      - name: Sync Capacitor
+        run: npx cap sync ios
+        working-directory: example
+
+      - name: Build iOS App
+        run: xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO clean build
+        working-directory: example

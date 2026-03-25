@@ -20,5 +20,4 @@ internal object RandomGenerator {
 
         return nextNumber
     }
-
 }
