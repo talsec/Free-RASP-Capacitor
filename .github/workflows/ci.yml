@@ -106,5 +106,5 @@ jobs:
         working-directory: example
 
       - name: Build iOS App
-        run: xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphonesimulator -destination 'platform=iOS Simulator' clean build
+        run: xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphonesimulator -destination generic/platform=iOS clean build
         working-directory: example
