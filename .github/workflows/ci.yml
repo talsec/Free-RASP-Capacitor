@@ -47,6 +47,15 @@ jobs:
       - name: Build package
         run: npm run ionic:build
 
+      - name: Verify build
+        run: |
+          if [ -n "$(git status --porcelain dist)" ]; then
+            echo "The 'dist' folder is out of sync. Please run 'npm run build' locally and commit the changes."
+            git status dist
+            git diff dist
+            exit 1
+          fi
+
   build-android:
     name: Build Android Example
     runs-on: ubuntu-latest

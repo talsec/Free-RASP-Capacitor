@@ -4,14 +4,16 @@ import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.aheaditec.freerasp.events.ThreatEvent
 import com.aheaditec.freerasp.interfaces.PluginThreatListener
 
-internal class ThreatDispatcher(private val listener: PluginThreatListener) {
+internal object ThreatDispatcher {
+    private lateinit var listener: PluginThreatListener
     private val threatCache = mutableSetOf<ThreatEvent>()
     private val malwareCache = mutableSetOf<SuspiciousAppInfo>()
 
     private var isAppInForeground = false
     private var isListenerRegistered = false
 
-    fun registerListener() {
+    fun registerListener(newListener: PluginThreatListener) {
+        listener = newListener
         isListenerRegistered = true
         isAppInForeground = true
         flushCache()

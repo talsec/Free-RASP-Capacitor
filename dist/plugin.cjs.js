@@ -83,6 +83,7 @@ class Threat {
                 this.UnofficialStore,
                 this.Screenshot,
                 this.ScreenRecording,
+                this.TimeSpoofing,
             ];
     }
 }
@@ -132,15 +133,13 @@ const itemsHaveType = (data, expectedType) => {
 const getThreatIdentifiers = async () => {
     const { ids } = await Talsec.getThreatIdentifiers();
     if (ids.length !== getThreatCount() || !itemsHaveType(ids, 'number')) {
-        console.error(`Threat count mismatch: Native ${ids.length} vs JS ${getThreatCount()}. Items are numbers: ${itemsHaveType(ids, 'number')}`);
-        // onInvalidCallback();
+        onInvalidCallback();
     }
     return ids;
 };
 const getThreatChannelData = async () => {
-    const dataLength = core.Capacitor.getPlatform() === 'ios' ? 2 : 3;
     const { ids } = await Talsec.getThreatChannelData();
-    if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
+    if (ids.length !== 3 || !itemsHaveType(ids, 'string')) {
         onInvalidCallback();
     }
     return ids;
@@ -181,24 +180,35 @@ const toSuspiciousAppInfo = (base64Value) => {
 };
 
 let eventsListener$1 = null;
+let threatChannel = null;
+let threatKey = null;
+let threatMalwareKey = null;
 let isInitializing$1 = false;
+let isMappingPrepared$1 = false;
 const registerThreatListener = async (config) => {
     if (isInitializing$1) {
         return;
     }
     isInitializing$1 = true;
-    if (eventsListener$1) {
-        await eventsListener$1.remove();
-        eventsListener$1 = null;
+    await removeThreatListener();
+    if (!threatChannel || !threatKey || !threatMalwareKey) {
+        [threatChannel, threatKey, threatMalwareKey] = await getThreatChannelData();
     }
-    const [channel, key, malwareKey] = await getThreatChannelData();
-    await prepareThreatMapping();
-    eventsListener$1 = await Talsec.addListener(channel, async (event) => {
+    if (!isMappingPrepared$1) {
+        await prepareThreatMapping();
+        isMappingPrepared$1 = true;
+    }
+    if (!threatChannel) {
+        onInvalidCallback();
+        return;
+    }
+    eventsListener$1 = await Talsec.addListener(threatChannel, async (event) => {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
-        if (event[key] == undefined) {
+        if (!threatKey || !threatMalwareKey) {
             onInvalidCallback();
+            return;
         }
-        switch (event[key]) {
+        switch (event[threatKey]) {
             case Threat.PrivilegedAccess.value:
                 (_a = config.privilegedAccess) === null || _a === void 0 ? void 0 : _a.call(config);
                 break;
@@ -239,7 +249,7 @@ const registerThreatListener = async (config) => {
                 (_o = config.systemVPN) === null || _o === void 0 ? void 0 : _o.call(config);
                 break;
             case Threat.Malware.value:
-                (_p = config.malware) === null || _p === void 0 ? void 0 : _p.call(config, await parseMalwareData(event[malwareKey]));
+                (_p = config.malware) === null || _p === void 0 ? void 0 : _p.call(config, await parseMalwareData(event[threatMalwareKey]));
                 break;
             case Threat.ADBEnabled.value:
                 (_q = config.adbEnabled) === null || _q === void 0 ? void 0 : _q.call(config);
@@ -273,10 +283,12 @@ const registerThreatListener = async (config) => {
     isInitializing$1 = false;
 };
 const removeThreatListener = async () => {
-    if (eventsListener$1) {
-        await eventsListener$1.remove();
-        eventsListener$1 = null;
+    if (!eventsListener$1 || !threatChannel) {
+        return;
     }
+    await eventsListener$1.remove();
+    eventsListener$1 = null;
+    await Talsec.removeListenerForEvent({ eventName: threatChannel });
 };
 
 const getRaspExecutionStateIdentifiers = async () => {
@@ -303,24 +315,34 @@ const prepareRaspExecutionStateMapping = async () => {
 };
 
 let eventsListener = null;
+let executionStateChannel = null;
+let executionStateKey = null;
 let isInitializing = false;
+let isMappingPrepared = false;
 const registerRaspExecutionStateListener = async (config) => {
     if (isInitializing) {
         return;
     }
     isInitializing = true;
-    if (eventsListener) {
-        await eventsListener.remove();
-        eventsListener = null;
+    await removeRaspExecutionStateListener();
+    if (!executionStateChannel || !executionStateKey) {
+        [executionStateChannel, executionStateKey] = await getRaspExecutionStateChannelData();
     }
-    const [channel, key] = await getRaspExecutionStateChannelData();
-    await prepareRaspExecutionStateMapping();
-    eventsListener = await Talsec.addListener(channel, async (event) => {
+    if (!isMappingPrepared) {
+        await prepareRaspExecutionStateMapping();
+        isMappingPrepared = true;
+    }
+    if (!executionStateChannel) {
+        onInvalidCallback();
+        return;
+    }
+    eventsListener = await Talsec.addListener(executionStateChannel, async (event) => {
         var _a;
-        if (event[key] == undefined) {
+        if (!executionStateKey) {
             onInvalidCallback();
+            return;
         }
-        switch (event[key]) {
+        switch (event[executionStateKey]) {
             case RaspExecutionState.AllChecksFinished.value:
                 (_a = config.allChecksFinished) === null || _a === void 0 ? void 0 : _a.call(config);
                 break;
@@ -332,18 +354,26 @@ const registerRaspExecutionStateListener = async (config) => {
     isInitializing = false;
 };
 const removeRaspExecutionStateListener = async () => {
-    if (eventsListener) {
-        await eventsListener.remove();
-        eventsListener = null;
+    if (!eventsListener || !executionStateChannel) {
+        return;
     }
+    await eventsListener.remove();
+    eventsListener = null;
+    await Talsec.removeListenerForEvent({ eventName: executionStateChannel });
 };
 
+let isRaspStarted = false;
 const startFreeRASP = async (config, actions, raspExecutionStateActions) => {
     await registerThreatListener(actions);
     if (raspExecutionStateActions) {
         await registerRaspExecutionStateListener(raspExecutionStateActions);
     }
-    return Talsec.talsecStart({ config });
+    if (isRaspStarted) {
+        return { started: true };
+    }
+    const response = await Talsec.talsecStart({ config });
+    isRaspStarted = true;
+    return response;
 };
 
 exports.abortApp = onInvalidCallback;
