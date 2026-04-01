@@ -89,7 +89,7 @@ jobs:
         working-directory: example
 
       - name: Build Android App
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleRelease
         working-directory: example/android
 
   build-ios:
