@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CapSuspiciousAppInfo(
     val packageInfo: CapPackageInfo,
-    val reason: String,
+    val reasons: Set<String>,
     val permissions: Set<String>?
 )
 

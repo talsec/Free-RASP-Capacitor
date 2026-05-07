@@ -56,7 +56,7 @@ internal fun JSONObject.getNestedArraySafe(key: String): Array<Array<String>> {
 internal fun SuspiciousAppInfo.toCapSuspiciousAppInfo(context: Context): CapSuspiciousAppInfo {
     return CapSuspiciousAppInfo(
         packageInfo = this.packageInfo.toCapPackageInfo(context),
-        reason = this.reason,
+        reasons = this.reasons,
         permissions = this.permissions
     )
 }
