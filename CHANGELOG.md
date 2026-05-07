@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Deprecated
 
-- `blacklistedPackageNames`, `blacklistedHashes`, `suspiciousPermissions`, `whitelistedInstallationSources` in `TalsecMalwareConfig` are deprecated but remain functional
+- `blacklistedPackageNames`, `blacklistedHashes`, `suspiciousPermissions`, `whitelistedInstallationSources` in `TalsecMalwareConfig` are deprecated but remain functional — use `SuspiciousAppDetectionConfig` instead
 
 ### Android
 

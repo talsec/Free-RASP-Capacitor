@@ -11,6 +11,10 @@ import com.aheaditec.freerasp.utils.Utils
 import com.aheaditec.freerasp.utils.getArraySafe
 import com.aheaditec.freerasp.utils.getNestedArraySafe
 import com.aheaditec.freerasp.utils.toEncodedJSArray
+import com.aheaditec.talsec_security.security.api.MalwareScanScope
+import com.aheaditec.talsec_security.security.api.ReasonMode
+import com.aheaditec.talsec_security.security.api.ScopeType
+import com.aheaditec.talsec_security.security.api.SuspiciousAppDetectionConfig
 import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.aheaditec.talsec_security.security.api.Talsec
 import com.aheaditec.talsec_security.security.api.TalsecConfig
@@ -322,6 +326,34 @@ class FreeraspPlugin : Plugin() {
             talsecBuilder.blacklistedPackageNames(malwareConfig.getArraySafe("blacklistedPackageNames"))
             talsecBuilder.suspiciousPermissions(malwareConfig.getNestedArraySafe("suspiciousPermissions"))
         }
+
+        if (androidConfig.has("suspiciousAppDetectionConfig")) {
+            val detectionConfig = androidConfig.getJSONObject("suspiciousAppDetectionConfig")
+            val detectionBuilder = SuspiciousAppDetectionConfig.Builder()
+            if (detectionConfig.has("packageNames")) {
+                detectionBuilder.packageNames(detectionConfig.getArraySafe("packageNames").toList())
+            }
+            if (detectionConfig.has("hashes")) {
+                detectionBuilder.hashes(detectionConfig.getArraySafe("hashes").toList())
+            }
+            if (detectionConfig.has("requestedPermissions")) {
+                detectionBuilder.requestedPermissions(detectionConfig.getNestedArraySafe("requestedPermissions").map { it.toList() })
+            }
+            if (detectionConfig.has("grantedPermissions")) {
+                detectionBuilder.grantedPermissions(detectionConfig.getNestedArraySafe("grantedPermissions").map { it.toList() })
+            }
+            if (detectionConfig.has("malwareScanScope")) {
+                val scopeConfig = detectionConfig.getJSONObject("malwareScanScope")
+                val scopeType = ScopeType.valueOf(scopeConfig.getString("scanScope"))
+                val trustedSources = scopeConfig.getArraySafe("trustedInstallSources").toList()
+                detectionBuilder.malwareScanScope(MalwareScanScope(scopeType, trustedSources))
+            }
+            if (detectionConfig.has("reasonMode")) {
+                detectionBuilder.reasonMode(ReasonMode.valueOf(detectionConfig.getString("reasonMode")))
+            }
+            talsecBuilder.suspiciousAppDetection(detectionBuilder.build())
+        }
+
         return talsecBuilder.build()
     }
 
