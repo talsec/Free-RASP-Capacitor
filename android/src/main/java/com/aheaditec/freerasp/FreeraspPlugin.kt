@@ -329,29 +329,27 @@ class FreeraspPlugin : Plugin() {
 
         if (androidConfig.has("suspiciousAppDetectionConfig")) {
             val detectionConfig = androidConfig.getJSONObject("suspiciousAppDetectionConfig")
-            val detectionBuilder = SuspiciousAppDetectionConfig.Builder()
-            if (detectionConfig.has("packageNames")) {
-                detectionBuilder.packageNames(detectionConfig.getArraySafe("packageNames").toList())
-            }
-            if (detectionConfig.has("hashes")) {
-                detectionBuilder.hashes(detectionConfig.getArraySafe("hashes").toList())
-            }
-            if (detectionConfig.has("requestedPermissions")) {
-                detectionBuilder.requestedPermissions(detectionConfig.getNestedArraySafe("requestedPermissions").map { it.toList() })
-            }
-            if (detectionConfig.has("grantedPermissions")) {
-                detectionBuilder.grantedPermissions(detectionConfig.getNestedArraySafe("grantedPermissions").map { it.toList() })
-            }
-            if (detectionConfig.has("malwareScanScope")) {
+            val scanScope = if (detectionConfig.has("malwareScanScope")) {
                 val scopeConfig = detectionConfig.getJSONObject("malwareScanScope")
-                val scopeType = ScopeType.valueOf(scopeConfig.getString("scanScope"))
-                val trustedSources = scopeConfig.getArraySafe("trustedInstallSources").toList()
-                detectionBuilder.malwareScanScope(MalwareScanScope(scopeType, trustedSources))
+                val scopeType = try { ScopeType.valueOf(scopeConfig.getString("scanScope")) } catch (_: Exception) { ScopeType.SIDELOADED_ONLY }
+                MalwareScanScope(scopeType, scopeConfig.getArraySafe("trustedInstallSources").toList())
+            } else {
+                MalwareScanScope(ScopeType.SIDELOADED_ONLY, emptyList())
             }
-            if (detectionConfig.has("reasonMode")) {
-                detectionBuilder.reasonMode(ReasonMode.valueOf(detectionConfig.getString("reasonMode")))
+            val reasonMode = if (detectionConfig.has("reasonMode")) {
+                try { ReasonMode.valueOf(detectionConfig.getString("reasonMode")) } catch (_: Exception) { ReasonMode.HIGHEST_CONFIDENCE }
+            } else {
+                ReasonMode.HIGHEST_CONFIDENCE
             }
-            talsecBuilder.suspiciousAppDetection(detectionBuilder.build())
+            val config = SuspiciousAppDetectionConfig(
+                packageNames = if (detectionConfig.has("packageNames")) detectionConfig.getArraySafe("packageNames").toSet() else null,
+                hashes = if (detectionConfig.has("hashes")) detectionConfig.getArraySafe("hashes").toSet() else null,
+                requestedPermissions = if (detectionConfig.has("requestedPermissions")) detectionConfig.getNestedArraySafe("requestedPermissions").map { it.toSet() }.toSet() else null,
+                grantedPermissions = if (detectionConfig.has("grantedPermissions")) detectionConfig.getNestedArraySafe("grantedPermissions").map { it.toSet() }.toSet() else null,
+                malwareScanScope = scanScope,
+                reasonMode = reasonMode,
+            )
+            talsecBuilder.suspiciousAppDetection(config)
         }
 
         return talsecBuilder.build()
