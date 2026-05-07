@@ -36,13 +36,13 @@ export type TalsecIosConfig = {
 };
 
 export type TalsecMalwareConfig = {
-  /** @deprecated Use SuspiciousAppDetectionConfig instead */
+  /** @deprecated Use SuspiciousAppDetectionConfig instead. Will be removed in a future release. */
   blacklistedHashes?: string[];
-  /** @deprecated Use SuspiciousAppDetectionConfig instead */
+  /** @deprecated Use SuspiciousAppDetectionConfig instead. Will be removed in a future release. */
   blacklistedPackageNames?: string[];
-  /** @deprecated Use SuspiciousAppDetectionConfig instead */
+  /** @deprecated Use SuspiciousAppDetectionConfig instead. Will be removed in a future release. */
   suspiciousPermissions?: string[][];
-  /** @deprecated Use SuspiciousAppDetectionConfig instead */
+  /** @deprecated Use SuspiciousAppDetectionConfig instead. Will be removed in a future release. */
   whitelistedInstallationSources?: string[];
 };
 

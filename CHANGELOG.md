@@ -12,14 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking
 
-- `SuspiciousAppInfo.reason` (String) renamed to `reasons` (List of String)
+- `SuspiciousAppInfo.reason` (String) renamed to `reasons` (Set<String>)
 - Value `"blacklist"` in `reasons` renamed to `"blocklist"`
 
 ### Capacitor
 
 #### Deprecated
 
-- `blacklistedPackageNames`, `blacklistedHashes`, `suspiciousPermissions`, `whitelistedInstallationSources` in `TalsecMalwareConfig` — use `SuspiciousAppDetectionConfig` instead
+- `blacklistedPackageNames`, `blacklistedHashes`, `suspiciousPermissions`, `whitelistedInstallationSources` in `TalsecMalwareConfig` are deprecated but remain functional — use `SuspiciousAppDetectionConfig` instead
 
 ### Android
 
