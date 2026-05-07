@@ -39,6 +39,8 @@ const App: React.FC = () => {
       packageName: 'io.ionic.starter',
       certificateHashes: ['AKoRuyLMM91E7lX/Zqp3u4jMmd0A7hH/Iqozu0TMVd0='],
       // supportedAlternativeStores: ['storeOne', 'storeTwo'],
+      // @deprecated: blacklistedHashes, blacklistedPackageNames, suspiciousPermissions,
+      // whitelistedInstallationSources are deprecated — use SuspiciousAppDetectionConfig instead
       malwareConfig: {
         blacklistedHashes: ['FgvSehLMM91E7lX/Zqp3u4jMmd0A7hH/Iqozu0TMVd0u'],
         blacklistedPackageNames: ['io.ionic.starter'],
