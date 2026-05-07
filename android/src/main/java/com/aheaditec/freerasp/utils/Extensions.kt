@@ -6,6 +6,10 @@ import android.util.Base64
 import android.util.Log
 import com.aheaditec.freerasp.models.CapPackageInfo
 import com.aheaditec.freerasp.models.CapSuspiciousAppInfo
+import com.aheaditec.talsec_security.security.api.MalwareScanScope
+import com.aheaditec.talsec_security.security.api.ReasonMode
+import com.aheaditec.talsec_security.security.api.ScopeType
+import com.aheaditec.talsec_security.security.api.SuspiciousAppDetectionConfig
 import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.getcapacitor.JSArray
 import kotlinx.serialization.encodeToString
@@ -48,6 +52,36 @@ internal fun JSONObject.getNestedArraySafe(key: String): Array<Array<String>> {
         }
     }
     return outArray.toTypedArray()
+}
+
+internal fun JSONObject.toMalwareScanScope(): MalwareScanScope {
+    val scopeType = try {
+        ScopeType.valueOf(getString("scanScope"))
+    } catch (_: Exception) {
+        ScopeType.SIDELOADED_ONLY
+    }
+    return MalwareScanScope(scopeType, getArraySafe("trustedInstallSources").toList())
+}
+
+internal fun JSONObject.toSuspiciousAppDetectionConfig(): SuspiciousAppDetectionConfig {
+    val scanScope = if (has("malwareScanScope")) {
+        getJSONObject("malwareScanScope").toMalwareScanScope()
+    } else {
+        MalwareScanScope(ScopeType.SIDELOADED_ONLY, emptyList())
+    }
+    val reasonMode = if (has("reasonMode")) {
+        try { ReasonMode.valueOf(getString("reasonMode")) } catch (_: Exception) { ReasonMode.HIGHEST_CONFIDENCE }
+    } else {
+        ReasonMode.HIGHEST_CONFIDENCE
+    }
+    return SuspiciousAppDetectionConfig(
+        packageNames = if (has("packageNames")) getArraySafe("packageNames").toSet() else null,
+        hashes = if (has("hashes")) getArraySafe("hashes").toSet() else null,
+        requestedPermissions = if (has("requestedPermissions")) getNestedArraySafe("requestedPermissions").map { it.toSet() }.toSet() else null,
+        grantedPermissions = if (has("grantedPermissions")) getNestedArraySafe("grantedPermissions").map { it.toSet() }.toSet() else null,
+        malwareScanScope = scanScope,
+        reasonMode = reasonMode,
+    )
 }
 
 /**
