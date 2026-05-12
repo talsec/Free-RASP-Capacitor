@@ -171,7 +171,7 @@ var capacitorFreerasp = (function (exports, core) {
         const packageInfo = data.packageInfo;
         return {
             packageInfo,
-            reason: data.reason,
+            reasons: data.reasons,
             permissions: data.permissions,
         };
     };

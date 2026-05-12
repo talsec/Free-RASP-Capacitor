@@ -54,33 +54,26 @@ internal fun JSONObject.getNestedArraySafe(key: String): Array<Array<String>> {
     return outArray.toTypedArray()
 }
 
+private inline fun <reified T : Enum<T>> String?.toEnumOrDefault(default: T): T =
+    if (this == null) default
+    else try { enumValueOf(this) } catch (_: IllegalArgumentException) { default }
+
 internal fun JSONObject.toMalwareScanScope(): MalwareScanScope {
-    val scopeType = try {
-        ScopeType.valueOf(getString("scanScope"))
-    } catch (_: Exception) {
-        ScopeType.SIDELOADED_ONLY
-    }
+    val scopeType = optString("scanScope").toEnumOrDefault(ScopeType.SIDELOADED_ONLY)
     return MalwareScanScope(scopeType, getArraySafe("trustedInstallSources").toList())
 }
 
 internal fun JSONObject.toSuspiciousAppDetectionConfig(): SuspiciousAppDetectionConfig {
-    val scanScope = if (has("malwareScanScope")) {
-        getJSONObject("malwareScanScope").toMalwareScanScope()
-    } else {
-        MalwareScanScope(ScopeType.SIDELOADED_ONLY, emptyList())
-    }
-    val reasonMode = if (has("reasonMode")) {
-        try { ReasonMode.valueOf(getString("reasonMode")) } catch (_: Exception) { ReasonMode.HIGHEST_CONFIDENCE }
-    } else {
-        ReasonMode.HIGHEST_CONFIDENCE
-    }
+    val malwareScanScope = optJSONObject("malwareScanScope")?.toMalwareScanScope()
+        ?: MalwareScanScope(ScopeType.SIDELOADED_ONLY, emptyList())
+    val reasonMode = optString("reasonMode").toEnumOrDefault(ReasonMode.HIGHEST_CONFIDENCE)
     return SuspiciousAppDetectionConfig(
-        packageNames = if (has("packageNames")) getArraySafe("packageNames").toSet() else null,
-        hashes = if (has("hashes")) getArraySafe("hashes").toSet() else null,
-        requestedPermissions = if (has("requestedPermissions")) getNestedArraySafe("requestedPermissions").map { it.toSet() }.toSet() else null,
-        grantedPermissions = if (has("grantedPermissions")) getNestedArraySafe("grantedPermissions").map { it.toSet() }.toSet() else null,
-        malwareScanScope = scanScope,
-        reasonMode = reasonMode,
+        if (has("packageNames")) getArraySafe("packageNames").toSet() else null,
+        if (has("hashes")) getArraySafe("hashes").toSet() else null,
+        if (has("requestedPermissions")) getNestedArraySafe("requestedPermissions").map { it.toSet() }.toSet() else null,
+        if (has("grantedPermissions")) getNestedArraySafe("grantedPermissions").map { it.toSet() }.toSet() else null,
+        malwareScanScope,
+        reasonMode,
     )
 }
 
