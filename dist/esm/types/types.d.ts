@@ -61,22 +61,11 @@ export type TalsecAndroidConfig = {
     packageName: string;
     certificateHashes: string[];
     supportedAlternativeStores?: string[];
-    malwareConfig?: TalsecMalwareConfig;
     suspiciousAppDetectionConfig?: SuspiciousAppDetectionConfig;
 };
 export type TalsecIosConfig = {
     appBundleId: string;
     appTeamId: string;
-};
-export type TalsecMalwareConfig = {
-    /** @deprecated Use SuspiciousAppDetectionConfig instead */
-    blacklistedHashes?: string[];
-    /** @deprecated Use SuspiciousAppDetectionConfig instead */
-    blacklistedPackageNames?: string[];
-    /** @deprecated Use SuspiciousAppDetectionConfig instead */
-    suspiciousPermissions?: string[][];
-    /** @deprecated Use SuspiciousAppDetectionConfig instead */
-    whitelistedInstallationSources?: string[];
 };
 export type ScopeType = 'SIDELOADED_ONLY' | 'SIDELOADED_AND_SYSTEM_EXCLUDE_OEM' | 'SIDELOADED_AND_OEM' | 'SIDELOADED_AND_SYSTEM_AND_OEM' | 'ALL';
 export type ReasonMode = 'ALL' | 'HIGHEST_CONFIDENCE';
@@ -89,8 +78,8 @@ export type SuspiciousAppDetectionConfig = {
     hashes?: string[];
     requestedPermissions?: string[][];
     grantedPermissions?: string[][];
-    malwareScanScope?: MalwareScanScope;
-    reasonMode?: ReasonMode;
+    malwareScanScope: MalwareScanScope;
+    reasonMode: ReasonMode;
 };
 export type SuspiciousAppInfo = {
     packageInfo: PackageInfo;
