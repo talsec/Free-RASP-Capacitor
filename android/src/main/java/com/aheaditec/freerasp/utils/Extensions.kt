@@ -54,19 +54,17 @@ internal fun JSONObject.getNestedArraySafe(key: String): Array<Array<String>> {
     return outArray.toTypedArray()
 }
 
-private inline fun <reified T : Enum<T>> String?.toEnumOrDefault(default: T): T =
-    if (this == null) default
-    else try { enumValueOf(this) } catch (_: IllegalArgumentException) { default }
-
 internal fun JSONObject.toMalwareScanScope(): MalwareScanScope {
-    val scopeType = optString("scanScope").toEnumOrDefault(ScopeType.SIDELOADED_ONLY)
-    return MalwareScanScope(scopeType, getArraySafe("trustedInstallSources").toList())
+    val scopeType = ScopeType.valueOf(getString("scanScope"))
+    val trustedInstallSources = optJSONArray("trustedInstallSources")
+        ?.toPrimitiveArray<String>()?.toList()
+        ?: emptyList()
+    return MalwareScanScope(scopeType, trustedInstallSources)
 }
 
 internal fun JSONObject.toSuspiciousAppDetectionConfig(): SuspiciousAppDetectionConfig {
-    val malwareScanScope = optJSONObject("malwareScanScope")?.toMalwareScanScope()
-        ?: MalwareScanScope(ScopeType.SIDELOADED_ONLY, emptyList())
-    val reasonMode = optString("reasonMode").toEnumOrDefault(ReasonMode.HIGHEST_CONFIDENCE)
+    val malwareScanScope = getJSONObject("malwareScanScope").toMalwareScanScope()
+    val reasonMode = ReasonMode.valueOf(getString("reasonMode"))
     return SuspiciousAppDetectionConfig(
         if (has("packageNames")) getArraySafe("packageNames").toSet() else null,
         if (has("hashes")) getArraySafe("hashes").toSet() else null,
