@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.0] - 2026-05-07
+## [3.0.0] - 2026-05-15
 
 - Android SDK version: 18.3.0
 - iOS SDK version: 6.14.4
@@ -14,12 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `SuspiciousAppInfo.reason` (String) renamed to `reasons` (string[])
 - Value `"blacklist"` in `reasons` renamed to `"blocklist"`
+- Removed `TalsecMalwareConfig` and `TalsecAndroidConfig.malwareConfig`
+- `SuspiciousAppDetectionConfig.malwareScanScope` and `reasonMode` are now required
 
 ### Capacitor
 
-#### Deprecated
+#### Added
 
-- `blacklistedPackageNames`, `blacklistedHashes`, `suspiciousPermissions`, `whitelistedInstallationSources` in `TalsecMalwareConfig` are deprecated but remain functional — use `SuspiciousAppDetectionConfig` instead
+- `SuspiciousAppDetectionConfig` for malware detection configuration
+
+#### Removed
+
+- `TalsecMalwareConfig` type and `TalsecAndroidConfig.malwareConfig` field
 
 ### Android
 
