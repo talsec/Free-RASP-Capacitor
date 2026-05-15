@@ -6,6 +6,10 @@ import android.util.Base64
 import android.util.Log
 import com.aheaditec.freerasp.models.CapPackageInfo
 import com.aheaditec.freerasp.models.CapSuspiciousAppInfo
+import com.aheaditec.talsec_security.security.api.MalwareScanScope
+import com.aheaditec.talsec_security.security.api.ReasonMode
+import com.aheaditec.talsec_security.security.api.ScopeType
+import com.aheaditec.talsec_security.security.api.SuspiciousAppDetectionConfig
 import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.getcapacitor.JSArray
 import kotlinx.serialization.encodeToString
@@ -50,13 +54,34 @@ internal fun JSONObject.getNestedArraySafe(key: String): Array<Array<String>> {
     return outArray.toTypedArray()
 }
 
+internal fun JSONObject.toMalwareScanScope(): MalwareScanScope {
+    val scopeType = ScopeType.valueOf(getString("scanScope"))
+    val trustedInstallSources = optJSONArray("trustedInstallSources")
+        ?.toPrimitiveArray<String>()?.toList()
+        ?: emptyList()
+    return MalwareScanScope(scopeType, trustedInstallSources)
+}
+
+internal fun JSONObject.toSuspiciousAppDetectionConfig(): SuspiciousAppDetectionConfig {
+    val malwareScanScope = getJSONObject("malwareScanScope").toMalwareScanScope()
+    val reasonMode = ReasonMode.valueOf(getString("reasonMode"))
+    return SuspiciousAppDetectionConfig(
+        if (has("packageNames")) getArraySafe("packageNames").toSet() else null,
+        if (has("hashes")) getArraySafe("hashes").toSet() else null,
+        if (has("requestedPermissions")) getNestedArraySafe("requestedPermissions").map { it.toSet() }.toSet() else null,
+        if (has("grantedPermissions")) getNestedArraySafe("grantedPermissions").map { it.toSet() }.toSet() else null,
+        malwareScanScope,
+        reasonMode,
+    )
+}
+
 /**
  * Converts the Talsec's SuspiciousAppInfo to Capacitor equivalent
  */
 internal fun SuspiciousAppInfo.toCapSuspiciousAppInfo(context: Context): CapSuspiciousAppInfo {
     return CapSuspiciousAppInfo(
         packageInfo = this.packageInfo.toCapPackageInfo(context),
-        reason = this.reason,
+        reasons = this.reasons,
         permissions = this.permissions
     )
 }

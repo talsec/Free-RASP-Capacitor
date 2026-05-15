@@ -9,8 +9,8 @@ import com.aheaditec.freerasp.dispatchers.ExecutionStateDispatcher
 import com.aheaditec.freerasp.dispatchers.ThreatDispatcher
 import com.aheaditec.freerasp.utils.Utils
 import com.aheaditec.freerasp.utils.getArraySafe
-import com.aheaditec.freerasp.utils.getNestedArraySafe
 import com.aheaditec.freerasp.utils.toEncodedJSArray
+import com.aheaditec.freerasp.utils.toSuspiciousAppDetectionConfig
 import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
 import com.aheaditec.talsec_security.security.api.Talsec
 import com.aheaditec.talsec_security.security.api.TalsecConfig
@@ -315,13 +315,12 @@ class FreeraspPlugin : Plugin() {
             .prod(configJson.getBool("isProd") ?: true)
             .killOnBypass(configJson.getBool("killOnBypass") ?: false)
 
-        if (androidConfig.has("malwareConfig")) {
-            val malwareConfig = androidConfig.getJSONObject("malwareConfig")
-            talsecBuilder.whitelistedInstallationSources(malwareConfig.getArraySafe("whitelistedInstallationSources"))
-            talsecBuilder.blacklistedHashes(malwareConfig.getArraySafe("blacklistedHashes"))
-            talsecBuilder.blacklistedPackageNames(malwareConfig.getArraySafe("blacklistedPackageNames"))
-            talsecBuilder.suspiciousPermissions(malwareConfig.getNestedArraySafe("suspiciousPermissions"))
+        if (androidConfig.has("suspiciousAppDetectionConfig")) {
+            talsecBuilder.suspiciousAppDetection(
+                androidConfig.getJSONObject("suspiciousAppDetectionConfig").toSuspiciousAppDetectionConfig()
+            )
         }
+
         return talsecBuilder.build()
     }
 
