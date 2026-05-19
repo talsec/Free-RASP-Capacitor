@@ -1,8 +1,4 @@
-import type {
-  RaspExecutionStateEventActions,
-  TalsecConfig,
-  ThreatEventActions,
-} from '../../types/types';
+import type { RaspExecutionStateEventActions, TalsecConfig, ThreatEventActions } from '../../types/types';
 import { normalizeConfig } from '../../utils/config';
 import { registerRaspExecutionStateListener } from '../listeners/raspExecutionState';
 import { registerThreatListener } from '../listeners/threat';
