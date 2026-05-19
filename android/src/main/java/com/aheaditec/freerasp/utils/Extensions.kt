@@ -54,23 +54,22 @@ internal fun JSONObject.getNestedArraySafe(key: String): Array<Array<String>> {
     return outArray.toTypedArray()
 }
 
-internal fun JSONObject.toMalwareScanScope(): MalwareScanScope {
+internal fun JSONObject.toScanScope(): MalwareScanScope {
     val scopeType = ScopeType.valueOf(getString("scanScope"))
     val trustedInstallSources = optJSONArray("trustedInstallSources")
         ?.toPrimitiveArray<String>()?.toList()
-        ?: emptyList()
     return MalwareScanScope(scopeType, trustedInstallSources)
 }
 
 internal fun JSONObject.toSuspiciousAppDetectionConfig(): SuspiciousAppDetectionConfig {
-    val malwareScanScope = getJSONObject("malwareScanScope").toMalwareScanScope()
+    val scanScope = getJSONObject("scanScope").toScanScope()
     val reasonMode = ReasonMode.valueOf(getString("reasonMode"))
     return SuspiciousAppDetectionConfig(
-        if (has("packageNames")) getArraySafe("packageNames").toSet() else null,
-        if (has("hashes")) getArraySafe("hashes").toSet() else null,
-        if (has("requestedPermissions")) getNestedArraySafe("requestedPermissions").map { it.toSet() }.toSet() else null,
-        if (has("grantedPermissions")) getNestedArraySafe("grantedPermissions").map { it.toSet() }.toSet() else null,
-        malwareScanScope,
+        getArraySafe("packageNames").toSet().takeIf { it.isNotEmpty() },
+        getArraySafe("hashes").toSet().takeIf { it.isNotEmpty() },
+        getNestedArraySafe("requestedPermissions").map { it.toSet() }.toSet().takeIf { it.isNotEmpty() },
+        getNestedArraySafe("grantedPermissions").map { it.toSet() }.toSet().takeIf { it.isNotEmpty() },
+        scanScope,
         reasonMode,
     )
 }

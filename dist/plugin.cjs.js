@@ -362,19 +362,19 @@ const removeRaspExecutionStateListener = async () => {
     await Talsec.removeListenerForEvent({ eventName: executionStateChannel });
 };
 
-const DEFAULT_MALWARE_SCAN_SCOPE = {
+const DEFAULT_SCAN_SCOPE = {
     scanScope: 'SIDELOADED_ONLY',
 };
 const DEFAULT_REASON_MODE = 'HIGHEST_CONFIDENCE';
-const withSuspiciousAppDetectionDefaults = (config) => {
+const withDefaults = (config) => {
     var _a, _b;
-    return (Object.assign(Object.assign({}, config), { malwareScanScope: (_a = config.malwareScanScope) !== null && _a !== void 0 ? _a : DEFAULT_MALWARE_SCAN_SCOPE, reasonMode: (_b = config.reasonMode) !== null && _b !== void 0 ? _b : DEFAULT_REASON_MODE }));
+    return (Object.assign(Object.assign({}, config), { scanScope: (_a = config.scanScope) !== null && _a !== void 0 ? _a : DEFAULT_SCAN_SCOPE, reasonMode: (_b = config.reasonMode) !== null && _b !== void 0 ? _b : DEFAULT_REASON_MODE }));
 };
 const normalizeAndroidConfig = (androidConfig) => {
     if (!androidConfig.suspiciousAppDetectionConfig) {
         return androidConfig;
     }
-    return Object.assign(Object.assign({}, androidConfig), { suspiciousAppDetectionConfig: withSuspiciousAppDetectionDefaults(androidConfig.suspiciousAppDetectionConfig) });
+    return Object.assign(Object.assign({}, androidConfig), { suspiciousAppDetectionConfig: withDefaults(androidConfig.suspiciousAppDetectionConfig) });
 };
 const normalizeConfig = (config) => {
     if (!config.androidConfig) {
@@ -382,6 +382,7 @@ const normalizeConfig = (config) => {
     }
     return Object.assign(Object.assign({}, config), { androidConfig: normalizeAndroidConfig(config.androidConfig) });
 };
+
 let isRaspStarted = false;
 const startFreeRASP = async (config, actions, raspExecutionStateActions) => {
     await registerThreatListener(actions);

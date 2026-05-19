@@ -50,7 +50,7 @@ const App: React.FC = () => {
           ['android.permission.BLUETOOTH'],
           ['android.permission.BATTERY_STATS'],
         ],
-        malwareScanScope: {
+        scanScope: {
           scanScope: 'SIDELOADED_ONLY',
           trustedInstallSources: ['com.apkpure.aegon'],
         },
