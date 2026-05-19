@@ -1,7 +1,7 @@
+import { normalizeConfig } from '../../utils/config';
 import { registerRaspExecutionStateListener } from '../listeners/raspExecutionState';
 import { registerThreatListener } from '../listeners/threat';
 import { Talsec } from '../nativeModules';
-import { normalizeConfig } from '../../utils/config';
 let isRaspStarted = false;
 export const startFreeRASP = async (config, actions, raspExecutionStateActions) => {
     await registerThreatListener(actions);
