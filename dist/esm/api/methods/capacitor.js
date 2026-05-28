@@ -1,4 +1,4 @@
-import { normalizeConfig } from '../../utils/config';
+import { withDefaults } from '../../utils/config';
 import { registerRaspExecutionStateListener } from '../listeners/raspExecutionState';
 import { registerThreatListener } from '../listeners/threat';
 import { Talsec } from '../nativeModules';
@@ -11,7 +11,7 @@ export const startFreeRASP = async (config, actions, raspExecutionStateActions) 
     if (isRaspStarted) {
         return { started: true };
     }
-    const response = await Talsec.talsecStart({ config: normalizeConfig(config) });
+    const response = await Talsec.talsecStart({ config: withDefaults(config) });
     isRaspStarted = true;
     return response;
 };

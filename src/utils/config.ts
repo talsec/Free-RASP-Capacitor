@@ -11,7 +11,7 @@ export const DEFAULT_SCAN_SCOPE: ScanScope = {
 };
 export const DEFAULT_REASON_MODE: ReasonMode = 'HIGHEST_CONFIDENCE';
 
-export const withDefaults = (config: SuspiciousAppDetectionConfig): SuspiciousAppDetectionConfig => ({
+export const withDetectionDefaults = (config: SuspiciousAppDetectionConfig): SuspiciousAppDetectionConfig => ({
   ...config,
   scanScope: config.scanScope ?? DEFAULT_SCAN_SCOPE,
   reasonMode: config.reasonMode ?? DEFAULT_REASON_MODE,
@@ -23,11 +23,11 @@ export const normalizeAndroidConfig = (androidConfig: TalsecAndroidConfig): Tals
   }
   return {
     ...androidConfig,
-    suspiciousAppDetectionConfig: withDefaults(androidConfig.suspiciousAppDetectionConfig),
+    suspiciousAppDetectionConfig: withDetectionDefaults(androidConfig.suspiciousAppDetectionConfig),
   };
 };
 
-export const normalizeConfig = (config: TalsecConfig): TalsecConfig => {
+export const withDefaults = (config: TalsecConfig): TalsecConfig => {
   if (!config.androidConfig) {
     return config;
   }

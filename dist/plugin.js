@@ -363,7 +363,7 @@ var capacitorFreerasp = (function (exports, core) {
         scanScope: 'SIDELOADED_ONLY',
     };
     const DEFAULT_REASON_MODE = 'HIGHEST_CONFIDENCE';
-    const withDefaults = (config) => {
+    const withDetectionDefaults = (config) => {
         var _a, _b;
         return (Object.assign(Object.assign({}, config), { scanScope: (_a = config.scanScope) !== null && _a !== void 0 ? _a : DEFAULT_SCAN_SCOPE, reasonMode: (_b = config.reasonMode) !== null && _b !== void 0 ? _b : DEFAULT_REASON_MODE }));
     };
@@ -371,9 +371,9 @@ var capacitorFreerasp = (function (exports, core) {
         if (!androidConfig.suspiciousAppDetectionConfig) {
             return androidConfig;
         }
-        return Object.assign(Object.assign({}, androidConfig), { suspiciousAppDetectionConfig: withDefaults(androidConfig.suspiciousAppDetectionConfig) });
+        return Object.assign(Object.assign({}, androidConfig), { suspiciousAppDetectionConfig: withDetectionDefaults(androidConfig.suspiciousAppDetectionConfig) });
     };
-    const normalizeConfig = (config) => {
+    const withDefaults = (config) => {
         if (!config.androidConfig) {
             return config;
         }
@@ -389,7 +389,7 @@ var capacitorFreerasp = (function (exports, core) {
         if (isRaspStarted) {
             return { started: true };
         }
-        const response = await Talsec.talsecStart({ config: normalizeConfig(config) });
+        const response = await Talsec.talsecStart({ config: withDefaults(config) });
         isRaspStarted = true;
         return response;
     };
