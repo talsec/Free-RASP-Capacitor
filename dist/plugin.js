@@ -360,7 +360,7 @@ var capacitorFreerasp = (function (exports, core) {
     };
 
     const DEFAULT_SCAN_SCOPE = {
-        scanScope: 'SIDELOADED_ONLY',
+        scopeType: 'SIDELOADED_ONLY',
     };
     const DEFAULT_REASON_MODE = 'HIGHEST_CONFIDENCE';
     const withDetectionDefaults = (config) => {

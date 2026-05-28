@@ -45,7 +45,7 @@ export type ScopeType =
 export type ReasonMode = 'ALL' | 'HIGHEST_CONFIDENCE';
 
 export type ScanScope = {
-  scanScope: ScopeType;
+  scopeType: ScopeType;
   trustedInstallSources?: string[];
 };
 

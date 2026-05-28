@@ -1,5 +1,5 @@
 export const DEFAULT_SCAN_SCOPE = {
-    scanScope: 'SIDELOADED_ONLY',
+    scopeType: 'SIDELOADED_ONLY',
 };
 export const DEFAULT_REASON_MODE = 'HIGHEST_CONFIDENCE';
 export const withDetectionDefaults = (config) => {

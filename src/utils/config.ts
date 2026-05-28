@@ -7,7 +7,7 @@ import type {
 } from '../types/types';
 
 export const DEFAULT_SCAN_SCOPE: ScanScope = {
-  scanScope: 'SIDELOADED_ONLY',
+  scopeType: 'SIDELOADED_ONLY',
 };
 export const DEFAULT_REASON_MODE: ReasonMode = 'HIGHEST_CONFIDENCE';
 

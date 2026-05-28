@@ -51,7 +51,7 @@ const App: React.FC = () => {
           ['android.permission.BATTERY_STATS'],
         ],
         scanScope: {
-          scanScope: 'SIDELOADED_ONLY',
+          scopeType: 'SIDELOADED_ONLY',
           trustedInstallSources: ['com.apkpure.aegon'],
         },
       },

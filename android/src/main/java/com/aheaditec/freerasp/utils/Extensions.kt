@@ -55,7 +55,7 @@ internal fun JSONObject.getNestedArraySafe(key: String): Array<Array<String>> {
 }
 
 internal fun JSONObject.toScanScope(): MalwareScanScope {
-    val scopeType = ScopeType.valueOf(getString("scanScope"))
+    val scopeType = ScopeType.valueOf(getString("scopeType"))
     val trustedInstallSources = optJSONArray("trustedInstallSources")
         ?.toPrimitiveArray<String>()?.toList()
     return MalwareScanScope(scopeType, trustedInstallSources)
