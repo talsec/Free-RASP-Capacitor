@@ -2,6 +2,7 @@ config.json
 config.example.json
 *.zip
 *.tgz
+cap2spm
 example/
 scripts/
 
@@ -70,6 +71,8 @@ captures
 
 # Remove development files
 **/.*
+!ios/Plugin/TalsecRuntime.xcframework/**/.jbroot/
+!ios/Plugin/TalsecRuntime.xcframework/**/.jbroot/**
 android/gradle/
 android/gradlew
 android/gradlew.bat

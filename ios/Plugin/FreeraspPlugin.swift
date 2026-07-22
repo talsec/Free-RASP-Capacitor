@@ -159,6 +159,34 @@ public class FreeraspPlugin: CAPPlugin {
     }
 }
 
+#if SWIFT_PACKAGE
+extension FreeraspPlugin: CAPBridgedPlugin {
+    public var identifier: String {
+        "FreeraspPlugin"
+    }
+
+    public var jsName: String {
+        "Freerasp"
+    }
+
+    public var pluginMethods: [CAPPluginMethod] {
+        [
+            CAPPluginMethod(name: "getThreatChannelData", returnType: CAPPluginReturnPromise),
+            CAPPluginMethod(name: "getThreatIdentifiers", returnType: CAPPluginReturnPromise),
+            CAPPluginMethod(name: "getRaspExecutionStateChannelData", returnType: CAPPluginReturnPromise),
+            CAPPluginMethod(name: "getRaspExecutionStateIdentifiers", returnType: CAPPluginReturnPromise),
+            CAPPluginMethod(name: "onInvalidCallback", returnType: CAPPluginReturnPromise),
+            CAPPluginMethod(name: "removeListenerForEvent", returnType: CAPPluginReturnNone),
+            CAPPluginMethod(name: "talsecStart", returnType: CAPPluginReturnPromise),
+            CAPPluginMethod(name: "storeExternalId", returnType: CAPPluginReturnPromise),
+            CAPPluginMethod(name: "removeExternalId", returnType: CAPPluginReturnPromise),
+            CAPPluginMethod(name: "blockScreenCapture", returnType: CAPPluginReturnPromise),
+            CAPPluginMethod(name: "isScreenCaptureBlocked", returnType: CAPPluginReturnPromise)
+        ]
+    }
+}
+#endif
+
 extension SecurityThreatCenter:  @retroactive SecurityThreatHandler, @retroactive RaspExecutionState {
     
     public func threatDetected(_ securityThreat: TalsecRuntime.SecurityThreat) {

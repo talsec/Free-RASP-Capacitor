@@ -93,9 +93,19 @@ jobs:
         working-directory: example/android
 
   build-ios:
-    name: Build iOS Example
+    name: Build iOS Example (${{ matrix.package-manager }})
     runs-on: macos-latest
     needs: build-library
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package-manager: Cocoapods
+            xcode-option: -workspace
+            xcode-container: ios/App/App.xcworkspace
+          - package-manager: SPM
+            xcode-option: -project
+            xcode-container: ios/App/App.xcodeproj
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -110,10 +120,12 @@ jobs:
         run: npm run build
         working-directory: example
 
-      - name: Sync Capacitor
-        run: npx cap sync ios
+      - name: Create iOS project
+        run: |
+          rm -rf ios
+          npx cap add ios --packagemanager "${{ matrix.package-manager }}"
         working-directory: example
 
       - name: Build iOS App
-        run: xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO clean build
+        run: xcodebuild "${{ matrix.xcode-option }}" "${{ matrix.xcode-container }}" -scheme App -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO clean build
         working-directory: example
