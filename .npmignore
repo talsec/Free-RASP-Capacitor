@@ -2,7 +2,6 @@ config.json
 config.example.json
 *.zip
 *.tgz
-cap2spm
 example/
 scripts/
 
