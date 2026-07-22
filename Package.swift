@@ -26,7 +26,6 @@ let package = Package(
             name: "CapacitorFreerasp",
             dependencies: [
                 .product(name: "Capacitor", package: "capacitor-swift-pm"),
-                .product(name: "Cordova", package: "capacitor-swift-pm"),
                 "TalsecRuntime"
             ],
             path: "ios/Plugin",
