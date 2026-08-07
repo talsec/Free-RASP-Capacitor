@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.2.0] - 2026-08-07
 
 - Android SDK version: 19.2.1
-- iOS SDK version: 7.1.1
+- iOS SDK version: 7.1.2
 
 ### Capacitor
 
@@ -36,6 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved hook detection
 - Improved Frida detection
 - Improved root detection capabilities
+
+### iOS
+
+#### Added
+
+- Improved jailbreak detection
 
 ## [3.1.0] - 2026-07-27
 

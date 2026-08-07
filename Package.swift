@@ -19,8 +19,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "TalsecRuntime",
-            url: "https://storage.googleapis.com/talsec-artifact-repository/freerasp/ios/capacitor/7.1.1/TalsecRuntime.xcframework.zip",
-            checksum: "fced1ed1c8ce3eec19ca66f290e65a3a1dab0ed2d2893ca82ced76e6e890b08b"
+            url: "https://storage.googleapis.com/talsec-artifact-repository/freerasp/ios/capacitor/7.1.2/TalsecRuntime.xcframework.zip",
+            checksum: "db6c4236bb9619b9c19ccada6b6787c137da2d72cc2e52c73537404c080024b3"
         ),
         .target(
             name: "CapacitorFreerasp",
