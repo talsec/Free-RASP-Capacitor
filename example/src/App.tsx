@@ -275,6 +275,16 @@ const App: React.FC = () => {
         ),
       );
     },
+    // Android only
+    bootloader: () => {
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Bootloader'
+            ? { ...threat, isSecure: false }
+            : threat,
+        ),
+      );
+    },
   
   };
   
