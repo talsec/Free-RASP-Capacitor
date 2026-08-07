@@ -116,6 +116,7 @@ export type ThreatEventActions = {
     locationSpoofing?: () => any;
     unsecureWifi?: () => any;
     automation?: () => any;
+    bootloader?: () => any;
 };
 export type NativeEvent = {
     [key: string]: number | string[] | undefined;

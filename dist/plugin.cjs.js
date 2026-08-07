@@ -68,6 +68,7 @@ class Threat {
                 this.LocationSpoofing,
                 this.UnsecureWifi,
                 this.Automation,
+                this.Bootloader,
             ]
             : [
                 this.AppIntegrity,
@@ -109,6 +110,7 @@ Threat.TimeSpoofing = new Threat(0);
 Threat.LocationSpoofing = new Threat(0);
 Threat.UnsecureWifi = new Threat(0);
 Threat.Automation = new Threat(0);
+Threat.Bootloader = new Threat(0);
 
 class RaspExecutionState {
     constructor(value) {
@@ -203,7 +205,7 @@ const registerThreatListener = async (config) => {
         return;
     }
     eventsListener$1 = await Talsec.addListener(threatChannel, async (event) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
         if (!threatKey || !threatMalwareKey) {
             onInvalidCallback();
             return;
@@ -274,6 +276,9 @@ const registerThreatListener = async (config) => {
                 break;
             case Threat.Automation.value:
                 (_x = config.automation) === null || _x === void 0 ? void 0 : _x.call(config);
+                break;
+            case Threat.Bootloader.value:
+                (_y = config.bootloader) === null || _y === void 0 ? void 0 : _y.call(config);
                 break;
             default:
                 onInvalidCallback();

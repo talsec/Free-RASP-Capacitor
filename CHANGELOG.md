@@ -28,6 +28,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed issue with app's color scheme initialization.
 - Fixed bad memory access in jaibreak check.
 
+## [3.1.0] - 2026-08-07
+
+- Android SDK version: 19.2.1
+- iOS SDK version: 6.14.4
+
+### Capacitor
+
+#### Added
+
+- `bootloader` threat callback, reporting an unlocked or compromised bootloader — Android only
+
+### Android
+
+#### Added
+
+- Added bootloader detection (unlocked/compromised) with `onBootloader()` callback
+- Added option to fetch JitPack dependencies from our own Talsec repository (`https://europe-west3-maven.pkg.dev/talsec-artifact-repository/common`)
+
+#### Fixed
+
+- Fixed native crash caused by std::terminate() race condition
+- Fixed periodic hook and root check overwriting
+- Fixed root detection crash in obfuscated release builds
+- Fixed hardware-backed keystore detection failing with `NoSuchMethodError` on some Android 12+ devices
+
+#### Changed
+
+- Improved KernelSU detection
+- Improved hook detection
+- Improved Frida detection
+- Improved root detection capabilities
+
 ## [3.0.0] - 2026-05-15
 
 - Android SDK version: 18.3.0

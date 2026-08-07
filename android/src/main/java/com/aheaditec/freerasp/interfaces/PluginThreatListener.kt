@@ -1,6 +1,6 @@
 package com.aheaditec.freerasp.interfaces
 
-import com.aheaditec.talsec_security.security.api.SuspiciousAppInfo
+import app.talsec.rasp.security.api.SuspiciousAppInfo
 import com.aheaditec.freerasp.events.ThreatEvent
 
 internal interface PluginThreatListener {
