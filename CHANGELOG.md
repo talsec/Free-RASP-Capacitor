@@ -5,33 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.1.0] - 2026-07-27
-
-- Android SDK version: 18.3.0
-- iOS SDK version: 7.1.1
-
-### Capacitor
-
-#### Added
-
-- Swift Package Manager support. CocoaPods remains supported as a fallback.
-
-### iOS
-
-#### Added
-
-- Added support for postponed checks, therefore, due to slower execution, some subchecks are run after initial startup checks.
-- Improved hook detection.
-
-#### Fixed
-
-- Fixed issue with app's color scheme initialization.
-- Fixed bad memory access in jaibreak check.
-
-## [3.1.0] - 2026-08-07
+## [3.2.0] - 2026-08-07
 
 - Android SDK version: 19.2.1
-- iOS SDK version: 6.14.4
+- iOS SDK version: 7.1.1
 
 ### Capacitor
 
@@ -59,6 +36,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved hook detection
 - Improved Frida detection
 - Improved root detection capabilities
+
+## [3.1.0] - 2026-07-27
+
+- Android SDK version: 18.3.0
+- iOS SDK version: 7.1.1
+
+### Capacitor
+
+#### Added
+
+- Swift Package Manager support. CocoaPods remains supported as a fallback.
+
+### iOS
+
+#### Added
+
+- Added support for postponed checks, therefore, due to slower execution, some subchecks are run after initial startup checks.
+- Improved hook detection.
+
+#### Fixed
+
+- Fixed issue with app's color scheme initialization.
+- Fixed bad memory access in jaibreak check.
 
 ## [3.0.0] - 2026-05-15
 
