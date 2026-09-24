@@ -9,11 +9,14 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://europe-west3-maven.pkg.dev/talsec-artifact-repository/plugin' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.11.2'
         classpath 'com.google.gms:google-services:4.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // TODO: set the real version once app.talsec.plugin with wrapper support is released
+        classpath 'app.talsec.plugin:talsec-security-plugin:1.1.0'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

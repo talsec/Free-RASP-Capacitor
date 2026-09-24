@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'app.talsec.plugin'
 
 android {
     namespace "io.ionic.starter"
