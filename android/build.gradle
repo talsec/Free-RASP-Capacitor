@@ -13,20 +13,25 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://europe-west3-maven.pkg.dev/talsec-artifact-repository/plugin' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.0.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:1.9.25"
+        // TODO: set the real version once app.talsec.plugin with wrapper support is released
+        classpath 'app.talsec.plugin:talsec-security-plugin:1.1.0'
     }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlinx-serialization'
+apply plugin: 'app.talsec.plugin'
 
 android {
     namespace "com.aheaditec.freerasp"
+    talsec { hostAppIdentity = true }
     compileSdk Math.max(36, project.hasProperty('rootProject.ext.compileSdk') ? rootProject.ext.compileSdk as int : 36)
     defaultConfig {
         minSdkVersion 23
