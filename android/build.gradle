@@ -19,7 +19,6 @@ buildscript {
         classpath 'com.android.tools.build:gradle:8.0.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:1.9.25"
-        // TODO: set the real version once app.talsec.plugin with wrapper support is released
         classpath 'app.talsec.plugin:talsec-security-plugin:1.1.0'
     }
 }
