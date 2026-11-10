@@ -25,7 +25,7 @@ export const registerRaspExecutionStateListener = async (config) => {
         return;
     }
     eventsListener = await Talsec.addListener(executionStateChannel, async (event) => {
-        var _a;
+        var _a, _b, _c;
         if (!executionStateKey) {
             onInvalidCallback();
             return;
@@ -33,6 +33,12 @@ export const registerRaspExecutionStateListener = async (config) => {
         switch (event[executionStateKey]) {
             case RaspExecutionState.AllChecksFinished.value:
                 (_a = config.allChecksFinished) === null || _a === void 0 ? void 0 : _a.call(config);
+                break;
+            case RaspExecutionState.CriticalChecksFinished.value:
+                (_b = config.criticalChecksFinished) === null || _b === void 0 ? void 0 : _b.call(config);
+                break;
+            case RaspExecutionState.PostponedChecksFinished.value:
+                (_c = config.postponedChecksFinished) === null || _c === void 0 ? void 0 : _c.call(config);
                 break;
             default:
                 onInvalidCallback();

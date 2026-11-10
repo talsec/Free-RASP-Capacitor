@@ -3,6 +3,7 @@ package com.aheaditec.freerasp
 import android.content.Context
 import app.talsec.rasp.security.api.SuspiciousAppInfo
 import app.talsec.rasp.security.api.ThreatListener
+import app.talsec.rasp.security.api.ThreatListener.CallState
 import com.aheaditec.freerasp.dispatchers.ExecutionStateDispatcher
 import com.aheaditec.freerasp.dispatchers.ThreatDispatcher
 import com.aheaditec.freerasp.events.RaspExecutionStateEvent
@@ -45,8 +46,8 @@ internal object PluginThreatHandler {
             ThreatDispatcher.dispatchThreat(ThreatEvent.ObfuscationIssues)
         }
 
-        override fun onMalware(suspiciousAppInfos: MutableList<SuspiciousAppInfo>) {
-            ThreatDispatcher.dispatchMalware(suspiciousAppInfos)
+        override fun onMalware(suspiciousAppInfos: List<SuspiciousAppInfo>) {
+            ThreatDispatcher.dispatchMalware(suspiciousAppInfos.toMutableList())
         }
 
         override fun onScreenshot() {
@@ -80,6 +81,10 @@ internal object PluginThreatHandler {
         override fun onBootloader() {
             ThreatDispatcher.dispatchThreat(ThreatEvent.Bootloader)
         }
+
+        override fun onOngoingCall(state: CallState) {
+            ThreatDispatcher.dispatchOngoingCall(state)
+        }
     }
 
     private val deviceState = object : ThreatListener.DeviceState() {
@@ -106,8 +111,18 @@ internal object PluginThreatHandler {
     }
 
     private val raspExecutionState = object : ThreatListener.RaspExecutionState() {
-        override fun onAllChecksFinished() {
+        override fun onCriticalChecksFinished() {
+            ExecutionStateDispatcher.dispatch(RaspExecutionStateEvent.CriticalChecksFinished)
+        }
+
+        // Fast checks finish where the removed onAllChecksFinished() used to be triggered, so
+        // they keep driving the cross-platform allChecksFinished state.
+        override fun onFastChecksFinished() {
             ExecutionStateDispatcher.dispatch(RaspExecutionStateEvent.AllChecksFinished)
+        }
+
+        override fun onPostponedChecksFinished() {
+            ExecutionStateDispatcher.dispatch(RaspExecutionStateEvent.PostponedChecksFinished)
         }
     }
 

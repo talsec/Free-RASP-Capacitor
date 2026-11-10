@@ -7,6 +7,9 @@ let eventsListener = null;
 let threatChannel = null;
 let threatKey = null;
 let threatMalwareKey = null;
+let threatCallStateKey = null;
+const callStates = ['STARTED', 'ONGOING', 'STOPPED'];
+const isCallState = (value) => typeof value === 'string' && callStates.includes(value);
 let isInitializing = false;
 let isMappingPrepared = false;
 export const registerThreatListener = async (config) => {
@@ -16,7 +19,7 @@ export const registerThreatListener = async (config) => {
     isInitializing = true;
     await removeThreatListener();
     if (!threatChannel || !threatKey || !threatMalwareKey) {
-        [threatChannel, threatKey, threatMalwareKey] = await getThreatChannelData();
+        [threatChannel, threatKey, threatMalwareKey, threatCallStateKey = null] = await getThreatChannelData();
     }
     if (!isMappingPrepared) {
         await prepareThreatMapping();
@@ -27,7 +30,7 @@ export const registerThreatListener = async (config) => {
         return;
     }
     eventsListener = await Talsec.addListener(threatChannel, async (event) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
         if (!threatKey || !threatMalwareKey) {
             onInvalidCallback();
             return;
@@ -102,6 +105,15 @@ export const registerThreatListener = async (config) => {
             case Threat.Bootloader.value:
                 (_y = config.bootloader) === null || _y === void 0 ? void 0 : _y.call(config);
                 break;
+            case Threat.OngoingCall.value: {
+                const callState = threatCallStateKey ? event[threatCallStateKey] : undefined;
+                if (!isCallState(callState)) {
+                    onInvalidCallback();
+                    break;
+                }
+                (_z = config.ongoingCall) === null || _z === void 0 ? void 0 : _z.call(config, callState);
+                break;
+            }
             default:
                 onInvalidCallback();
                 break;

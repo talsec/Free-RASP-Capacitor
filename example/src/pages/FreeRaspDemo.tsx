@@ -29,6 +29,10 @@ import {
   addToWhitelist,
   blockScreenCapture,
   isScreenCaptureBlocked,
+  blockScreenControl,
+  isScreenControlBlocked,
+  blockOverlayWindows,
+  isOverlayWindowsBlocked,
   storeExternalId,
   removeExternalId,
 } from 'capacitor-freerasp';
@@ -43,8 +47,11 @@ const FreeRaspDemo: React.FC<{
   }[];
   suspiciousApps: SuspiciousAppInfo[];
   allChecksStatus: 'in progress' | 'completed';
-}> = ({ checks, suspiciousApps, allChecksStatus }) => {
+  postponedChecksStatus: 'in progress' | 'completed';
+}> = ({ checks, suspiciousApps, allChecksStatus, postponedChecksStatus }) => {
   const [screenCaptureBlocked, setScreenCaptureBlocked] = React.useState(false);
+  const [screenControlBlocked, setScreenControlBlocked] = React.useState(false);
+  const [overlayWindowsBlocked, setOverlayWindowsBlocked] = React.useState(false);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [showToast, setShowToast] = React.useState(false);
   const [externalIdValue, setExternalIdValue] = React.useState('');
@@ -97,6 +104,42 @@ const FreeRaspDemo: React.FC<{
       console.error(`Failed to ${enable ? 'block' : 'enable'} screen capture: ${(e as Error).message}`);
     }
   };
+
+  const handleScreenControl = async (enable: boolean) => {
+    try {
+      await blockScreenControl(enable);
+      setScreenControlBlocked(await isScreenControlBlocked());
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to ${enable ? 'block' : 'enable'} screen control: ${e}`);
+    }
+  };
+
+  const handleOverlayWindows = async (enable: boolean) => {
+    try {
+      const applied = await blockOverlayWindows(enable);
+      // eslint-disable-next-line no-console
+      console.info('Changing Overlay Windows Status applied:', applied);
+      setOverlayWindowsBlocked(await isOverlayWindowsBlocked());
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to ${enable ? 'block' : 'enable'} overlay windows: ${e}`);
+    }
+  };
+
+  const renderExecutionState = (label: string, status: 'in progress' | 'completed') => (
+    <IonItem>
+      <IonLabel color={status === 'completed' ? 'success' : 'primary'}>
+        {label}
+        <p className="checkDescription">{status}</p>
+      </IonLabel>
+      {status === 'completed' ? (
+        <IonIcon icon={shieldCheckmarkOutline} color="success" size="large" slot="end" />
+      ) : (
+        <IonSpinner color="primary" slot="end" />
+      )}
+    </IonItem>
+  );
 
   const handleModalDismiss = () => {
     setIsModalOpen(false);
@@ -195,20 +238,29 @@ const FreeRaspDemo: React.FC<{
             Remove External ID
           </IonButton>
         </IonRow>
+        {platform === 'android' && (
+          <IonRow className="centered-row">
+            <IonButton
+              className="ion-text-wrap features-button"
+              color={screenControlBlocked ? 'danger' : 'primary'}
+              onClick={() => handleScreenControl(!screenControlBlocked)}
+            >
+              {screenControlBlocked ? 'Unblock Screen Control' : 'Block Screen Control'}
+            </IonButton>
+            <IonButton
+              className="ion-text-wrap features-button"
+              color={overlayWindowsBlocked ? 'danger' : 'primary'}
+              onClick={() => handleOverlayWindows(!overlayWindowsBlocked)}
+            >
+              {overlayWindowsBlocked ? 'Unblock Overlays' : 'Block Overlays'}
+            </IonButton>
+          </IonRow>
+        )}
         <IonListHeader>
           <h1>RASP Execution State:</h1>
         </IonListHeader>
-        <IonItem>
-          <IonLabel color={allChecksStatus === 'completed' ? 'success' : 'primary'}>
-            All checks finished
-            <p className="checkDescription">{allChecksStatus}</p>
-          </IonLabel>
-          {allChecksStatus === 'completed' ? (
-            <IonIcon icon={shieldCheckmarkOutline} color="success" size="large" slot="end" />
-          ) : (
-            <IonSpinner color="primary" slot="end" />
-          )}
-        </IonItem>
+        {renderExecutionState('All checks finished', allChecksStatus)}
+        {platform === 'android' && renderExecutionState('Postponed checks finished', postponedChecksStatus)}
         <IonListHeader>
           <h1>freeRASP checks:</h1>
         </IonListHeader>

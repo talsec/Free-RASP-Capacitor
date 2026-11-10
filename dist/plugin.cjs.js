@@ -21,6 +21,72 @@ const isScreenCaptureBlocked = async () => {
     const { result } = await Talsec.isScreenCaptureBlocked();
     return result;
 };
+const androidOnly = (feature) => Promise.reject(`${feature} is not available on iOS`);
+/**
+ * Android only. Prevents accessibility services from reading or controlling
+ * the app screen.
+ */
+const blockScreenControl = async (enable) => {
+    if (core.Capacitor.getPlatform() === 'ios') {
+        return androidOnly('Screen control blocking');
+    }
+    const { result } = await Talsec.blockScreenControl({ enable });
+    return result;
+};
+/**
+ * Android only. Returns whether screen control is blocked.
+ */
+const isScreenControlBlocked = async () => {
+    if (core.Capacitor.getPlatform() === 'ios') {
+        return androidOnly('Screen control blocking');
+    }
+    const { result } = await Talsec.isScreenControlBlocked();
+    return result;
+};
+/**
+ * Android only. Hides overlay windows of other apps over the app screen.
+ * Requires Android 12+ and the `HIDE_OVERLAY_WINDOWS` permission.
+ *
+ * @returns whether the request was applied
+ */
+const blockOverlayWindows = async (enable) => {
+    if (core.Capacitor.getPlatform() === 'ios') {
+        return androidOnly('Overlay windows blocking');
+    }
+    const { result } = await Talsec.blockOverlayWindows({ enable });
+    return result;
+};
+/**
+ * Android only. Returns whether overlay windows of other apps are hidden.
+ */
+const isOverlayWindowsBlocked = async () => {
+    if (core.Capacitor.getPlatform() === 'ios') {
+        return androidOnly('Overlay windows blocking');
+    }
+    const { result } = await Talsec.isOverlayWindowsBlocked();
+    return result;
+};
+/**
+ * Android only. Starts the ongoing call (cellular and VoIP) detection.
+ * Call states are reported through the `ongoingCall` threat action.
+ */
+const startOngoingCallDetection = async () => {
+    if (core.Capacitor.getPlatform() === 'ios') {
+        return androidOnly('Ongoing call detection');
+    }
+    const { result } = await Talsec.startOngoingCallDetection();
+    return result;
+};
+/**
+ * Android only. Stops the ongoing call detection.
+ */
+const stopOngoingCallDetection = async () => {
+    if (core.Capacitor.getPlatform() === 'ios') {
+        return androidOnly('Ongoing call detection');
+    }
+    const { result } = await Talsec.stopOngoingCallDetection();
+    return result;
+};
 const storeExternalId = async (data) => {
     const { result } = await Talsec.storeExternalId({ data });
     return result;
@@ -69,6 +135,7 @@ class Threat {
                 this.UnsecureWifi,
                 this.Automation,
                 this.Bootloader,
+                this.OngoingCall,
             ]
             : [
                 this.AppIntegrity,
@@ -111,16 +178,21 @@ Threat.LocationSpoofing = new Threat(0);
 Threat.UnsecureWifi = new Threat(0);
 Threat.Automation = new Threat(0);
 Threat.Bootloader = new Threat(0);
+Threat.OngoingCall = new Threat(0);
 
 class RaspExecutionState {
     constructor(value) {
         this.value = value;
     }
     static getValues() {
-        return [this.AllChecksFinished];
+        return core.Capacitor.getPlatform() === 'android'
+            ? [this.AllChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished]
+            : [this.AllChecksFinished];
     }
 }
 RaspExecutionState.AllChecksFinished = new RaspExecutionState(0);
+RaspExecutionState.CriticalChecksFinished = new RaspExecutionState(0);
+RaspExecutionState.PostponedChecksFinished = new RaspExecutionState(0);
 
 const getThreatCount = () => {
     return Threat.getValues().length;
@@ -140,8 +212,10 @@ const getThreatIdentifiers = async () => {
     return ids;
 };
 const getThreatChannelData = async () => {
+    // Android also sends the key of the ongoing call state
+    const dataLength = core.Capacitor.getPlatform() === 'android' ? 4 : 3;
     const { ids } = await Talsec.getThreatChannelData();
-    if (ids.length !== 3 || !itemsHaveType(ids, 'string')) {
+    if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
         onInvalidCallback();
     }
     return ids;
@@ -185,6 +259,9 @@ let eventsListener$1 = null;
 let threatChannel = null;
 let threatKey = null;
 let threatMalwareKey = null;
+let threatCallStateKey = null;
+const callStates = ['STARTED', 'ONGOING', 'STOPPED'];
+const isCallState = (value) => typeof value === 'string' && callStates.includes(value);
 let isInitializing$1 = false;
 let isMappingPrepared$1 = false;
 const registerThreatListener = async (config) => {
@@ -194,7 +271,7 @@ const registerThreatListener = async (config) => {
     isInitializing$1 = true;
     await removeThreatListener();
     if (!threatChannel || !threatKey || !threatMalwareKey) {
-        [threatChannel, threatKey, threatMalwareKey] = await getThreatChannelData();
+        [threatChannel, threatKey, threatMalwareKey, threatCallStateKey = null] = await getThreatChannelData();
     }
     if (!isMappingPrepared$1) {
         await prepareThreatMapping();
@@ -205,7 +282,7 @@ const registerThreatListener = async (config) => {
         return;
     }
     eventsListener$1 = await Talsec.addListener(threatChannel, async (event) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
         if (!threatKey || !threatMalwareKey) {
             onInvalidCallback();
             return;
@@ -280,6 +357,15 @@ const registerThreatListener = async (config) => {
             case Threat.Bootloader.value:
                 (_y = config.bootloader) === null || _y === void 0 ? void 0 : _y.call(config);
                 break;
+            case Threat.OngoingCall.value: {
+                const callState = threatCallStateKey ? event[threatCallStateKey] : undefined;
+                if (!isCallState(callState)) {
+                    onInvalidCallback();
+                    break;
+                }
+                (_z = config.ongoingCall) === null || _z === void 0 ? void 0 : _z.call(config, callState);
+                break;
+            }
             default:
                 onInvalidCallback();
                 break;
@@ -342,7 +428,7 @@ const registerRaspExecutionStateListener = async (config) => {
         return;
     }
     eventsListener = await Talsec.addListener(executionStateChannel, async (event) => {
-        var _a;
+        var _a, _b, _c;
         if (!executionStateKey) {
             onInvalidCallback();
             return;
@@ -350,6 +436,12 @@ const registerRaspExecutionStateListener = async (config) => {
         switch (event[executionStateKey]) {
             case RaspExecutionState.AllChecksFinished.value:
                 (_a = config.allChecksFinished) === null || _a === void 0 ? void 0 : _a.call(config);
+                break;
+            case RaspExecutionState.CriticalChecksFinished.value:
+                (_b = config.criticalChecksFinished) === null || _b === void 0 ? void 0 : _b.call(config);
+                break;
+            case RaspExecutionState.PostponedChecksFinished.value:
+                (_c = config.postponedChecksFinished) === null || _c === void 0 ? void 0 : _c.call(config);
                 break;
             default:
                 onInvalidCallback();
@@ -404,9 +496,13 @@ const startFreeRASP = async (config, actions, raspExecutionStateActions) => {
 
 exports.abortApp = onInvalidCallback;
 exports.addToWhitelist = addToWhitelist;
+exports.blockOverlayWindows = blockOverlayWindows;
 exports.blockScreenCapture = blockScreenCapture;
+exports.blockScreenControl = blockScreenControl;
 exports.getAppIcon = getAppIcon;
+exports.isOverlayWindowsBlocked = isOverlayWindowsBlocked;
 exports.isScreenCaptureBlocked = isScreenCaptureBlocked;
+exports.isScreenControlBlocked = isScreenControlBlocked;
 exports.onInvalidCallback = onInvalidCallback;
 exports.registerRaspExecutionStateListener = registerRaspExecutionStateListener;
 exports.registerThreatListener = registerThreatListener;
@@ -414,5 +510,7 @@ exports.removeExternalId = removeExternalId;
 exports.removeRaspExecutionStateListener = removeRaspExecutionStateListener;
 exports.removeThreatListener = removeThreatListener;
 exports.startFreeRASP = startFreeRASP;
+exports.startOngoingCallDetection = startOngoingCallDetection;
+exports.stopOngoingCallDetection = stopOngoingCallDetection;
 exports.storeExternalId = storeExternalId;
 //# sourceMappingURL=plugin.cjs.js.map

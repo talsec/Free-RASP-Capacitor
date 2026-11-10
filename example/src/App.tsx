@@ -4,7 +4,13 @@ import FreeRaspDemo from './pages/FreeRaspDemo';
 import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
 
-import { startFreeRASP, SuspiciousAppInfo, addToWhitelist } from 'capacitor-freerasp';
+import {
+  startFreeRASP,
+  startOngoingCallDetection,
+  SuspiciousAppInfo,
+  addToWhitelist,
+  type CallState,
+} from 'capacitor-freerasp';
 import { androidChecks, commonChecks, iosChecks } from './utils/checks';
 
 /* Core CSS required for Ionic components to work properly */
@@ -33,6 +39,10 @@ const App: React.FC = () => {
   const [allChecksStatus, setAllChecksStatus] = useState<
     'in progress' | 'completed'
     >('in progress');
+
+  const [postponedChecksStatus, setPostponedChecksStatus] = useState<
+    'in progress' | 'completed'
+  >('in progress');
 
   const config = {
     androidConfig: {
@@ -285,6 +295,18 @@ const App: React.FC = () => {
         ),
       );
     },
+    // Android only
+    ongoingCall: (state: CallState) => {
+      // eslint-disable-next-line no-console
+      console.log('freeRASP: Ongoing call', state);
+      setAppChecks(currentState =>
+        currentState.map(threat =>
+          threat.name === 'Ongoing Call'
+            ? { ...threat, isSecure: state === 'STOPPED' }
+            : threat,
+        ),
+      );
+    },
   
   };
   
@@ -294,7 +316,13 @@ const App: React.FC = () => {
       setAllChecksStatus('completed');
       // eslint-disable-next-line no-console
       console.log('freeRASP: All checks finished');
-    }
+    },
+    // Android only
+    postponedChecksFinished: () => {
+      setPostponedChecksStatus('completed');
+      // eslint-disable-next-line no-console
+      console.log('freeRASP: Postponed checks finished');
+    },
   };
 
   // start freeRASP
@@ -306,6 +334,8 @@ const App: React.FC = () => {
     })();
 
     if (Capacitor.getPlatform() === 'android') {
+      // Report cellular and VoIP calls through the ongoingCall action
+      startOngoingCallDetection();
       addToWhitelist('com.example.myApp');
       Geolocation.requestPermissions().then((permission) => {
         // eslint-disable-next-line no-console
@@ -316,7 +346,12 @@ const App: React.FC = () => {
 
   return (
     <IonApp>
-      <FreeRaspDemo checks={appChecks} suspiciousApps={suspiciousApps} allChecksStatus={allChecksStatus} />
+      <FreeRaspDemo
+        checks={appChecks}
+        suspiciousApps={suspiciousApps}
+        allChecksStatus={allChecksStatus}
+        postponedChecksStatus={postponedChecksStatus}
+      />
     </IonApp>
   );
 };

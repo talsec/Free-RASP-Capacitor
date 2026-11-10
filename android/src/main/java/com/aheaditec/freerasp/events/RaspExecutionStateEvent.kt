@@ -8,6 +8,8 @@ internal sealed class RaspExecutionStateEvent(override val value: Int) : BaseRas
     override val channelKey: String get() = CHANNEL_KEY
 
     object AllChecksFinished : RaspExecutionStateEvent(RandomGenerator.next())
+    object CriticalChecksFinished : RaspExecutionStateEvent(RandomGenerator.next())
+    object PostponedChecksFinished : RaspExecutionStateEvent(RandomGenerator.next())
 
     companion object {
         internal val CHANNEL_NAME = RandomGenerator.next().toString()
@@ -15,7 +17,9 @@ internal sealed class RaspExecutionStateEvent(override val value: Int) : BaseRas
 
         internal val ALL_EVENTS = JSONArray(
             listOf(
-                AllChecksFinished.value
+                AllChecksFinished.value,
+                CriticalChecksFinished.value,
+                PostponedChecksFinished.value
             )
         )
     }

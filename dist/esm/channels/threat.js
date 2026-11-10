@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { onInvalidCallback } from '../api/methods/native';
 import { Talsec } from '../api/nativeModules';
 import { Threat } from '../models/threat';
@@ -10,8 +11,10 @@ export const getThreatIdentifiers = async () => {
     return ids;
 };
 export const getThreatChannelData = async () => {
+    // Android also sends the key of the ongoing call state
+    const dataLength = Capacitor.getPlatform() === 'android' ? 4 : 3;
     const { ids } = await Talsec.getThreatChannelData();
-    if (ids.length !== 3 || !itemsHaveType(ids, 'string')) {
+    if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
         onInvalidCallback();
     }
     return ids;

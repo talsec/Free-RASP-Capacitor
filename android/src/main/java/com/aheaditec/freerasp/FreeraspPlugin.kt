@@ -1,5 +1,7 @@
 package com.aheaditec.freerasp
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.os.Handler
@@ -8,6 +10,7 @@ import android.os.Looper
 import app.talsec.rasp.security.api.SuspiciousAppInfo
 import app.talsec.rasp.security.api.Talsec
 import app.talsec.rasp.security.api.TalsecConfig
+import app.talsec.rasp.security.api.ThreatListener.CallState
 import com.aheaditec.freerasp.dispatchers.ExecutionStateDispatcher
 import com.aheaditec.freerasp.dispatchers.ThreatDispatcher
 import com.aheaditec.freerasp.utils.Utils
@@ -25,6 +28,7 @@ import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
 import org.json.JSONArray
+import java.lang.ref.WeakReference
 
 typealias CapacitorCallback = (String, JSObject) -> Unit
 
@@ -107,6 +111,7 @@ class FreeraspPlugin : Plugin() {
             ScreenProtector.unregister(activity)
         }
         if (activity.isFinishing) {
+            stopOngoingCallDetectionInternal()
             ThreatDispatcher.unregisterListener()
             ExecutionStateDispatcher.unregisterListener()
             PluginThreatHandler.unregisterSDKListener(context)
@@ -151,13 +156,16 @@ class FreeraspPlugin : Plugin() {
 
     /**
      * Method to setup the message passing between native and Capacitor
-     * @return list of [CHANNEL_NAME, CHANNEL_KEY, MALWARE_CHANNEL_KEY]
+     * @return list of [CHANNEL_NAME, CHANNEL_KEY, MALWARE_CHANNEL_KEY, CALL_STATE_CHANNEL_KEY]
      */
     @PluginMethod
     fun getThreatChannelData(call: PluginCall) {
         val channelData = JSONArray(
             (listOf(
-                ThreatEvent.CHANNEL_NAME, ThreatEvent.CHANNEL_KEY, ThreatEvent.MALWARE_CHANNEL_KEY
+                ThreatEvent.CHANNEL_NAME,
+                ThreatEvent.CHANNEL_KEY,
+                ThreatEvent.MALWARE_CHANNEL_KEY,
+                ThreatEvent.CALL_STATE_CHANNEL_KEY
             ))
         )
         call.resolve(JSObject().put("ids", channelData))
@@ -259,8 +267,15 @@ class FreeraspPlugin : Plugin() {
      */
     @PluginMethod
     fun isScreenCaptureBlocked(call: PluginCall) {
+        val currentActivity = activity ?: run {
+            call.reject(
+                "Cannot check screen capture state, activity is null.",
+                "IsScreenCaptureBlockedError"
+            )
+            return
+        }
         try {
-            val isBlocked = Talsec.isScreenCaptureBlocked()
+            val isBlocked = Talsec.isScreenCaptureBlocked(currentActivity)
             call.resolve(JSObject().put("result", isBlocked))
         } catch (e: Exception) {
             call.reject(
@@ -268,6 +283,161 @@ class FreeraspPlugin : Plugin() {
                 "IsScreenCaptureBlockedError"
             )
         }
+    }
+
+    /**
+     * Method to block accessibility services from reading or controlling the screen
+     * @param enable Pass `true` to block screen control, `false` to enable it
+     */
+    @PluginMethod
+    fun blockScreenControl(call: PluginCall) {
+        val enable = call.getBoolean("enable") ?: run {
+            call.reject(
+                "Enable argument is missing or not a boolean.", "MissingArgumentError"
+            )
+            return
+        }
+
+        activity?.runOnUiThread {
+            try {
+                Talsec.blockScreenControl(activity, enable)
+                call.resolve(JSObject().put("result", true))
+            } catch (e: Exception) {
+                call.reject(
+                    "Error while setting screen control: ${e.message}", "BlockScreenControlError"
+                )
+            }
+        } ?: run {
+            call.reject("Cannot block screen control, activity is null.", "BlockScreenControlError")
+        }
+    }
+
+    /**
+     * Method to check if screen control is currently blocked
+     */
+    @PluginMethod
+    fun isScreenControlBlocked(call: PluginCall) {
+        val currentActivity = activity ?: run {
+            call.reject(
+                "Cannot check screen control state, activity is null.",
+                "IsScreenControlBlockedError"
+            )
+            return
+        }
+        try {
+            call.resolve(JSObject().put("result", Talsec.isScreenControlBlocked(currentActivity)))
+        } catch (e: Exception) {
+            call.reject(
+                "Error while checking if screen control is blocked: ${e.message}",
+                "IsScreenControlBlockedError"
+            )
+        }
+    }
+
+    /**
+     * Method to hide overlay windows of other apps over the activity.
+     * Requires Android 12+ and the HIDE_OVERLAY_WINDOWS permission.
+     * @param enable Pass `true` to hide overlay windows, `false` to show them
+     * @return whether the request was applied
+     */
+    // Missing permission is suppressed because the decision to use the overlay API is made
+    // by developer, and not enforced by the library.
+    @SuppressLint("MissingPermission")
+    @PluginMethod
+    fun blockOverlayWindows(call: PluginCall) {
+        val enable = call.getBoolean("enable") ?: run {
+            call.reject(
+                "Enable argument is missing or not a boolean.", "MissingArgumentError"
+            )
+            return
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            call.resolve(JSObject().put("result", false))
+            return
+        }
+
+        activity?.runOnUiThread {
+            try {
+                call.resolve(JSObject().put("result", Talsec.blockOverlayWindows(activity, enable)))
+            } catch (e: Exception) {
+                call.reject(
+                    "Error while setting overlay windows: ${e.message}", "BlockOverlayWindowsError"
+                )
+            }
+        } ?: run {
+            call.reject("Cannot block overlay windows, activity is null.", "BlockOverlayWindowsError")
+        }
+    }
+
+    /**
+     * Method to check if overlay windows of other apps are currently hidden
+     */
+    @PluginMethod
+    fun isOverlayWindowsBlocked(call: PluginCall) {
+        val currentActivity = activity ?: run {
+            call.reject(
+                "Cannot check overlay windows state, activity is null.",
+                "IsOverlayWindowsBlockedError"
+            )
+            return
+        }
+        try {
+            call.resolve(JSObject().put("result", Talsec.isOverlayWindowsBlocked(currentActivity)))
+        } catch (e: Exception) {
+            call.reject(
+                "Error while checking if overlay windows are blocked: ${e.message}",
+                "IsOverlayWindowsBlockedError"
+            )
+        }
+    }
+
+    /**
+     * Method to start the ongoing call (cellular and VoIP) detection for the current activity
+     */
+    @PluginMethod
+    fun startOngoingCallDetection(call: PluginCall) {
+        val currentActivity = activity ?: run {
+            call.reject(
+                "Cannot start ongoing call detection, activity is null.",
+                "OngoingCallDetectionError"
+            )
+            return
+        }
+        try {
+            if (ongoingCallActivity?.get() !== currentActivity) {
+                stopOngoingCallDetectionInternal()
+                Talsec.startOngoingCallDetection(currentActivity)
+                ongoingCallActivity = WeakReference(currentActivity)
+            }
+            call.resolve(JSObject().put("result", true))
+        } catch (e: Exception) {
+            call.reject(
+                "Error while starting ongoing call detection: ${e.message}",
+                "OngoingCallDetectionError"
+            )
+        }
+    }
+
+    /**
+     * Method to stop the ongoing call detection
+     */
+    @PluginMethod
+    fun stopOngoingCallDetection(call: PluginCall) {
+        try {
+            stopOngoingCallDetectionInternal()
+            call.resolve(JSObject().put("result", true))
+        } catch (e: Exception) {
+            call.reject(
+                "Error while stopping ongoing call detection: ${e.message}",
+                "OngoingCallDetectionError"
+            )
+        }
+    }
+
+    private fun stopOngoingCallDetectionInternal() {
+        ongoingCallActivity?.get()?.let { Talsec.stopOngoingCallDetection(it) }
+        ongoingCallActivity = null
     }
 
     @PluginMethod
@@ -331,6 +501,9 @@ class FreeraspPlugin : Plugin() {
         private val mainHandler = Handler(Looper.getMainLooper())
 
         internal var talsecStarted = false
+
+        // Ongoing call detection is registered per activity
+        private var ongoingCallActivity: WeakReference<Activity>? = null
     }
 
     internal class PluginListener(
@@ -343,6 +516,13 @@ class FreeraspPlugin : Plugin() {
 
         override fun malwareDetected(suspiciousApps: MutableList<SuspiciousAppInfo>) {
             notifyMalware(suspiciousApps, context, pluginCallback)
+        }
+
+        override fun ongoingCallDetected(state: CallState) {
+            val params = JSObject()
+                .put(ThreatEvent.CHANNEL_KEY, ThreatEvent.OngoingCall.value)
+                .put(ThreatEvent.CALL_STATE_CHANNEL_KEY, state.name)
+            pluginCallback(ThreatEvent.CHANNEL_NAME, params)
         }
 
         override fun raspExecutionStateChanged(event: RaspExecutionStateEvent) {

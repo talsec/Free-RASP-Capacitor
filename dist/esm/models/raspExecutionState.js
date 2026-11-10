@@ -1,10 +1,15 @@
+import { Capacitor } from '@capacitor/core';
 export class RaspExecutionState {
     constructor(value) {
         this.value = value;
     }
     static getValues() {
-        return [this.AllChecksFinished];
+        return Capacitor.getPlatform() === 'android'
+            ? [this.AllChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished]
+            : [this.AllChecksFinished];
     }
 }
 RaspExecutionState.AllChecksFinished = new RaspExecutionState(0);
+RaspExecutionState.CriticalChecksFinished = new RaspExecutionState(0);
+RaspExecutionState.PostponedChecksFinished = new RaspExecutionState(0);
 //# sourceMappingURL=raspExecutionState.js.map

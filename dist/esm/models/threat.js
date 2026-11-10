@@ -28,6 +28,7 @@ export class Threat {
                 this.UnsecureWifi,
                 this.Automation,
                 this.Bootloader,
+                this.OngoingCall,
             ]
             : [
                 this.AppIntegrity,
@@ -70,4 +71,5 @@ Threat.LocationSpoofing = new Threat(0);
 Threat.UnsecureWifi = new Threat(0);
 Threat.Automation = new Threat(0);
 Threat.Bootloader = new Threat(0);
+Threat.OngoingCall = new Threat(0);
 //# sourceMappingURL=threat.js.map

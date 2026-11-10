@@ -2,7 +2,7 @@ import type { PluginListenerHandle } from '@capacitor/core';
 
 import { getThreatChannelData, prepareThreatMapping } from '../../channels/threat';
 import { Threat } from '../../models/threat';
-import type { ThreatEventActions } from '../../types/types';
+import type { CallState, ThreatEventActions } from '../../types/types';
 import { parseMalwareData } from '../../utils/malware';
 import { onInvalidCallback } from '../methods/native';
 import { Talsec } from '../nativeModules';
@@ -12,6 +12,11 @@ let eventsListener: PluginListenerHandle | null = null;
 let threatChannel: string | null = null;
 let threatKey: string | null = null;
 let threatMalwareKey: string | null = null;
+let threatCallStateKey: string | null = null;
+
+const callStates: readonly string[] = ['STARTED', 'ONGOING', 'STOPPED'];
+
+const isCallState = (value: unknown): value is CallState => typeof value === 'string' && callStates.includes(value);
 
 let isInitializing = false;
 let isMappingPrepared = false;
@@ -25,7 +30,7 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
   await removeThreatListener();
 
   if (!threatChannel || !threatKey || !threatMalwareKey) {
-    [threatChannel, threatKey, threatMalwareKey] = await getThreatChannelData();
+    [threatChannel, threatKey, threatMalwareKey, threatCallStateKey = null] = await getThreatChannelData();
   }
 
   if (!isMappingPrepared) {
@@ -113,6 +118,15 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
       case Threat.Bootloader.value:
         config.bootloader?.();
         break;
+      case Threat.OngoingCall.value: {
+        const callState = threatCallStateKey ? event[threatCallStateKey] : undefined;
+        if (!isCallState(callState)) {
+          onInvalidCallback();
+          break;
+        }
+        config.ongoingCall?.(callState);
+        break;
+      }
       default:
         onInvalidCallback();
         break;
