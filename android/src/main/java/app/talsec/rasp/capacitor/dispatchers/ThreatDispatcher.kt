@@ -1,9 +1,9 @@
-package com.aheaditec.freerasp.dispatchers
+package app.talsec.rasp.capacitor.dispatchers
 
 import app.talsec.rasp.security.api.SuspiciousAppInfo
 import app.talsec.rasp.security.api.ThreatListener.CallState
-import com.aheaditec.freerasp.events.ThreatEvent
-import com.aheaditec.freerasp.interfaces.PluginThreatListener
+import app.talsec.rasp.capacitor.events.ThreatEvent
+import app.talsec.rasp.capacitor.interfaces.PluginThreatListener
 
 internal object ThreatDispatcher {
     private lateinit var listener: PluginThreatListener

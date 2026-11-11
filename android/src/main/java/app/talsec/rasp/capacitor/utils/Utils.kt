@@ -1,4 +1,4 @@
-package com.aheaditec.freerasp.utils
+package app.talsec.rasp.capacitor.utils
 
 import android.content.Context
 import android.content.pm.ApplicationInfo

@@ -1,4 +1,4 @@
-package com.aheaditec.freerasp
+package app.talsec.rasp.capacitor
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -11,7 +11,7 @@ import android.view.WindowManager.SCREEN_RECORDING_STATE_VISIBLE
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import app.talsec.rasp.security.api.Talsec
-import com.aheaditec.freerasp.events.ThreatEvent
+import app.talsec.rasp.capacitor.events.ThreatEvent
 import java.util.function.Consumer
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)

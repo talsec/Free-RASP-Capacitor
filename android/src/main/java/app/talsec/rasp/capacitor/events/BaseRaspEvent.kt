@@ -1,4 +1,4 @@
-package com.aheaditec.freerasp.events
+package app.talsec.rasp.capacitor.events
 
 internal interface BaseRaspEvent {
     val value: Int

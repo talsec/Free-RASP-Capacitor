@@ -1,4 +1,4 @@
-package com.aheaditec.freerasp.models
+package app.talsec.rasp.capacitor.models
 
 import kotlinx.serialization.Serializable
 
