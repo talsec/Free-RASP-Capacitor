@@ -1,6 +1,6 @@
-package com.aheaditec.freerasp.events
+package app.talsec.rasp.capacitor.events
 
-import com.aheaditec.freerasp.utils.RandomGenerator
+import app.talsec.rasp.capacitor.utils.RandomGenerator
 import org.json.JSONArray
 
 internal sealed class RaspExecutionStateEvent(override val value: Int) : BaseRaspEvent {

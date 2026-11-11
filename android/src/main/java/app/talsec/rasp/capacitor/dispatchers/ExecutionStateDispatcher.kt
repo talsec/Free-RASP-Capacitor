@@ -1,7 +1,7 @@
-package com.aheaditec.freerasp.dispatchers
+package app.talsec.rasp.capacitor.dispatchers
 
-import com.aheaditec.freerasp.events.RaspExecutionStateEvent
-import com.aheaditec.freerasp.interfaces.PluginExecutionStateListener
+import app.talsec.rasp.capacitor.events.RaspExecutionStateEvent
+import app.talsec.rasp.capacitor.interfaces.PluginExecutionStateListener
 
 internal object ExecutionStateDispatcher {
     private lateinit var listener: PluginExecutionStateListener

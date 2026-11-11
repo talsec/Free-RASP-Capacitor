@@ -1,4 +1,4 @@
-package com.aheaditec.freerasp
+package app.talsec.rasp.capacitor
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -12,17 +12,17 @@ import app.talsec.rasp.security.api.Talsec
 import app.talsec.rasp.security.api.TalsecConfig
 import app.talsec.rasp.security.api.TalsecMode
 import app.talsec.rasp.security.api.ThreatListener.CallState
-import com.aheaditec.freerasp.dispatchers.ExecutionStateDispatcher
-import com.aheaditec.freerasp.dispatchers.ThreatDispatcher
-import com.aheaditec.freerasp.utils.Utils
-import com.aheaditec.freerasp.utils.getArraySafe
-import com.aheaditec.freerasp.utils.toEncodedJSArray
-import com.aheaditec.freerasp.utils.toSuspiciousAppDetectionConfig
-import com.aheaditec.freerasp.events.BaseRaspEvent
-import com.aheaditec.freerasp.events.RaspExecutionStateEvent
-import com.aheaditec.freerasp.events.ThreatEvent
-import com.aheaditec.freerasp.interfaces.PluginExecutionStateListener
-import com.aheaditec.freerasp.interfaces.PluginThreatListener
+import app.talsec.rasp.capacitor.dispatchers.ExecutionStateDispatcher
+import app.talsec.rasp.capacitor.dispatchers.ThreatDispatcher
+import app.talsec.rasp.capacitor.utils.Utils
+import app.talsec.rasp.capacitor.utils.getArraySafe
+import app.talsec.rasp.capacitor.utils.toEncodedJSArray
+import app.talsec.rasp.capacitor.utils.toSuspiciousAppDetectionConfig
+import app.talsec.rasp.capacitor.events.BaseRaspEvent
+import app.talsec.rasp.capacitor.events.RaspExecutionStateEvent
+import app.talsec.rasp.capacitor.events.ThreatEvent
+import app.talsec.rasp.capacitor.interfaces.PluginExecutionStateListener
+import app.talsec.rasp.capacitor.interfaces.PluginThreatListener
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall

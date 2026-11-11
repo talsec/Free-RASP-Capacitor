@@ -1,13 +1,13 @@
-package com.aheaditec.freerasp
+package app.talsec.rasp.capacitor
 
 import android.content.Context
 import app.talsec.rasp.security.api.SuspiciousAppInfo
 import app.talsec.rasp.security.api.ThreatListener
 import app.talsec.rasp.security.api.ThreatListener.CallState
-import com.aheaditec.freerasp.dispatchers.ExecutionStateDispatcher
-import com.aheaditec.freerasp.dispatchers.ThreatDispatcher
-import com.aheaditec.freerasp.events.RaspExecutionStateEvent
-import com.aheaditec.freerasp.events.ThreatEvent
+import app.talsec.rasp.capacitor.dispatchers.ExecutionStateDispatcher
+import app.talsec.rasp.capacitor.dispatchers.ThreatDispatcher
+import app.talsec.rasp.capacitor.events.RaspExecutionStateEvent
+import app.talsec.rasp.capacitor.events.ThreatEvent
 
 internal object PluginThreatHandler {
 
