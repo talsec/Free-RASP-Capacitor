@@ -212,10 +212,8 @@ const getThreatIdentifiers = async () => {
     return ids;
 };
 const getThreatChannelData = async () => {
-    // Android also sends the key of the ongoing call state
-    const dataLength = core.Capacitor.getPlatform() === 'android' ? 4 : 3;
     const { ids } = await Talsec.getThreatChannelData();
-    if (ids.length !== dataLength || !itemsHaveType(ids, 'string')) {
+    if (ids.length !== 4 || !itemsHaveType(ids, 'string')) {
         onInvalidCallback();
     }
     return ids;
@@ -270,8 +268,8 @@ const registerThreatListener = async (config) => {
     }
     isInitializing$1 = true;
     await removeThreatListener();
-    if (!threatChannel || !threatKey || !threatMalwareKey) {
-        [threatChannel, threatKey, threatMalwareKey, threatCallStateKey = null] = await getThreatChannelData();
+    if (!threatChannel || !threatKey || !threatMalwareKey || !threatCallStateKey) {
+        [threatChannel, threatKey, threatMalwareKey, threatCallStateKey] = await getThreatChannelData();
     }
     if (!isMappingPrepared$1) {
         await prepareThreatMapping();
@@ -283,7 +281,7 @@ const registerThreatListener = async (config) => {
     }
     eventsListener$1 = await Talsec.addListener(threatChannel, async (event) => {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
-        if (!threatKey || !threatMalwareKey) {
+        if (!threatKey || !threatMalwareKey || !threatCallStateKey) {
             onInvalidCallback();
             return;
         }
@@ -358,7 +356,7 @@ const registerThreatListener = async (config) => {
                 (_y = config.bootloader) === null || _y === void 0 ? void 0 : _y.call(config);
                 break;
             case Threat.OngoingCall.value: {
-                const callState = threatCallStateKey ? event[threatCallStateKey] : undefined;
+                const callState = event[threatCallStateKey];
                 if (!isCallState(callState)) {
                     onInvalidCallback();
                     break;
