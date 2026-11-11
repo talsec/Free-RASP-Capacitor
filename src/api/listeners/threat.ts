@@ -29,8 +29,8 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
 
   await removeThreatListener();
 
-  if (!threatChannel || !threatKey || !threatMalwareKey) {
-    [threatChannel, threatKey, threatMalwareKey, threatCallStateKey = null] = await getThreatChannelData();
+  if (!threatChannel || !threatKey || !threatMalwareKey || !threatCallStateKey) {
+    [threatChannel, threatKey, threatMalwareKey, threatCallStateKey] = await getThreatChannelData();
   }
 
   if (!isMappingPrepared) {
@@ -44,7 +44,7 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
   }
 
   eventsListener = await Talsec.addListener(threatChannel, async (event: any) => {
-    if (!threatKey || !threatMalwareKey) {
+    if (!threatKey || !threatMalwareKey || !threatCallStateKey) {
       onInvalidCallback();
       return;
     }
@@ -119,7 +119,7 @@ export const registerThreatListener = async (config: ThreatEventActions): Promis
         config.bootloader?.();
         break;
       case Threat.OngoingCall.value: {
-        const callState = threatCallStateKey ? event[threatCallStateKey] : undefined;
+        const callState = event[threatCallStateKey];
         if (!isCallState(callState)) {
           onInvalidCallback();
           break;

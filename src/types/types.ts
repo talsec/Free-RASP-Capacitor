@@ -4,7 +4,7 @@ export interface TalsecPlugin {
   onInvalidCallback(): void;
   removeListenerForEvent(options: { eventName: string }): Promise<{ result: string }>;
   getThreatIdentifiers(): Promise<{ ids: number[] }>;
-  getThreatChannelData(): Promise<{ ids: [string, string, string, string?] }>;
+  getThreatChannelData(): Promise<{ ids: [string, string, string, string] }>;
   getRaspExecutionStateIdentifiers(): Promise<{ ids: number[] }>;
   getRaspExecutionStateChannelData(): Promise<{ ids: [string, string] }>;
   storeExternalId(options: { data: string }): Promise<{ result: boolean }>;

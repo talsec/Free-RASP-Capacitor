@@ -15,7 +15,7 @@ export interface TalsecPlugin {
         ids: number[];
     }>;
     getThreatChannelData(): Promise<{
-        ids: [string, string, string, string?];
+        ids: [string, string, string, string];
     }>;
     getRaspExecutionStateIdentifiers(): Promise<{
         ids: number[];

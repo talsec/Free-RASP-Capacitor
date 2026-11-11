@@ -103,7 +103,8 @@ public class FreeraspPlugin: CAPPlugin {
      */
     @objc func getThreatChannelData(_ call: CAPPluginCall) -> Void {
         call.resolve([
-                    "ids": [EventIdentifiers.threatChannelName, EventIdentifiers.threatChannelKey, "0"]
+                    // Malware and ongoing call are Android only, so iOS sends placeholders for their keys
+                    "ids": [EventIdentifiers.threatChannelName, EventIdentifiers.threatChannelKey, "0", "0"]
                 ])
     }
 
