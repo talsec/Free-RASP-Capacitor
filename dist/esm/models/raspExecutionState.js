@@ -5,11 +5,11 @@ export class RaspExecutionState {
     }
     static getValues() {
         return Capacitor.getPlatform() === 'android'
-            ? [this.AllChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished]
-            : [this.AllChecksFinished];
+            ? [this.FastChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished]
+            : [this.FastChecksFinished];
     }
 }
-RaspExecutionState.AllChecksFinished = new RaspExecutionState(0);
+RaspExecutionState.FastChecksFinished = new RaspExecutionState(0);
 RaspExecutionState.CriticalChecksFinished = new RaspExecutionState(0);
 RaspExecutionState.PostponedChecksFinished = new RaspExecutionState(0);
 //# sourceMappingURL=raspExecutionState.js.map

@@ -183,11 +183,11 @@ var capacitorFreerasp = (function (exports, core) {
         }
         static getValues() {
             return core.Capacitor.getPlatform() === 'android'
-                ? [this.AllChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished]
-                : [this.AllChecksFinished];
+                ? [this.FastChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished]
+                : [this.FastChecksFinished];
         }
     }
-    RaspExecutionState.AllChecksFinished = new RaspExecutionState(0);
+    RaspExecutionState.FastChecksFinished = new RaspExecutionState(0);
     RaspExecutionState.CriticalChecksFinished = new RaspExecutionState(0);
     RaspExecutionState.PostponedChecksFinished = new RaspExecutionState(0);
 
@@ -431,8 +431,8 @@ var capacitorFreerasp = (function (exports, core) {
                 return;
             }
             switch (event[executionStateKey]) {
-                case RaspExecutionState.AllChecksFinished.value:
-                    (_a = config.allChecksFinished) === null || _a === void 0 ? void 0 : _a.call(config);
+                case RaspExecutionState.FastChecksFinished.value:
+                    (_a = config.fastChecksFinished) === null || _a === void 0 ? void 0 : _a.call(config);
                     break;
                 case RaspExecutionState.CriticalChecksFinished.value:
                     (_b = config.criticalChecksFinished) === null || _b === void 0 ? void 0 : _b.call(config);

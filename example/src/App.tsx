@@ -312,10 +312,10 @@ const App: React.FC = () => {
   
 
   const raspExecutionStateActions = {
-    allChecksFinished: () => {
+    fastChecksFinished: () => {
       setAllChecksStatus('completed');
       // eslint-disable-next-line no-console
-      console.log('freeRASP: All checks finished');
+      console.log('freeRASP: Fast checks finished');
     },
     // Android only
     postponedChecksFinished: () => {

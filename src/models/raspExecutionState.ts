@@ -3,7 +3,7 @@ import { Capacitor } from '@capacitor/core';
 export class RaspExecutionState {
   value: number;
 
-  static AllChecksFinished = new RaspExecutionState(0);
+  static FastChecksFinished = new RaspExecutionState(0);
   static CriticalChecksFinished = new RaspExecutionState(0);
   static PostponedChecksFinished = new RaspExecutionState(0);
 
@@ -13,7 +13,7 @@ export class RaspExecutionState {
 
   static getValues(): RaspExecutionState[] {
     return Capacitor.getPlatform() === 'android'
-      ? [this.AllChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished]
-      : [this.AllChecksFinished];
+      ? [this.FastChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished]
+      : [this.FastChecksFinished];
   }
 }

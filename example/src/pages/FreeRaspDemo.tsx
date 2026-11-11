@@ -259,7 +259,7 @@ const FreeRaspDemo: React.FC<{
         <IonListHeader>
           <h1>RASP Execution State:</h1>
         </IonListHeader>
-        {renderExecutionState('All checks finished', allChecksStatus)}
+        {renderExecutionState('Fast checks finished', allChecksStatus)}
         {platform === 'android' && renderExecutionState('Postponed checks finished', postponedChecksStatus)}
         <IonListHeader>
           <h1>freeRASP checks:</h1>
