@@ -10,6 +10,7 @@ import android.os.Looper
 import app.talsec.rasp.security.api.SuspiciousAppInfo
 import app.talsec.rasp.security.api.Talsec
 import app.talsec.rasp.security.api.TalsecConfig
+import app.talsec.rasp.security.api.TalsecMode
 import app.talsec.rasp.security.api.ThreatListener.CallState
 import com.aheaditec.freerasp.dispatchers.ExecutionStateDispatcher
 import com.aheaditec.freerasp.dispatchers.ThreatDispatcher
@@ -57,7 +58,7 @@ class FreeraspPlugin : Plugin() {
             PluginThreatHandler.registerSDKListener(context)
 
             bridge.activity.runOnUiThread {
-                Talsec.start(context, talsecConfig)
+                Talsec.start(context, talsecConfig, TalsecMode.BACKGROUND)
                 mainHandler.post {
                     talsecStarted = true
                     // This code must be called only AFTER Talsec.start
