@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Methods that resolved with a status string or a constant now resolve to `void`: `startFreeRASP`, `addToWhitelist`, `blockScreenCapture`, `blockScreenControl`, `startOngoingCallDetection`, `stopOngoingCallDetection`, `storeExternalId`, `removeExternalId`
 - All methods now reject with `TalsecError` (`code`: `talsec-failure`, `unsupported-platform`, `configuration-exception`, `external-id-failure`, `malware-failure`) instead of native errors or plain strings
 - `onInvalidCallback` no longer exported; use `abortApp` to terminate the app
+- The `TalsecPlugin` interface of the native bridge is no longer exported; use the exported functions instead
 
 ### Capacitor
 
