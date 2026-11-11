@@ -86,7 +86,7 @@ export type TalsecAndroidConfig = {
     suspiciousAppDetectionConfig?: SuspiciousAppDetectionConfig;
 };
 export type TalsecIosConfig = {
-    appBundleId: string;
+    appBundleIds: string[];
     appTeamId: string;
 };
 export type ScopeType = 'SIDELOADED_ONLY' | 'SIDELOADED_AND_SYSTEM_EXCLUDE_OEM' | 'SIDELOADED_AND_OEM' | 'SIDELOADED_AND_SYSTEM_AND_OEM' | 'ALL';

@@ -1,6 +1,6 @@
 import { getRaspExecutionStateChannelData, prepareRaspExecutionStateMapping } from '../../channels/raspExecutionState';
 import { RaspExecutionState } from '../../models/raspExecutionState';
-import { onInvalidCallback } from '../methods/native';
+import { onInvalidCallback } from '../methods/internal';
 import { Talsec } from '../nativeModules';
 let eventsListener = null;
 let executionStateChannel = null;

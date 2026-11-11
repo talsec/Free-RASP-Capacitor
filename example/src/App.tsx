@@ -69,7 +69,7 @@ const App: React.FC = () => {
       },
     },
     iosConfig: {
-      appBundleId: 'io.ionic.starter',
+      appBundleIds: ['io.ionic.starter'],
       appTeamId: 'your_team_ID',
     },
     watcherMail: 'your_email_address@example.com',
@@ -330,9 +330,14 @@ const App: React.FC = () => {
   // start freeRASP
   useEffect(() => {
     (async () => {
-      const response = await startFreeRASP(config, actions, raspExecutionStateActions);
-      // eslint-disable-next-line no-console
-      console.log('Talsec started:', response);
+      try {
+        await startFreeRASP(config, actions, raspExecutionStateActions);
+        // eslint-disable-next-line no-console
+        console.log('Talsec started');
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Talsec failed to start:', error);
+      }
     })();
 
     if (Capacitor.getPlatform() === 'android') {

@@ -73,9 +73,9 @@ const FreeRaspDemo: React.FC<{
     await Promise.all(
       appsToWhitelist.map(async (app) => {
         try {
-          const whitelistResponse = await addToWhitelist(app);
+          await addToWhitelist(app);
           // eslint-disable-next-line no-console
-          console.info(`${app} stored to Malware Whitelist: ${whitelistResponse}`);
+          console.info(`${app} stored to Malware Whitelist`);
         } catch (error) {
           // eslint-disable-next-line no-console
           console.info('Malware whitelist failed: ', error);
@@ -96,9 +96,9 @@ const FreeRaspDemo: React.FC<{
 
   const handleScreenCapture = async (enable: boolean) => {
     try {
-      const blockScreenCaptureResponse = await blockScreenCapture(enable);
+      await blockScreenCapture(enable);
       // eslint-disable-next-line no-console
-      console.info('Changing Screen Capture Status:', blockScreenCaptureResponse);
+      console.info(`Screen capture ${enable ? 'blocked' : 'enabled'}`);
       await updateScreenCaptureStatus();
     } catch (e) {
       // eslint-disable-next-line no-console

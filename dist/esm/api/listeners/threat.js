@@ -1,7 +1,7 @@
 import { getThreatChannelData, prepareThreatMapping } from '../../channels/threat';
 import { Threat } from '../../models/threat';
 import { parseMalwareData } from '../../utils/malware';
-import { onInvalidCallback } from '../methods/native';
+import { onInvalidCallback } from '../methods/internal';
 import { Talsec } from '../nativeModules';
 let eventsListener = null;
 let threatChannel = null;
