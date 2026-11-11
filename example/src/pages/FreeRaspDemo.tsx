@@ -44,6 +44,7 @@ const FreeRaspDemo: React.FC<{
   checks: {
     name: string;
     isSecure: boolean;
+    detail?: string;
   }[];
   suspiciousApps: SuspiciousAppInfo[];
   allChecksStatus: 'in progress' | 'completed';
@@ -270,13 +271,14 @@ const FreeRaspDemo: React.FC<{
             check: {
               name: string;
               isSecure: boolean;
+              detail?: string;
             },
             idx: number,
           ) => (
             <IonItem key={idx}>
               <IonLabel color={check.isSecure ? 'success' : 'danger'}>
                 {check.name}
-                <p className="checkDescription">{check.isSecure ? 'secure' : 'danger'} </p>
+                <p className="checkDescription">{check.detail ?? (check.isSecure ? 'secure' : 'danger')} </p>
               </IonLabel>
 
               {check.name === 'Malware' && <MalwareModal isDisabled={check.isSecure} suspiciousApps={suspiciousApps} />}

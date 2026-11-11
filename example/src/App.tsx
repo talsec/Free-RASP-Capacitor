@@ -26,6 +26,8 @@ import './theme/variables.css';
 
 setupIonicReact();
 
+const callStateLabel = (state: CallState) => state.charAt(0) + state.slice(1).toLowerCase();
+
 const App: React.FC = () => {
   const [appChecks, setAppChecks] = useState([
     ...commonChecks,
@@ -302,7 +304,7 @@ const App: React.FC = () => {
       setAppChecks(currentState =>
         currentState.map(threat =>
           threat.name === 'Ongoing Call'
-            ? { ...threat, isSecure: state === 'STOPPED' }
+            ? { ...threat, isSecure: state === 'STOPPED', detail: callStateLabel(state) }
             : threat,
         ),
       );
