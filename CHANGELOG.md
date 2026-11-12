@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Android package (namespace) of the plugin renamed from `com.aheaditec.freerasp` to `app.talsec.rasp.capacitor`, following the Android SDK's `app.talsec.rasp`
 - On Android, `isScreenCaptureBlocked()` reports the protection state of the current activity
+- Threat and RASP execution state actions are typed as returning `void` instead of `any`
 
 ### Android
 
