@@ -1,5 +1,6 @@
-import { onInvalidCallback } from './api/methods/native';
+import { onInvalidCallback } from './api/methods/internal';
 export * from './types/types';
+export { TalsecError } from './errors';
 export * from './api/methods/native';
 export * from './api/listeners/threat';
 export * from './api/listeners/raspExecutionState';

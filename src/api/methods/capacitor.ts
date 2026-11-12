@@ -1,3 +1,4 @@
+import { wrapNative } from '../../errors';
 import type { RaspExecutionStateEventActions, TalsecConfig, ThreatEventActions } from '../../types/types';
 import { withDefaults } from '../../utils/config';
 import { registerRaspExecutionStateListener } from '../listeners/raspExecutionState';
@@ -10,17 +11,15 @@ export const startFreeRASP = async (
   config: TalsecConfig,
   actions: ThreatEventActions,
   raspExecutionStateActions?: RaspExecutionStateEventActions,
-): Promise<{ started: boolean }> => {
+): Promise<void> => {
   await registerThreatListener(actions);
   if (raspExecutionStateActions) {
     await registerRaspExecutionStateListener(raspExecutionStateActions);
   }
   if (isRaspStarted) {
-    return { started: true };
+    return;
   }
 
-  const response = await Talsec.talsecStart({ config: withDefaults(config) });
+  await wrapNative('talsec-failure', () => Talsec.talsecStart({ config: withDefaults(config) }));
   isRaspStarted = true;
-
-  return response;
 };

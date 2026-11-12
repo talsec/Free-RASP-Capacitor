@@ -1,4 +1,4 @@
-import { onInvalidCallback } from '../api/methods/native';
+import { onInvalidCallback } from '../api/methods/internal';
 import { Talsec } from '../api/nativeModules';
 import { Threat } from '../models/threat';
 import { getThreatCount, itemsHaveType } from '../utils/utils';

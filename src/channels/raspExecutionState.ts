@@ -1,4 +1,4 @@
-import { onInvalidCallback } from '../api/methods/native';
+import { onInvalidCallback } from '../api/methods/internal';
 import { Talsec } from '../api/nativeModules';
 import { RaspExecutionState } from '../models/raspExecutionState';
 import { getRaspExecutionStateCount, itemsHaveType } from '../utils/utils';

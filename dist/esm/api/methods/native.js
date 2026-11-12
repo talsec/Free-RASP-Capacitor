@@ -1,40 +1,47 @@
 import { Capacitor } from '@capacitor/core';
+import { TalsecError, unsupportedOnIos, wrapNative } from '../../errors';
 import { Talsec } from '../nativeModules';
+const isIos = () => Capacitor.getPlatform() === 'ios';
+/**
+ * Android only. Adds an app to the malware whitelist, so it isn't reported as malware.
+ */
 export const addToWhitelist = async (packageName) => {
-    if (Capacitor.getPlatform() === 'ios') {
-        return Promise.reject('Malware detection is not available on iOS');
+    if (isIos()) {
+        throw unsupportedOnIos('Malware detection');
     }
-    const { result } = await Talsec.addToWhitelist({ packageName });
-    return result;
+    await wrapNative('malware-failure', () => Talsec.addToWhitelist({ packageName }));
 };
+/**
+ * Blocks or unblocks screen capture of the app screen.
+ */
 export const blockScreenCapture = async (enable) => {
-    const { result } = await Talsec.blockScreenCapture({ enable });
-    return result;
+    await wrapNative('talsec-failure', () => Talsec.blockScreenCapture({ enable }));
 };
+/**
+ * Returns whether screen capture of the app screen is blocked.
+ */
 export const isScreenCaptureBlocked = async () => {
-    const { result } = await Talsec.isScreenCaptureBlocked();
+    const { result } = await wrapNative('talsec-failure', () => Talsec.isScreenCaptureBlocked());
     return result;
 };
-const androidOnly = (feature) => Promise.reject(`${feature} is not available on iOS`);
 /**
  * Android only. Prevents accessibility services from reading or controlling
  * the app screen.
  */
 export const blockScreenControl = async (enable) => {
-    if (Capacitor.getPlatform() === 'ios') {
-        return androidOnly('Screen control blocking');
+    if (isIos()) {
+        throw unsupportedOnIos('Screen control blocking');
     }
-    const { result } = await Talsec.blockScreenControl({ enable });
-    return result;
+    await wrapNative('talsec-failure', () => Talsec.blockScreenControl({ enable }));
 };
 /**
  * Android only. Returns whether screen control is blocked.
  */
 export const isScreenControlBlocked = async () => {
-    if (Capacitor.getPlatform() === 'ios') {
-        return androidOnly('Screen control blocking');
+    if (isIos()) {
+        throw unsupportedOnIos('Screen control blocking');
     }
-    const { result } = await Talsec.isScreenControlBlocked();
+    const { result } = await wrapNative('talsec-failure', () => Talsec.isScreenControlBlocked());
     return result;
 };
 /**
@@ -44,20 +51,20 @@ export const isScreenControlBlocked = async () => {
  * @returns whether the request was applied
  */
 export const blockOverlayWindows = async (enable) => {
-    if (Capacitor.getPlatform() === 'ios') {
-        return androidOnly('Overlay windows blocking');
+    if (isIos()) {
+        throw unsupportedOnIos('Overlay windows blocking');
     }
-    const { result } = await Talsec.blockOverlayWindows({ enable });
+    const { result } = await wrapNative('talsec-failure', () => Talsec.blockOverlayWindows({ enable }));
     return result;
 };
 /**
  * Android only. Returns whether overlay windows of other apps are hidden.
  */
 export const isOverlayWindowsBlocked = async () => {
-    if (Capacitor.getPlatform() === 'ios') {
-        return androidOnly('Overlay windows blocking');
+    if (isIos()) {
+        throw unsupportedOnIos('Overlay windows blocking');
     }
-    const { result } = await Talsec.isOverlayWindowsBlocked();
+    const { result } = await wrapNative('talsec-failure', () => Talsec.isOverlayWindowsBlocked());
     return result;
 };
 /**
@@ -65,38 +72,43 @@ export const isOverlayWindowsBlocked = async () => {
  * Call states are reported through the `ongoingCall` threat action.
  */
 export const startOngoingCallDetection = async () => {
-    if (Capacitor.getPlatform() === 'ios') {
-        return androidOnly('Ongoing call detection');
+    if (isIos()) {
+        throw unsupportedOnIos('Ongoing call detection');
     }
-    const { result } = await Talsec.startOngoingCallDetection();
-    return result;
+    await wrapNative('talsec-failure', () => Talsec.startOngoingCallDetection());
 };
 /**
  * Android only. Stops the ongoing call detection.
  */
 export const stopOngoingCallDetection = async () => {
-    if (Capacitor.getPlatform() === 'ios') {
-        return androidOnly('Ongoing call detection');
+    if (isIos()) {
+        throw unsupportedOnIos('Ongoing call detection');
     }
-    const { result } = await Talsec.stopOngoingCallDetection();
-    return result;
+    await wrapNative('talsec-failure', () => Talsec.stopOngoingCallDetection());
 };
+/**
+ * Stores an external ID, sent to the backend with the security logs.
+ */
 export const storeExternalId = async (data) => {
-    const { result } = await Talsec.storeExternalId({ data });
-    return result;
+    await wrapNative('external-id-failure', () => Talsec.storeExternalId({ data }));
 };
+/**
+ * Removes the stored external ID.
+ */
 export const removeExternalId = async () => {
-    const { result } = await Talsec.removeExternalId();
-    return result;
+    await wrapNative('external-id-failure', () => Talsec.removeExternalId());
 };
+/**
+ * Android only. Returns the app icon of the given package as a base64-encoded PNG.
+ */
 export const getAppIcon = async (packageName) => {
-    if (Capacitor.getPlatform() === 'ios') {
-        return Promise.reject('App icon retrieval for Malware detection is not available on iOS');
+    if (isIos()) {
+        throw unsupportedOnIos('App icon retrieval for malware detection');
     }
-    const { result } = await Talsec.getAppIcon({ packageName });
+    const { result } = await wrapNative('malware-failure', () => Talsec.getAppIcon({ packageName }));
+    if (typeof result !== 'string') {
+        throw new TalsecError('malware-failure', 'App icon is not available');
+    }
     return result;
-};
-export const onInvalidCallback = () => {
-    Talsec.onInvalidCallback();
 };
 //# sourceMappingURL=native.js.map

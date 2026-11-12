@@ -1,3 +1,4 @@
+import { wrapNative } from '../../errors';
 import { withDefaults } from '../../utils/config';
 import { registerRaspExecutionStateListener } from '../listeners/raspExecutionState';
 import { registerThreatListener } from '../listeners/threat';
@@ -9,10 +10,9 @@ export const startFreeRASP = async (config, actions, raspExecutionStateActions) 
         await registerRaspExecutionStateListener(raspExecutionStateActions);
     }
     if (isRaspStarted) {
-        return { started: true };
+        return;
     }
-    const response = await Talsec.talsecStart({ config: withDefaults(config) });
+    await wrapNative('talsec-failure', () => Talsec.talsecStart({ config: withDefaults(config) }));
     isRaspStarted = true;
-    return response;
 };
 //# sourceMappingURL=capacitor.js.map
