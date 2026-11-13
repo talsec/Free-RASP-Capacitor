@@ -3,7 +3,7 @@ import type { PluginListenerHandle } from '@capacitor/core';
 import { getRaspExecutionStateChannelData, prepareRaspExecutionStateMapping } from '../../channels/raspExecutionState';
 import { RaspExecutionState } from '../../models/raspExecutionState';
 import type { RaspExecutionStateEventActions } from '../../types/types';
-import { onInvalidCallback } from '../methods/native';
+import { onInvalidCallback } from '../methods/internal';
 import { Talsec } from '../nativeModules';
 
 let eventsListener: PluginListenerHandle | null = null;
@@ -42,8 +42,14 @@ export const registerRaspExecutionStateListener = async (config: RaspExecutionSt
     }
 
     switch (event[executionStateKey]) {
-      case RaspExecutionState.AllChecksFinished.value:
-        config.allChecksFinished?.();
+      case RaspExecutionState.FastChecksFinished.value:
+        config.fastChecksFinished?.();
+        break;
+      case RaspExecutionState.CriticalChecksFinished.value:
+        config.criticalChecksFinished?.();
+        break;
+      case RaspExecutionState.PostponedChecksFinished.value:
+        config.postponedChecksFinished?.();
         break;
       default:
         onInvalidCallback();

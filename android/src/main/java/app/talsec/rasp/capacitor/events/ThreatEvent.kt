@@ -1,6 +1,6 @@
-package com.aheaditec.freerasp.events
+package app.talsec.rasp.capacitor.events
 
-import com.aheaditec.freerasp.utils.RandomGenerator
+import app.talsec.rasp.capacitor.utils.RandomGenerator
 import org.json.JSONArray
 
 /**
@@ -36,12 +36,14 @@ internal sealed class ThreatEvent(override val value: Int) : BaseRaspEvent {
     object UnsecureWifi : ThreatEvent(RandomGenerator.next())
     object Automation : ThreatEvent(RandomGenerator.next())
     object Bootloader : ThreatEvent(RandomGenerator.next())
+    object OngoingCall : ThreatEvent(RandomGenerator.next())
 
     companion object {
 
         internal val CHANNEL_NAME = RandomGenerator.next().toString()
         internal val CHANNEL_KEY = RandomGenerator.next().toString()
         internal val MALWARE_CHANNEL_KEY = RandomGenerator.next().toString()
+        internal val CALL_STATE_CHANNEL_KEY = RandomGenerator.next().toString()
 
         internal val ALL_EVENTS = JSONArray(
             listOf(
@@ -66,7 +68,8 @@ internal sealed class ThreatEvent(override val value: Int) : BaseRaspEvent {
                 LocationSpoofing,
                 UnsecureWifi,
                 Automation,
-                Bootloader
+                Bootloader,
+                OngoingCall
             ).map { it.value }
         )
     }

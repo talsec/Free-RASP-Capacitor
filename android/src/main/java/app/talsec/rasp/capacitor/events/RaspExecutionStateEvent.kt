@@ -1,13 +1,15 @@
-package com.aheaditec.freerasp.events
+package app.talsec.rasp.capacitor.events
 
-import com.aheaditec.freerasp.utils.RandomGenerator
+import app.talsec.rasp.capacitor.utils.RandomGenerator
 import org.json.JSONArray
 
 internal sealed class RaspExecutionStateEvent(override val value: Int) : BaseRaspEvent {
     override val channelName: String get() = CHANNEL_NAME
     override val channelKey: String get() = CHANNEL_KEY
 
-    object AllChecksFinished : RaspExecutionStateEvent(RandomGenerator.next())
+    object FastChecksFinished : RaspExecutionStateEvent(RandomGenerator.next())
+    object CriticalChecksFinished : RaspExecutionStateEvent(RandomGenerator.next())
+    object PostponedChecksFinished : RaspExecutionStateEvent(RandomGenerator.next())
 
     companion object {
         internal val CHANNEL_NAME = RandomGenerator.next().toString()
@@ -15,7 +17,9 @@ internal sealed class RaspExecutionStateEvent(override val value: Int) : BaseRas
 
         internal val ALL_EVENTS = JSONArray(
             listOf(
-                AllChecksFinished.value
+                FastChecksFinished.value,
+                CriticalChecksFinished.value,
+                PostponedChecksFinished.value
             )
         )
     }

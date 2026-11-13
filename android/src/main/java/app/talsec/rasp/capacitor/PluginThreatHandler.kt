@@ -1,12 +1,13 @@
-package com.aheaditec.freerasp
+package app.talsec.rasp.capacitor
 
 import android.content.Context
 import app.talsec.rasp.security.api.SuspiciousAppInfo
 import app.talsec.rasp.security.api.ThreatListener
-import com.aheaditec.freerasp.dispatchers.ExecutionStateDispatcher
-import com.aheaditec.freerasp.dispatchers.ThreatDispatcher
-import com.aheaditec.freerasp.events.RaspExecutionStateEvent
-import com.aheaditec.freerasp.events.ThreatEvent
+import app.talsec.rasp.security.api.ThreatListener.CallState
+import app.talsec.rasp.capacitor.dispatchers.ExecutionStateDispatcher
+import app.talsec.rasp.capacitor.dispatchers.ThreatDispatcher
+import app.talsec.rasp.capacitor.events.RaspExecutionStateEvent
+import app.talsec.rasp.capacitor.events.ThreatEvent
 
 internal object PluginThreatHandler {
 
@@ -45,8 +46,8 @@ internal object PluginThreatHandler {
             ThreatDispatcher.dispatchThreat(ThreatEvent.ObfuscationIssues)
         }
 
-        override fun onMalware(suspiciousAppInfos: MutableList<SuspiciousAppInfo>) {
-            ThreatDispatcher.dispatchMalware(suspiciousAppInfos)
+        override fun onMalware(suspiciousAppInfos: List<SuspiciousAppInfo>) {
+            ThreatDispatcher.dispatchMalware(suspiciousAppInfos.toMutableList())
         }
 
         override fun onScreenshot() {
@@ -80,6 +81,10 @@ internal object PluginThreatHandler {
         override fun onBootloader() {
             ThreatDispatcher.dispatchThreat(ThreatEvent.Bootloader)
         }
+
+        override fun onOngoingCall(state: CallState) {
+            ThreatDispatcher.dispatchOngoingCall(state)
+        }
     }
 
     private val deviceState = object : ThreatListener.DeviceState() {
@@ -106,8 +111,16 @@ internal object PluginThreatHandler {
     }
 
     private val raspExecutionState = object : ThreatListener.RaspExecutionState() {
-        override fun onAllChecksFinished() {
-            ExecutionStateDispatcher.dispatch(RaspExecutionStateEvent.AllChecksFinished)
+        override fun onCriticalChecksFinished() {
+            ExecutionStateDispatcher.dispatch(RaspExecutionStateEvent.CriticalChecksFinished)
+        }
+
+        override fun onFastChecksFinished() {
+            ExecutionStateDispatcher.dispatch(RaspExecutionStateEvent.FastChecksFinished)
+        }
+
+        override fun onPostponedChecksFinished() {
+            ExecutionStateDispatcher.dispatch(RaspExecutionStateEvent.PostponedChecksFinished)
         }
     }
 

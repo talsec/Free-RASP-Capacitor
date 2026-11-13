@@ -1,4 +1,4 @@
-package com.aheaditec.freerasp.utils
+package app.talsec.rasp.capacitor.utils
 
 import android.content.Context
 import android.content.pm.PackageInfo
@@ -9,8 +9,8 @@ import app.talsec.rasp.security.api.ReasonMode
 import app.talsec.rasp.security.api.ScopeType
 import app.talsec.rasp.security.api.SuspiciousAppDetectionConfig
 import app.talsec.rasp.security.api.SuspiciousAppInfo
-import com.aheaditec.freerasp.models.CapPackageInfo
-import com.aheaditec.freerasp.models.CapSuspiciousAppInfo
+import app.talsec.rasp.capacitor.models.CapPackageInfo
+import app.talsec.rasp.capacitor.models.CapSuspiciousAppInfo
 import com.getcapacitor.JSArray
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

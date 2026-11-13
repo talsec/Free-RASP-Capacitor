@@ -3,38 +3,153 @@ var capacitorFreerasp = (function (exports, core) {
 
     const Talsec = core.registerPlugin('Freerasp', {});
 
-    const addToWhitelist = async (packageName) => {
-        if (core.Capacitor.getPlatform() === 'ios') {
-            return Promise.reject('Malware detection is not available on iOS');
-        }
-        const { result } = await Talsec.addToWhitelist({ packageName });
-        return result;
-    };
-    const blockScreenCapture = async (enable) => {
-        const { result } = await Talsec.blockScreenCapture({ enable });
-        return result;
-    };
-    const isScreenCaptureBlocked = async () => {
-        const { result } = await Talsec.isScreenCaptureBlocked();
-        return result;
-    };
-    const storeExternalId = async (data) => {
-        const { result } = await Talsec.storeExternalId({ data });
-        return result;
-    };
-    const removeExternalId = async () => {
-        const { result } = await Talsec.removeExternalId();
-        return result;
-    };
-    const getAppIcon = async (packageName) => {
-        if (core.Capacitor.getPlatform() === 'ios') {
-            return Promise.reject('App icon retrieval for Malware detection is not available on iOS');
-        }
-        const { result } = await Talsec.getAppIcon({ packageName });
-        return result;
-    };
+    /**
+     * Terminates the app. Used when the native channel reports an unexpected callback.
+     */
     const onInvalidCallback = () => {
         Talsec.onInvalidCallback();
+    };
+
+    /**
+     * The only error type rejected by the freeRASP API.
+     */
+    class TalsecError extends Error {
+        constructor(code, message) {
+            super(message);
+            this.name = 'TalsecError';
+            this.code = code;
+            Object.setPrototypeOf(this, TalsecError.prototype);
+        }
+    }
+    /**
+     * Runs a native call and rethrows any failure as a {@link TalsecError}.
+     */
+    const wrapNative = async (code, fn) => {
+        var _a;
+        try {
+            return await fn();
+        }
+        catch (e) {
+            if (e instanceof TalsecError) {
+                throw e;
+            }
+            throw new TalsecError(code, (_a = e === null || e === void 0 ? void 0 : e.message) !== null && _a !== void 0 ? _a : String(e));
+        }
+    };
+    /**
+     * Rejects calls of Android-only features on iOS.
+     */
+    const unsupportedOnIos = (feature) => new TalsecError('unsupported-platform', `${feature} is not available on iOS`);
+
+    const isIos = () => core.Capacitor.getPlatform() === 'ios';
+    /**
+     * Android only. Adds an app to the malware whitelist, so it isn't reported as malware.
+     */
+    const addToWhitelist = async (packageName) => {
+        if (isIos()) {
+            throw unsupportedOnIos('Malware detection');
+        }
+        await wrapNative('malware-failure', () => Talsec.addToWhitelist({ packageName }));
+    };
+    /**
+     * Blocks or unblocks screen capture of the app screen.
+     */
+    const blockScreenCapture = async (enable) => {
+        await wrapNative('talsec-failure', () => Talsec.blockScreenCapture({ enable }));
+    };
+    /**
+     * Returns whether screen capture of the app screen is blocked.
+     */
+    const isScreenCaptureBlocked = async () => {
+        const { result } = await wrapNative('talsec-failure', () => Talsec.isScreenCaptureBlocked());
+        return result;
+    };
+    /**
+     * Android only. Prevents accessibility services from reading or controlling
+     * the app screen.
+     */
+    const blockScreenControl = async (enable) => {
+        if (isIos()) {
+            throw unsupportedOnIos('Screen control blocking');
+        }
+        await wrapNative('talsec-failure', () => Talsec.blockScreenControl({ enable }));
+    };
+    /**
+     * Android only. Returns whether screen control is blocked.
+     */
+    const isScreenControlBlocked = async () => {
+        if (isIos()) {
+            throw unsupportedOnIos('Screen control blocking');
+        }
+        const { result } = await wrapNative('talsec-failure', () => Talsec.isScreenControlBlocked());
+        return result;
+    };
+    /**
+     * Android only. Hides overlay windows of other apps over the app screen.
+     * Requires Android 12+ and the `HIDE_OVERLAY_WINDOWS` permission.
+     *
+     * @returns whether the request was applied
+     */
+    const blockOverlayWindows = async (enable) => {
+        if (isIos()) {
+            throw unsupportedOnIos('Overlay windows blocking');
+        }
+        const { result } = await wrapNative('talsec-failure', () => Talsec.blockOverlayWindows({ enable }));
+        return result;
+    };
+    /**
+     * Android only. Returns whether overlay windows of other apps are hidden.
+     */
+    const isOverlayWindowsBlocked = async () => {
+        if (isIos()) {
+            throw unsupportedOnIos('Overlay windows blocking');
+        }
+        const { result } = await wrapNative('talsec-failure', () => Talsec.isOverlayWindowsBlocked());
+        return result;
+    };
+    /**
+     * Android only. Starts the ongoing call (cellular and VoIP) detection.
+     * Call states are reported through the `ongoingCall` threat action.
+     */
+    const startOngoingCallDetection = async () => {
+        if (isIos()) {
+            throw unsupportedOnIos('Ongoing call detection');
+        }
+        await wrapNative('talsec-failure', () => Talsec.startOngoingCallDetection());
+    };
+    /**
+     * Android only. Stops the ongoing call detection.
+     */
+    const stopOngoingCallDetection = async () => {
+        if (isIos()) {
+            throw unsupportedOnIos('Ongoing call detection');
+        }
+        await wrapNative('talsec-failure', () => Talsec.stopOngoingCallDetection());
+    };
+    /**
+     * Stores an external ID, sent to the backend with the security logs.
+     */
+    const storeExternalId = async (data) => {
+        await wrapNative('external-id-failure', () => Talsec.storeExternalId({ data }));
+    };
+    /**
+     * Removes the stored external ID.
+     */
+    const removeExternalId = async () => {
+        await wrapNative('external-id-failure', () => Talsec.removeExternalId());
+    };
+    /**
+     * Android only. Returns the app icon of the given package as a base64-encoded PNG.
+     */
+    const getAppIcon = async (packageName) => {
+        if (isIos()) {
+            throw unsupportedOnIos('App icon retrieval for malware detection');
+        }
+        const { result } = await wrapNative('malware-failure', () => Talsec.getAppIcon({ packageName }));
+        if (typeof result !== 'string') {
+            throw new TalsecError('malware-failure', 'App icon is not available');
+        }
+        return result;
     };
 
     class Threat {
@@ -66,6 +181,7 @@ var capacitorFreerasp = (function (exports, core) {
                     this.UnsecureWifi,
                     this.Automation,
                     this.Bootloader,
+                    this.OngoingCall,
                 ]
                 : [
                     this.AppIntegrity,
@@ -108,16 +224,21 @@ var capacitorFreerasp = (function (exports, core) {
     Threat.UnsecureWifi = new Threat(0);
     Threat.Automation = new Threat(0);
     Threat.Bootloader = new Threat(0);
+    Threat.OngoingCall = new Threat(0);
 
     class RaspExecutionState {
         constructor(value) {
             this.value = value;
         }
         static getValues() {
-            return [this.AllChecksFinished];
+            return core.Capacitor.getPlatform() === 'android'
+                ? [this.FastChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished]
+                : [this.FastChecksFinished];
         }
     }
-    RaspExecutionState.AllChecksFinished = new RaspExecutionState(0);
+    RaspExecutionState.FastChecksFinished = new RaspExecutionState(0);
+    RaspExecutionState.CriticalChecksFinished = new RaspExecutionState(0);
+    RaspExecutionState.PostponedChecksFinished = new RaspExecutionState(0);
 
     const getThreatCount = () => {
         return Threat.getValues().length;
@@ -138,7 +259,7 @@ var capacitorFreerasp = (function (exports, core) {
     };
     const getThreatChannelData = async () => {
         const { ids } = await Talsec.getThreatChannelData();
-        if (ids.length !== 3 || !itemsHaveType(ids, 'string')) {
+        if (ids.length !== 4 || !itemsHaveType(ids, 'string')) {
             onInvalidCallback();
         }
         return ids;
@@ -182,6 +303,9 @@ var capacitorFreerasp = (function (exports, core) {
     let threatChannel = null;
     let threatKey = null;
     let threatMalwareKey = null;
+    let threatCallStateKey = null;
+    const callStates = ['STARTED', 'ONGOING', 'STOPPED'];
+    const isCallState = (value) => typeof value === 'string' && callStates.includes(value);
     let isInitializing$1 = false;
     let isMappingPrepared$1 = false;
     const registerThreatListener = async (config) => {
@@ -190,8 +314,8 @@ var capacitorFreerasp = (function (exports, core) {
         }
         isInitializing$1 = true;
         await removeThreatListener();
-        if (!threatChannel || !threatKey || !threatMalwareKey) {
-            [threatChannel, threatKey, threatMalwareKey] = await getThreatChannelData();
+        if (!threatChannel || !threatKey || !threatMalwareKey || !threatCallStateKey) {
+            [threatChannel, threatKey, threatMalwareKey, threatCallStateKey] = await getThreatChannelData();
         }
         if (!isMappingPrepared$1) {
             await prepareThreatMapping();
@@ -202,8 +326,8 @@ var capacitorFreerasp = (function (exports, core) {
             return;
         }
         eventsListener$1 = await Talsec.addListener(threatChannel, async (event) => {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
-            if (!threatKey || !threatMalwareKey) {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
+            if (!threatKey || !threatMalwareKey || !threatCallStateKey) {
                 onInvalidCallback();
                 return;
             }
@@ -277,6 +401,15 @@ var capacitorFreerasp = (function (exports, core) {
                 case Threat.Bootloader.value:
                     (_y = config.bootloader) === null || _y === void 0 ? void 0 : _y.call(config);
                     break;
+                case Threat.OngoingCall.value: {
+                    const callState = event[threatCallStateKey];
+                    if (!isCallState(callState)) {
+                        onInvalidCallback();
+                        break;
+                    }
+                    (_z = config.ongoingCall) === null || _z === void 0 ? void 0 : _z.call(config, callState);
+                    break;
+                }
                 default:
                     onInvalidCallback();
                     break;
@@ -339,14 +472,20 @@ var capacitorFreerasp = (function (exports, core) {
             return;
         }
         eventsListener = await Talsec.addListener(executionStateChannel, async (event) => {
-            var _a;
+            var _a, _b, _c;
             if (!executionStateKey) {
                 onInvalidCallback();
                 return;
             }
             switch (event[executionStateKey]) {
-                case RaspExecutionState.AllChecksFinished.value:
-                    (_a = config.allChecksFinished) === null || _a === void 0 ? void 0 : _a.call(config);
+                case RaspExecutionState.FastChecksFinished.value:
+                    (_a = config.fastChecksFinished) === null || _a === void 0 ? void 0 : _a.call(config);
+                    break;
+                case RaspExecutionState.CriticalChecksFinished.value:
+                    (_b = config.criticalChecksFinished) === null || _b === void 0 ? void 0 : _b.call(config);
+                    break;
+                case RaspExecutionState.PostponedChecksFinished.value:
+                    (_c = config.postponedChecksFinished) === null || _c === void 0 ? void 0 : _c.call(config);
                     break;
                 default:
                     onInvalidCallback();
@@ -392,25 +531,30 @@ var capacitorFreerasp = (function (exports, core) {
             await registerRaspExecutionStateListener(raspExecutionStateActions);
         }
         if (isRaspStarted) {
-            return { started: true };
+            return;
         }
-        const response = await Talsec.talsecStart({ config: withDefaults(config) });
+        await wrapNative('talsec-failure', () => Talsec.talsecStart({ config: withDefaults(config) }));
         isRaspStarted = true;
-        return response;
     };
 
+    exports.TalsecError = TalsecError;
     exports.abortApp = onInvalidCallback;
     exports.addToWhitelist = addToWhitelist;
+    exports.blockOverlayWindows = blockOverlayWindows;
     exports.blockScreenCapture = blockScreenCapture;
+    exports.blockScreenControl = blockScreenControl;
     exports.getAppIcon = getAppIcon;
+    exports.isOverlayWindowsBlocked = isOverlayWindowsBlocked;
     exports.isScreenCaptureBlocked = isScreenCaptureBlocked;
-    exports.onInvalidCallback = onInvalidCallback;
+    exports.isScreenControlBlocked = isScreenControlBlocked;
     exports.registerRaspExecutionStateListener = registerRaspExecutionStateListener;
     exports.registerThreatListener = registerThreatListener;
     exports.removeExternalId = removeExternalId;
     exports.removeRaspExecutionStateListener = removeRaspExecutionStateListener;
     exports.removeThreatListener = removeThreatListener;
     exports.startFreeRASP = startFreeRASP;
+    exports.startOngoingCallDetection = startOngoingCallDetection;
+    exports.stopOngoingCallDetection = stopOngoingCallDetection;
     exports.storeExternalId = storeExternalId;
 
     Object.defineProperty(exports, '__esModule', { value: true });

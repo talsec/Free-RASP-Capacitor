@@ -1,4 +1,4 @@
-import { onInvalidCallback } from '../api/methods/native';
+import { onInvalidCallback } from '../api/methods/internal';
 import { Talsec } from '../api/nativeModules';
 import { Threat } from '../models/threat';
 import { getThreatCount, itemsHaveType } from '../utils/utils';
@@ -11,9 +11,9 @@ export const getThreatIdentifiers = async (): Promise<number[]> => {
   return ids;
 };
 
-export const getThreatChannelData = async (): Promise<[string, string, string]> => {
+export const getThreatChannelData = async (): Promise<[string, string, string, string]> => {
   const { ids } = await Talsec.getThreatChannelData();
-  if (ids.length !== 3 || !itemsHaveType(ids, 'string')) {
+  if (ids.length !== 4 || !itemsHaveType(ids, 'string')) {
     onInvalidCallback();
   }
   return ids;
