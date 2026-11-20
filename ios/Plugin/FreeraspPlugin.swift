@@ -62,12 +62,12 @@ public class FreeraspPlugin: CAPPlugin {
             call.reject("Missing external ID data parameter in freeRASP Native Plugin", "MissingArgumentError")
             return
         }
-        UserDefaults.standard.set(externalId, forKey: "app.talsec.externalid")
+        Talsec.storeExternalId(externalId: externalId)
         call.resolve(["result": true])
     }
     
     @objc func removeExternalId(_ call: CAPPluginCall) -> Void {
-        UserDefaults.standard.removeObject(forKey: "app.talsec.externalid")
+        Talsec.removeExternalId()
         call.resolve(["result": true])
     }
 
