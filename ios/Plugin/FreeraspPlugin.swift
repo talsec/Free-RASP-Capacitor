@@ -62,12 +62,12 @@ public class FreeraspPlugin: CAPPlugin {
             call.reject("Missing external ID data parameter in freeRASP Native Plugin", "MissingArgumentError")
             return
         }
-        UserDefaults.standard.set(externalId, forKey: "app.talsec.externalid")
+        Talsec.storeExternalId(externalId: externalId)
         call.resolve(["result": true])
     }
     
     @objc func removeExternalId(_ call: CAPPluginCall) -> Void {
-        UserDefaults.standard.removeObject(forKey: "app.talsec.externalid")
+        Talsec.removeExternalId()
         call.resolve(["result": true])
     }
 
@@ -197,8 +197,15 @@ extension SecurityThreatCenter:  @retroactive SecurityThreatHandler, @retroactiv
         ThreatDispatcher.shared.dispatch(threat: securityThreat)
     }
     
-    // The iOS SDK reports its standard checks as a single "all checks" event, which maps to fastChecksFinished.
-    public func onAllChecksFinished() {
+    public func onCriticalChecksFinished() {
+        ExecutionStateDispatcher.shared.dispatch(event: RaspExecutionStates.criticalChecksFinished)
+    }
+
+    public func onFastChecksFinished() {
         ExecutionStateDispatcher.shared.dispatch(event: RaspExecutionStates.fastChecksFinished)
+    }
+
+    public func onPostponedChecksFinished() {
+        ExecutionStateDispatcher.shared.dispatch(event: RaspExecutionStates.postponedChecksFinished)
     }
 }

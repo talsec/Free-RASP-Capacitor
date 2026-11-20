@@ -1,5 +1,3 @@
-import { Capacitor } from '@capacitor/core';
-
 export class RaspExecutionState {
   value: number;
 
@@ -12,8 +10,6 @@ export class RaspExecutionState {
   }
 
   static getValues(): RaspExecutionState[] {
-    return Capacitor.getPlatform() === 'android'
-      ? [this.FastChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished]
-      : [this.FastChecksFinished];
+    return [this.FastChecksFinished, this.CriticalChecksFinished, this.PostponedChecksFinished];
   }
 }
