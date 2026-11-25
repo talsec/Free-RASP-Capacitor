@@ -47,9 +47,10 @@ const FreeRaspDemo: React.FC<{
     detail?: string;
   }[];
   suspiciousApps: SuspiciousAppInfo[];
+  criticalChecksStatus: 'in progress' | 'completed';
   allChecksStatus: 'in progress' | 'completed';
   postponedChecksStatus: 'in progress' | 'completed';
-}> = ({ checks, suspiciousApps, allChecksStatus, postponedChecksStatus }) => {
+}> = ({ checks, suspiciousApps, criticalChecksStatus, allChecksStatus, postponedChecksStatus }) => {
   const [screenCaptureBlocked, setScreenCaptureBlocked] = React.useState(false);
   const [screenControlBlocked, setScreenControlBlocked] = React.useState(false);
   const [overlayWindowsBlocked, setOverlayWindowsBlocked] = React.useState(false);
@@ -260,8 +261,9 @@ const FreeRaspDemo: React.FC<{
         <IonListHeader>
           <h1>RASP Execution State:</h1>
         </IonListHeader>
+        {renderExecutionState('Critical checks finished', criticalChecksStatus)}
         {renderExecutionState('Fast checks finished', allChecksStatus)}
-        {platform === 'android' && renderExecutionState('Postponed checks finished', postponedChecksStatus)}
+        {renderExecutionState('Postponed checks finished', postponedChecksStatus)}
         <IonListHeader>
           <h1>freeRASP checks:</h1>
         </IonListHeader>

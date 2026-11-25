@@ -46,6 +46,10 @@ const App: React.FC = () => {
     'in progress' | 'completed'
   >('in progress');
 
+  const [criticalChecksStatus, setCriticalChecksStatus] = useState<
+    'in progress' | 'completed'
+  >('in progress');
+
   const config = {
     androidConfig: {
       packageName: 'io.ionic.starter',
@@ -314,12 +318,16 @@ const App: React.FC = () => {
   
 
   const raspExecutionStateActions = {
+    criticalChecksFinished: () => {
+      setCriticalChecksStatus('completed');
+      // eslint-disable-next-line no-console
+      console.log('freeRASP: Critical checks finished');
+    },
     fastChecksFinished: () => {
       setAllChecksStatus('completed');
       // eslint-disable-next-line no-console
       console.log('freeRASP: Fast checks finished');
     },
-    // Android only
     postponedChecksFinished: () => {
       setPostponedChecksStatus('completed');
       // eslint-disable-next-line no-console
@@ -356,6 +364,7 @@ const App: React.FC = () => {
       <FreeRaspDemo
         checks={appChecks}
         suspiciousApps={suspiciousApps}
+        criticalChecksStatus={criticalChecksStatus}
         allChecksStatus={allChecksStatus}
         postponedChecksStatus={postponedChecksStatus}
       />

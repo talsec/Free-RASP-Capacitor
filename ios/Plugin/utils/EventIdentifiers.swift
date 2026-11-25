@@ -1,7 +1,7 @@
 struct EventIdentifiers {
     static var generatedNumbers: [Int] = {
         var numbers = [Int]()
-        for _ in 0..<20 {
+        for _ in 0..<22 {
             numbers.append(RandomGenerator.next())
         }
         return numbers
@@ -12,6 +12,6 @@ struct EventIdentifiers {
     static let raspExecutionStateChannelKey: String = String(generatedNumbers[2])
     static let raspExecutionStateChannelName: String = String(generatedNumbers[3])
 
-    static let raspExecutionStateIdentifierList: [Int] = [generatedNumbers[4]]
+    static let raspExecutionStateIdentifierList: [Int] = Array(generatedNumbers[4...6])
     static let threatIdentifierList: [Int] = generatedNumbers.suffix(15)
 }
